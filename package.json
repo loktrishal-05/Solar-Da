@@ -1,0 +1,24 @@
+{
+  "name": "terrasub-solarda-platform",
+  "version": "3.0.0",
+  "description": "TerraSub & Solar-Da v3 Agricultural Intelligence Platform Monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "weiqou/*"
+  ],
+  "scripts": {
+    "build:engine": "npm run build --workspace=@terrasub-solarda/engine",
+    "test:engine": "npm run test --workspace=@terrasub-solarda/engine",
+    "build:contracts": "npm run build --workspace=@terrasub-solarda/contracts",
+    "build": "npm run build:engine && npm run build:contracts && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev": "npm run build && concurrently \"npm:dev:api\" \"npm:dev:web\""
+  },
+  "devDependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  }
+}

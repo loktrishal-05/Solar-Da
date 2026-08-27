@@ -1,0 +1,23 @@
+{
+  "name": "@terrasub-solarda/engine",
+  "version": "1.0.0",
+  "description": "Pure domain engine for TerraSub and Solar-Da v3",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@terrasub-solarda/api",
+  "version": "1.0.0",
+  "description": "API Backend Server for TerraSub & Solar-Da v3 Platform",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "node dist/server.js",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.11.0",
+    "@prisma/client": "^5.14.0",
+    "@terrasub-solarda/contracts": "*",
+    "@terrasub-solarda/engine": "*",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ws": "^8.17.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
+    "@types/ws": "^8.5.10",
+    "prisma": "^5.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

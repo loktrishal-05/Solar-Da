@@ -1,0 +1,304 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  sites       Site[]
+  growUnits   GrowUnit[]
+  auditLogs   AuditLog[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  phone          String       @unique
+  email          String?      @unique
+  role           String       // GROWER | AGRONOMIST | BUYER | AGGREGATOR | ADMIN | SUPPORT_OPERATOR
+  createdAt      DateTime     @default(now())
+
+  growUnits           GrowUnit[]
+  diseaseReports      DiseaseReport[]
+  chatMessages        ChatMessage[]
+  marketplaceListings MarketplaceListing[]
+  proposalsConfirmed  Proposal[]           @relation("ConfirmedByUser")
+}
+
+model Site {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  location       String
+  createdAt      DateTime     @default(now())
+
+  growBlocks     GrowBlock[]
+}
+
+model GrowBlock {
+  id               String           @id @default(uuid())
+  siteId           String
+  site             Site             @relation(fields: [siteId], references: [id])
+  name             String
+  createdAt        DateTime         @default(now())
+
+  reservoirGroups  ReservoirGroup[]
+}
+
+// TerraSub Horizontal Grow Unit
+model GrowUnit {
+  id               String          @id @default(uuid())
+  organizationId   String
+  organization     Organization    @relation(fields: [organizationId], references: [id])
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  label            String
+  substrateBatchId String?
+  substrateBatch   SubstrateBatch? @relation(fields: [substrateBatchId], references: [id])
+  autonomyLevel    String          @default("L2_SUPERVISED")
+  moistureThresholdLow Float      @default(30.0)
+  targetEcMsCm     Float           @default(1.8)
+  createdAt        DateTime        @default(now())
+
+  readings         SensorReading[]
+  irrigationEvents IrrigationEvent[]
+  diseaseReports   DiseaseReport[]
+}
+
+model SubstrateBatch {
+  id                 String   @id @default(uuid())
+  coirPct            Float
+  vermicompostPct    Float
+  biocharPct         Float
+  neemCakePct        Float
+  boneMealPct        Float
+  gelatinGrams       Float
+  gelatinSource      String   // FISH | POULTRY | TANNERY | OTHER
+  gelatinValid       Boolean
+  trialType          String   // CONTROL | BENCHMARK | FORMULA | ISOLATION_NO_GELATIN
+  mixedOn            DateTime @default(now())
+  notes              String?
+
+  growUnits          GrowUnit[]
+}
+
+// Solar-Da v3 Reservoir Group (The Chemistry Unit)
+model ReservoirGroup {
+  id             String    @id @default(uuid())
+  growBlockId    String
+  growBlock      GrowBlock @relation(fields: [growBlockId], references: [id])
+  label          String
+  autonomyLevel  String    @default("L2_SUPERVISED")
+  currentEcMsCm  Float     @default(1.8)
+  currentPh      Float     @default(6.0)
+  currentDoMgL   Float     @default(6.5)
+  currentTempC   Float     @default(22.0)
+  massGrams      Float     @default(50000.0)
+  levelMm        Float     @default(450.0)
+  eStopActive    Boolean   @default(false)
+  lastDoseTime   DateTime?
+  createdAt      DateTime  @default(now())
+
+  reservoirs     Reservoir[]
+  towers         Tower[]
+  readings       SolutionReading[]
+  proposals      Proposal[]
+}
+
+model Reservoir {
+  id               String         @id @default(uuid())
+  reservoirGroupId String
+  reservoirGroup   ReservoirGroup @relation(fields: [reservoirGroupId], references: [id])
+  volumeLiters     Float          @default(100.0)
+  minLevelMm       Float          @default(100.0)
+  max24hDoseMl     Float          @default(1000.0)
+  mixingDelayMs    Int            @default(300000)
+}
+
+model Tower {
+  id               String         @id @default(uuid())
+  reservoirGroupId String
+  reservoirGroup   ReservoirGroup @relation(fields: [reservoirGroupId], references: [id])
+  label            String
+  totalPorts       Int            @default(24)
+
+  segments         Segment[]
+}
+
+model Segment {
+  id        String   @id @default(uuid())
+  towerId   String
+  tower     Tower    @relation(fields: [towerId], references: [id])
+  segmentNo Int
+
+  ports     Port[]
+}
+
+model Port {
+  id        String   @id @default(uuid())
+  segmentId String
+  segment   Segment  @relation(fields: [segmentId], references: [id])
+  portNo    Int
+  occupied  Boolean  @default(false)
+}
+
+// Telemetry & Events
+model SensorReading {
+  id            String   @id @default(uuid())
+  growUnitId    String
+  growUnit      GrowUnit @relation(fields: [growUnitId], references: [id])
+  recordedAt    DateTime @default(now())
+  moisturePct   Float?
+  ecMsCm        Float
+  ph            Float
+  tempC         Float?
+  qualityStatus String   @default("VALID")
+}
+
+model SolutionReading {
+  id                  String         @id @default(uuid())
+  reservoirGroupId    String
+  reservoirGroup      ReservoirGroup @relation(fields: [reservoirGroupId], references: [id])
+  recordedAt          DateTime       @default(now())
+  ecMsCm              Float
+  ph                  Float
+  doMgL               Float?
+  solutionTempC       Float?
+  massGrams           Float?
+  levelMm             Float?
+  flowRateLmin        Float?
+  ambientTempC        Float?
+  relativeHumidityPct Float?
+  qualityStatus       String         @default("VALID")
+}
+
+model Proposal {
+  id                        String         @id @default(uuid())
+  reservoirGroupId          String?
+  reservoirGroup            ReservoirGroup? @relation(fields: [reservoirGroupId], references: [id])
+  actuatorType              String
+  targetValue               Float
+  unit                      String
+  reason                    String
+  idempotencyKey            String         @unique
+  expiresAt                 DateTime
+  requiresHumanConfirmation Boolean        @default(true)
+  proposedBy                String         // AUTOMATION_RULE | ASSISTANT_TOOL | MANUAL_OPERATOR
+  status                    String         @default("PENDING_CONFIRMATION") // PENDING_CONFIRMATION | CONFIRMED | EXECUTED | VETOED | EXPIRED
+  confirmedByUserId         String?
+  confirmedByUser           User?          @relation("ConfirmedByUser", fields: [confirmedByUserId], references: [id])
+  confirmedAt               DateTime?
+  createdAt                 DateTime       @default(now())
+}
+
+model IrrigationEvent {
+  id                String   @id @default(uuid())
+  growUnitId        String
+  growUnit          GrowUnit @relation(fields: [growUnitId], references: [id])
+  triggeredAt       DateTime @default(now())
+  triggerType       String   // AUTO | MANUAL
+  durationSec       Int
+  fertilizerDoseMl  Float    @default(0.0)
+  status            String   @default("COMPLETED")
+}
+
+model DiseaseReport {
+  id                 String    @id @default(uuid())
+  growUnitId         String?
+  growUnit           GrowUnit? @relation(fields: [growUnitId], references: [id])
+  userId             String
+  user               User      @relation(fields: [userId], references: [id])
+  imageUrl           String
+  imageTarget        String    @default("CANOPY") // CANOPY | ROOT_PORT
+  predictedClass     String
+  confidence         Float
+  abstained          Boolean   @default(false)
+  isTipburn          Boolean   @default(false)
+  cureSteps          String    // JSON stringified protocol
+  harvestBlockDays   Int       @default(0)
+  createdAt          DateTime  @default(now())
+}
+
+model CropRecommendation {
+  id               String   @id @default(uuid())
+  region           String
+  cropName         String
+  avgMandiPrice    Float?
+  priceTrend7d     Float?
+  climateFitScore  Float
+  score            Float
+  explainTrace     String
+  generatedAt      DateTime @default(now())
+}
+
+model ChatMessage {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  sessionId   String
+  role        String   // user | assistant
+  contentType String   @default("text") // text | image | voice
+  content     String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+}
+
+model HarvestLot {
+  id             String   @id @default(uuid())
+  cropName       String
+  quantityKg     Float
+  harvestedAt    DateTime @default(now())
+
+  passportBlocks PassportBlockRecord[]
+  listings       MarketplaceListing[]
+}
+
+model PassportBlockRecord {
+  id                             String     @id @default(uuid())
+  harvestLotId                   String
+  harvestLot                     HarvestLot @relation(fields: [harvestLotId], references: [id])
+  blockIndex                     Int
+  previousHash                   String
+  timestampMs                    BigInt
+  cropName                       String
+  dosagesSummary                 String     // JSON stringified array
+  treatmentApplications          String     // JSON stringified array
+  harvestBlockComplianceVerified Boolean
+  energyMixSummary               String
+  blockHash                      String
+}
+
+model MarketplaceListing {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  harvestLotId String
+  harvestLot   HarvestLot @relation(fields: [harvestLotId], references: [id])
+  cropName     String
+  quantityKg   Float
+  pricePerKg   Float
+  status       String     @default("ACTIVE") // ACTIVE | SOLD
+  createdAt    DateTime   @default(now())
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  action         String
+  actor          String
+  details        String
+  timestamp      DateTime     @default(now())
+}
