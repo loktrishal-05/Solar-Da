@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AdvisorPanel } from './AdvisorPanel';
+import { BenchmarkPage } from './BenchmarkPage';
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle } from 'lucide-react';
 
 // Agent Console: replay controls, live (replayed) feed, per-node reasoning trace, approvals inbox.
@@ -35,6 +37,8 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   const [openRun, setOpenRun] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<'console' | 'advisor' | 'benchmark'>('console');
+  const [lowBandwidth, setLowBandwidth] = useState(false);
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
@@ -130,6 +134,19 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
       </div>
 
       {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800 font-mono">{error}</div>}
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        {([['console', 'Agent console'], ['advisor', 'Farmer advisor (தமிழ்)'], ['benchmark', 'Benchmark']] as const).map(([k, label]) => (
+          <button key={k} onClick={() => setTab(k)} className={`px-3 py-1.5 rounded-full border font-bold ${tab === k ? 'bg-[#1B4332] text-white border-[#1B4332]' : 'bg-white'}`}>{label}</button>
+        ))}
+        <label className="ml-auto flex items-center gap-1.5 text-gray-600">
+          <input type="checkbox" checked={lowBandwidth} onChange={(e) => setLowBandwidth(e.target.checked)} /> Low-bandwidth mode (no charts or voice)
+        </label>
+      </div>
+
+      {tab === 'advisor' && <AdvisorPanel lowBandwidth={lowBandwidth} />}
+      {tab === 'benchmark' && <BenchmarkPage lowBandwidth={lowBandwidth} />}
+      {tab === 'console' && (<>
 
       {/* Replay controls */}
       <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm space-y-3">
@@ -272,6 +289,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
           ))}
         </div>
       </section>
+      </>)}
     </div>
   );
 };

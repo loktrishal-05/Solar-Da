@@ -1,0 +1,13 @@
+# FAO-56 single crop coefficients (Kc) and stage lengths, one source per row.
+# Allen, R.G., Pereira, L.S., Raes, D., Smith, M. (1998). Crop evapotranspiration. FAO Irrigation and Drainage Paper 56.
+# Kc: Table 12 (sub-humid climate, RHmin ~45%, u2 ~2 m/s). Stage lengths: Table 11.
+# Verify each row against the paper before quoting numbers in slides.
+tomato:
+  kc_ini: {value: 0.60, source: "FAO-56 Table 12, Tomato"}
+  kc_mid: {value: 1.15, source: "FAO-56 Table 12, Tomato"}
+  kc_end: {value: 0.80, source: "FAO-56 Table 12, Tomato (0.70-0.90 range, midpoint)"}
+  stages_days:
+    ini: {value: 30, source: "FAO-56 Table 11, Tomato, arid region, January planting"}
+    dev: {value: 40, source: "FAO-56 Table 11, Tomato, arid region, January planting"}
+    mid: {value: 40, source: "FAO-56 Table 11, Tomato, arid region, January planting"}
+    late: {value: 25, source: "FAO-56 Table 11, Tomato, arid region, January planting"}

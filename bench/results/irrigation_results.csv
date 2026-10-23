@@ -1,0 +1,13 @@
+policy,year,water_mm,events,stress_days,dry_yield_t_ha
+fixed_schedule,2021,840.0,42,0,8.754
+et_controller,2021,560.0,28,0,8.728
+agent,2021,340.0,17,0,8.412
+agent_no_forecast,2021,340.0,17,0,8.412
+fixed_schedule,2022,840.0,42,0,8.796
+et_controller,2022,520.0,26,0,8.767
+agent,2022,380.0,19,0,8.48
+agent_no_forecast,2022,380.0,19,0,8.48
+fixed_schedule,2023,840.0,42,0,8.837
+et_controller,2023,500.0,25,0,8.78
+agent,2023,300.0,15,0,8.454
+agent_no_forecast,2023,300.0,15,0,8.454

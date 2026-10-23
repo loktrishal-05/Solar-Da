@@ -1,0 +1,14 @@
+description: >
+  Chennai tomato bed (AquaCrop twin + Open-Meteo archive, 2023). Each morning the irrigation agent compares
+  hold / irrigate now / irrigate tonight in the twin and cites ET0 and twin run ids. Rain is forecast from 16 March,
+  so it holds. Soil water is a twin estimate (source "twin"), not a sensor.
+dataset: none
+start: "2023-03-08T06:00:00Z"
+end: "2023-03-18T06:00:00Z"
+crop: Butterhead Lettuce
+autonomy: auto_in_envelope
+tick_minutes: 1440
+field: {zone: bed-1, planting: "2023-01-15", crop: Tomato, soil: SandyLoam, history_policy: et_controller}
+expected:
+  must_propose: [irrigate]
+  must_hold_for_rain: "2023-03-16"

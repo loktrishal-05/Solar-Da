@@ -1,0 +1,10 @@
+== ph_excursion session ph_excursion-78438a started 00:15:39
+finished 00:22:09
+runs audited 36 | dispatched 13 ['dose_ph'] | vetoes ['MAX_DOSE_PER_HOUR', 'MAX_DOSE_PER_HOUR', 'MAX_DOSE_PER_HOUR', 'MAX_DOSE_PER_HOUR', 'MAX_DOSE_PER_HOUR', 'MAX_DOSE_PER_HOUR', 'MAX_DOSE_PER_HOUR']
+every dispatched action has a verdict: True
+every dispatched action has an audit entry: True
+== heatwave session heatwave-50a44f started 00:22:10
+finished 00:34:35
+runs audited 24 | dispatched 13 ['alert', 'ventilate'] | vetoes []
+every dispatched action has a verdict: True
+every dispatched action has an audit entry: True

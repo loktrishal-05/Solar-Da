@@ -1,6 +1,7 @@
 """Agent runtime API (FastAPI). Replay control, farm-shift runs, approvals, E-STOP, SSE stream."""
 import asyncio
 import json
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,7 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 from . import api_client, llm, runner
+from .graphs import advisor
 from .models import Approval
 from .replay.scenario import list_scenarios, load_scenario
 
@@ -160,3 +162,35 @@ def estop(req: EStop, run_id: str | None = None):
     active = api_client.estop(req.active)
     runner.bus.publish("estop", {"active": active, "run_id": run_id})
     return {"eStopActive": active}
+
+
+class Ask(BaseModel):
+    text: str
+    language: str | None = None
+
+
+@app.post("/advisor/ask")
+def advisor_ask(req: Ask):
+    return advisor.ask(req.text, req.language)
+
+
+BENCH = Path(__file__).resolve().parents[3] / "bench" / "results"
+
+
+@app.get("/bench/results")
+def bench_results():
+    """Benchmark tables for the web page (simulation results; raw files in bench/results/)."""
+    import csv
+    out = {"irrigation": [], "advisor": None, "vision": None}
+    f = BENCH / "irrigation_results.csv"
+    if f.exists():
+        out["irrigation"] = list(csv.DictReader(f.open(encoding="utf-8")))
+    a = BENCH / "advisor_golden.json"
+    if a.exists():
+        out["advisor"] = json.loads(a.read_text(encoding="utf-8"))["summary"]
+    v = BENCH.parents[1] / "services" / "vision" / "model" / "metrics.json"
+    if v.exists():
+        out["vision"] = json.loads(v.read_text(encoding="utf-8"))
+    s = BENCH / "summary.md"
+    out["summary_md"] = s.read_text(encoding="utf-8") if s.exists() else ""
+    return out

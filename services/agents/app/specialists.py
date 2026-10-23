@@ -77,9 +77,26 @@ def climate(state: dict) -> list[dict]:
 
 
 def irrigation(state: dict) -> list[dict]:
-    """Phase 1: soil-moisture rule. Phase 2 replaces this with the twin-backed three-option comparison."""
+    """Field beds: twin-backed comparison of hold / irrigate now / irrigate tonight (app/irrigation.py).
+    Other zones: soil-moisture rule."""
     snap, bad, run = state["snapshot"], state.get("bad_metrics", {}), _run(state)
     out = []
+    f = state["scenario"].get("field")
+    if f and f["zone"] in snap and "root_zone_water" not in bad.get(f["zone"], []):
+        from . import irrigation as irr
+        from .graphs.farm_shift import field_history
+        try:
+            dec = irr.agent_decide(f["planting"], state["sim_time"][:10], field_history(state))
+        except Exception as e:
+            return [_action(run, "alert", f["zone"], {"message": f"Irrigation planner unavailable: {type(e).__name__}"},
+                            "Twin or weather unavailable; no irrigation proposed", [], "none", 1.0)]
+        if dec["option"] == "hold":
+            return [_action(run, "no_op", f["zone"], {"decision": "hold", "options": dec["options"]}, dec["rationale"],
+                            dec["evidence"], "none", 0.9)]
+        when = "now" if dec["option"] == "irrigate_now" else "tonight"
+        return [_action(run, "irrigate", f["zone"],
+                        {"mm": dec["depth_mm"], "minutes": dec["depth_mm"], "when": when, "options": dec["options"]},
+                        dec["rationale"], dec["evidence"], f"soil_moisture +{0.5 * dec['depth_mm']:g} in 60m", 0.85)]
     for zone in snap:
         sm = _good(snap, zone, "soil_moisture", bad)
         if sm and sm["value"] < 30:
@@ -88,9 +105,46 @@ def irrigation(state: dict) -> list[dict]:
     return out
 
 
+RESCAN_AFTER_DAYS = 5
+
+
+def _new_images(state: dict) -> list[dict]:
+    """Photos that arrived since the previous tick (scenario packs schedule them on the replay clock)."""
+    from datetime import timedelta
+    from .replay.clock import fmt_ts, parse_ts
+    now = state["sim_time"]
+    since = fmt_ts(parse_ts(now) - timedelta(minutes=state["scenario"].get("tick_minutes", 30)))
+    return [i for i in state["scenario"].get("images", []) if since < i["at"] <= now]
+
+
 def disease(state: dict) -> list[dict]:
-    """Phase 1 placeholder: the vision tool arrives in Phase 3. Without it the specialist proposes nothing."""
-    return []
+    """classify_leaf tool -> abstain and ask for a re-photo, or propose treatment (always needs a human) with a re-scan."""
+    from . import knowledge, vision_client
+    run = _run(state)
+    out = []
+    for img in _new_images(state):
+        try:
+            r = vision_client.classify_file(img["path"], img.get("blur", 0))
+        except Exception as e:
+            out.append(_action(run, "alert", img["zone"], {"message": f"Leaf photo not analysed: vision service unavailable ({type(e).__name__})"},
+                               "Vision unavailable; no diagnosis guessed", [f"img:{img['path']}"], "none", 1.0))
+            continue
+        ev = [f"img:{img['path']}@{img['at']}"]
+        if r["abstain"]:
+            out.append(_action(run, "alert", img["zone"], {"message": f"Please retake the leaf photo: {r['reason']}",
+                                                           "vision": r}, "Classifier abstained instead of guessing", ev, "none", 1.0))
+            continue
+        top = r["top"]
+        if top["healthy"]:
+            continue
+        docs = knowledge.search(f"{top['crop']} {top['condition']} management", k=2)
+        out.append(_action(run, "treat_disease", img["zone"],
+                           {"diagnosis": top["label"], "confidence": top["confidence"], "rescan_after_days": RESCAN_AFTER_DAYS,
+                            "guidance": [d["id"] for d in docs],
+                            "note": "No product or dose is chosen by the agent; a human decides using the cited sources."},
+                           f"{top['crop']} {top['condition']} at {top['confidence']:.0%} (calibrated, threshold {r['threshold']:.0%})",
+                           ev + [d["id"] for d in docs], f"rescan in {RESCAN_AFTER_DAYS}d", top["confidence"]))
+    return out
 
 
 def sensor_alerts(state: dict) -> list[dict]:

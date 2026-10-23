@@ -15,7 +15,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send, interrupt
 
-from .. import api_client, llm, quality, specialists
+from .. import api_client, irrigation, llm, quality, specialists, weather
 from ..replay.adapters import DATASETS, load_events
 from ..replay.clock import fmt_ts, parse_ts
 from ..replay.faults import apply_faults, pump_failed
@@ -77,20 +77,51 @@ def _apply_effects(snapshot: dict, state: FarmState) -> list[str]:
     return applied
 
 
+def _field(state: FarmState) -> tuple[list[dict], dict | None]:
+    """Field bed: soil water is a twin estimate (AquaCrop, irrigation history so far), weather from the archive."""
+    f = state["scenario"].get("field")
+    if not f:
+        return [], None
+    today = state["sim_time"][:10]
+    try:
+        r = irrigation.twin_run(f["planting"], today, field_history(state), f.get("crop", "Tomato"), f.get("soil", "SandyLoam"))
+    except Exception as e:  # twin down: no soil estimate, so the irrigation specialist proposes nothing
+        return [], {"error": f"twin unavailable ({type(e).__name__})"}
+    wx, out = weather.day(today), weather.outlook(today, 2)
+    ev = [{"ts": state["sim_time"], "siteId": state["site_id"], "zone": f["zone"], "metric": m,
+           "value": r[k], "unit": u, "quality": "ok", "source": "twin"}
+          for m, k, u in (("root_zone_water", "root_zone_water_mm", "mm"), ("canopy_cover", "canopy_cover", "fraction"))]
+    return ev, {"today": wx, "outlook": out, "rain_next_window_mm": out["rain_mm"], "twin_stress_days_so_far": r["stress_days"]}
+
+
+def field_history(state: FarmState) -> list[dict]:
+    """Irrigation before the scenario (synthesised by the ET controller) plus this session's dispatched irrigation."""
+    f = state["scenario"]["field"]
+    hist = irrigation.prior_history(f["planting"], state["scenario"]["start"][:10], f.get("history_policy"))
+    for rec in api_client.actions():
+        a = rec.get("action", {})
+        if rec.get("run_id", "").startswith(state["session_id"] + ":") and a.get("kind") == "irrigate" and a.get("zone") == f["zone"]:
+            day = parse_ts(rec["sim_time"]) + timedelta(days=1 if a["params"].get("when") == "tonight" else 0)
+            hist.append({"date": day.strftime("%Y-%m-%d"), "mm": float(a["params"].get("mm", 0))})
+    return hist
+
+
 def ingest(state: FarmState) -> dict:
     sc = state["scenario"]
     now = state["sim_time"]
     start = fmt_ts(parse_ts(now) - timedelta(hours=WINDOW_HOURS))
     end = fmt_ts(parse_ts(now) + timedelta(seconds=1))
-    events = apply_faults(load_events(sc["dataset"], start, end), sc["faults"])
+    events = apply_faults(load_events(sc["dataset"], start, end), sc["faults"]) if sc["dataset"] != "none" else []
+    field_events, field_weather = _field(state)
+    events += field_events
     for s in sc.get("synthetic", []):  # simulated streams a scenario adds (e.g. soil moisture for a field bed)
         events.append({"ts": now, "siteId": state["site_id"], "zone": s["zone"], "metric": s["metric"],
                        "value": s["value"], "unit": s["unit"], "quality": "ok", "source": "simulated"})
-    q = quality.check_window(events, now, DATASETS[sc["dataset"]]["interval_min"])
+    q = quality.check_window(events, now, DATASETS.get(sc["dataset"], {}).get("interval_min", 1440))
     applied = _apply_effects(q["snapshot"], state)
-    weather = sc.get("weather") or None
+    wx = {**(sc.get("weather") or {}), **(field_weather or {})} or None
     n_bad = sum(len(v) for v in q["bad_metrics"].values())
-    return {**q, "weather": weather,
+    return {**q, "weather": wx,
             "trace": _trace(state, "ingest", f"{len(events)} readings, {len(q['quality_flags'])} quality flags, "
                                              f"{n_bad} metric(s) unusable" + (f"; plant effects: {', '.join(applied)}" if applied else ""),
                             flags=q["quality_flags"], snapshot=q["snapshot"])}
@@ -145,9 +176,11 @@ def arbiter(state: FarmState) -> dict:
         k = (p["kind"], p["zone"])
         if k not in best or p["confidence"] > best[k]["confidence"]:
             best[k] = p
-    plan = sorted(best.values(), key=lambda p: (p["kind"] == "alert", -p["confidence"]))
+    holds = [p for p in best.values() if p["kind"] == "no_op"]  # decisions not to act stay in the trace only
+    plan = sorted((p for p in best.values() if p["kind"] != "no_op"), key=lambda p: (p["kind"] == "alert", -p["confidence"]))
     return {"plan": plan, "trace": _trace(state, "arbiter", f"{len(plan)} action(s) after de-duplication (attempt {state.get('attempt', 0)})",
-                                          plan=[{k: p[k] for k in ('id', 'kind', 'zone', 'params')} for p in plan])}
+                                          plan=[{k: p[k] for k in ('id', 'kind', 'zone', 'params', 'rationale', 'evidence')} for p in plan],
+                                          holds=[{k: p[k] for k in ('zone', 'params', 'rationale', 'evidence')} for p in holds])}
 
 
 def safety_gate(state: FarmState) -> dict:

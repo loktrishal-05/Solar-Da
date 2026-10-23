@@ -96,7 +96,7 @@ def _drive(run_id: str, payload) -> dict:
 def start_run(session_id: str, tick: int, scenario: dict, sim_time: str, autonomy: str) -> dict:
     run_id = f"{session_id}:{tick:03d}"
     _save_run(run_id, session_id=session_id, scenario=scenario["name"], sim_time=sim_time, autonomy=autonomy)
-    state = {"run_id": run_id, "session_id": session_id, "site_id": DATASETS[scenario["dataset"]]["site_id"],
+    state = {"run_id": run_id, "session_id": session_id, "site_id": DATASETS.get(scenario["dataset"], {}).get("site_id", "chennai-field"),
              "sim_time": sim_time, "autonomy": autonomy, "scenario": scenario, "attempt": 0}
     bus.publish("run_start", {"run_id": run_id, "sim_time": sim_time})
     return _drive(run_id, state)
@@ -150,12 +150,13 @@ class Session:
         self.next_tick = parse_ts(self.sc["start"])
         self.stopped = False
         self._last_emit = None
-        self._events = apply_faults(load_events(self.sc["dataset"], self.sc["start"], self.sc["end"]), self.sc["faults"])
+        self._events = (apply_faults(load_events(self.sc["dataset"], self.sc["start"], self.sc["end"]), self.sc["faults"])
+                        if self.sc["dataset"] != "none" else [])
         self.thread = threading.Thread(target=self._loop, daemon=True)
 
     def info(self) -> dict:
         return {"session_id": self.id, "scenario": self.sc["name"], "description": self.sc.get("description", ""),
-                "dataset": DATASETS[self.sc["dataset"]]["label"], "speed": self.clock.speed,
+                "dataset": DATASETS.get(self.sc["dataset"], {}).get("label", "AquaCrop twin + Open-Meteo Chennai archive (simulated field)"), "speed": self.clock.speed,
                 "paused": self.clock.paused, "sim_time": fmt_ts(self.clock.now()), "start": self.sc["start"],
                 "end": self.sc["end"], "autonomy": self.autonomy, "finished": self.clock.finished, "mode": "replay"}
 

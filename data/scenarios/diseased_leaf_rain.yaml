@@ -1,17 +1,18 @@
 description: >
-  Field bed with a diseased-leaf photo ahead of a rain forecast. Irrigation must be held for rain and the
-  treatment proposal must wait for a human. Uses the vision service (Phase 3) and weather (Phase 2);
-  without them the disease step abstains.
-dataset: eden_iss
-start: "2020-03-09T06:00:00Z"
-end: "2020-03-09T10:00:00Z"
+  Chennai tomato bed with a diseased-leaf photo (PlantVillage late blight) on 15 March and rain forecast from
+  16 March. The vision model classifies the leaf; the treatment proposal must wait for a human, and irrigation holds
+  for the rain. A blurry copy of the photo is sent first: the model must abstain and ask for another.
+dataset: none
+start: "2023-03-14T06:00:00Z"
+end: "2023-03-17T06:00:00Z"
 crop: Butterhead Lettuce
 autonomy: auto_in_envelope
-tick_minutes: 60
-weather: {rain_next_window_mm: 14}
+tick_minutes: 1440
+field: {zone: bed-1, planting: "2023-01-15", crop: Tomato, soil: SandyLoam, history_policy: et_controller}
 images:
-  - {zone: bed-1, at: "2020-03-09T07:00:00Z", path: "data/demo_images/tomato_late_blight_plantvillage.jpg"}
-faults: []
+  - {zone: bed-1, at: "2023-03-14T06:00:00Z", path: "data/demo_images/tomato_late_blight_plantvillage.jpg", blur: 14}
+  - {zone: bed-1, at: "2023-03-15T06:00:00Z", path: "data/demo_images/tomato_late_blight_plantvillage.jpg"}
 expected:
-  must_veto: [RAIN_HOLD]
+  must_abstain_first: true
   must_need_human: [treat_disease]
+  must_hold_for_rain: "2023-03-16"
