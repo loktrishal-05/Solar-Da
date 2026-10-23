@@ -6,7 +6,7 @@ Precision Agriculture OS — biodegradable substrate management, vertical tower 
 
 - **`weiqou/web`** — Vite + React 18 + TypeScript frontend (light + dark theme variants)
 - **`weiqou/api`** — Express backend (proposals, telemetry, alerts)
-- **`weiqou/electron`** — Electron desktop wrapper
+- **`weiqou/electron` — _not present in this repo (README claim removed; see docs/AUDIT.md)_
 - **`packages/engine`** — Core simulation engine (substrate recipes, control agents, safety invariants)
 - **`packages/contracts`** — Shared TypeScript types
 
@@ -43,8 +43,8 @@ See `docs/PLANT_DISEASE_MODEL.md` for full details.
 ## Other documentation
 
 - `docs/PLANT_DISEASE_MODEL.md` — Plant disease model architecture, setup, troubleshooting
-- `idk whatt is it.md` — Working notes / handoff doc from prior teammate (includes aspirational roadmap)
-- `DOCS/terrasub-solarda-master-prompt.md` — Master project prompt and feature spec
+- `docs/HANDOFF.md` — Working notes / handoff doc from prior teammate (includes aspirational roadmap)
+- `docs/terrasub-solarda-master-prompt.md` — Master project prompt and feature spec
 
 ## Tech stack
 
