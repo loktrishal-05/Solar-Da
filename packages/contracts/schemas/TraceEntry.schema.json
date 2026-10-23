@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "node": {
+      "type": "string"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "run_id",
+    "node",
+    "ts",
+    "summary"
+  ],
+  "additionalProperties": false
+}

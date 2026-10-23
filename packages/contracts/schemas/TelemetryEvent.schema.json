@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "siteId": {
+      "type": "string"
+    },
+    "zone": {
+      "type": "string"
+    },
+    "metric": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "quality": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "suspect",
+        "bad"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "replay",
+        "simulated",
+        "twin"
+      ]
+    }
+  },
+  "required": [
+    "ts",
+    "siteId",
+    "zone",
+    "metric",
+    "value",
+    "unit",
+    "quality",
+    "source"
+  ],
+  "additionalProperties": false
+}

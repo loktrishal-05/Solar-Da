@@ -1,0 +1,7 @@
+{
+  "TelemetryEvent": {"ts":"2020-07-14T12:00:00.000Z","siteId":"chennai-01","zone":"tower-a","metric":"vpd","value":1.42,"unit":"kPa","quality":"ok","source":"replay"},
+  "ProposedAction": {"id":"act-1","kind":"irrigate","zone":"tower-a","params":{"minutes":12},"rationale":"ET0 high, soil dry","evidence":["tel-1","wx-9"],"expected_effect":"soil_moisture +4% in 2h","confidence":0.8},
+  "SafetyVerdict": {"proposal_id":"act-1","verdict":"veto","reason":"pH above ceiling","invariant":"PH_OUT_OF_BOUNDS","needs_human":false},
+  "Approval": {"proposal_id":"act-1","decision":"approve","decided_by":"farmer-1","ts":"2020-07-14T12:05:00.000Z"},
+  "TraceEntry": {"run_id":"run-1","node":"safety_gate","ts":"2020-07-14T12:00:01.000Z","summary":"1 vetoed","data":{"vetoed":["act-1"]}}
+}

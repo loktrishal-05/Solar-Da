@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "proposal_id": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "modify",
+        "veto"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "invariant": {
+      "type": "string"
+    },
+    "needs_human": {
+      "type": "boolean"
+    },
+    "modified_params": {
+      "type": "object",
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "proposal_id",
+    "verdict",
+    "reason",
+    "needs_human"
+  ],
+  "additionalProperties": false
+}

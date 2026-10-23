@@ -1,0 +1,7 @@
+{
+  "TelemetryEvent": {"ts":"2020-07-14T12:00:00.000Z","siteId":"s","zone":"z","metric":"vpd","value":1,"unit":"kPa","quality":"ok","source":"live"},
+  "ProposedAction": {"id":"a","kind":"set_pump_speed","zone":"z","params":{},"rationale":"r","evidence":[],"expected_effect":"e","confidence":0.5},
+  "SafetyVerdict": {"proposal_id":"a","verdict":"maybe","reason":"r","needs_human":false},
+  "Approval": {"proposal_id":"a","decision":"approve","decided_by":"f","ts":"yesterday"},
+  "TraceEntry": {"run_id":"r","node":"n","ts":"2020-07-14T12:00:00.000Z"}
+}
