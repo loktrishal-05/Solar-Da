@@ -5,5 +5,5 @@ import { writeFileSync } from 'node:fs';
 
 for (const [name, schema] of Object.entries(agentSchemas)) {
   const json = zodToJsonSchema(schema, { name, $refStrategy: 'none' });
-  writeFileSync(new URL(`../schemas/${name}.schema.json`, import.meta.url), JSON.stringify(json.definitions[name], null, 2) + '\n');
+  writeFileSync(new URL(`../schemas/${name}.schema.json`, import.meta.url), JSON.stringify({ title: name, ...json.definitions[name] }, null, 2) + '\n');
 }

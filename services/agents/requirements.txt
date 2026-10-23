@@ -1,0 +1,10 @@
+# Agent runtime. Interpreter: CPython 3.11.9. Exact pins in requirements.lock.
+langgraph
+langchain
+langgraph-checkpoint-sqlite
+fastapi
+uvicorn[standard]
+pydantic
+datamodel-code-generator
+pytest
+httpx

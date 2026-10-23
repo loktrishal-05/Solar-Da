@@ -46,3 +46,9 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 ## Hygiene findings
 - No real keys found in git history (5 commits scanned for AIza/sk-/ghp_/KEY=...). One placeholder `DEVICE_SECRET = "ESP32_SECRET_KEY_99"` in firmware: replace with config before real use. No `.env` committed.
 - No theme in code is consistent with the handoff note (see docs/DECISIONS.md).
+
+## Python stack (added in Phase 0)
+| Item | Status | Evidence |
+|---|---|---|
+| `services/agents` venv (LangGraph 1.2.16, LangChain 1.4.7, FastAPI 0.161.1, uvicorn 0.54.0, Pydantic 2.14.1) | real | installs on CPython 3.11.9; `uvicorn app.main:app` serves `GET /health` 200; `pytest services/agents/tests` passes |
+| `services/twin` (AquaCrop-OSPy 3.1.0) | real | smoke test runs a full season; 3.0.10 on 3.10 fails (docs/DECISIONS.md D2) |

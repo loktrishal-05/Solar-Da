@@ -57,3 +57,20 @@ See `docs/PLANT_DISEASE_MODEL.md` for full details.
 ## Safety invariants
 
 The platform enforces 13 hard safety invariants (pH ceilings, EC bounds, VPD ranges, etc.) on every actuator proposal. The "E-STOP" button in the navbar is a hardware-interlock override that disables all automatic actions.
+
+## Agent layer (in progress, see docs/BLUEPRINT.md)
+
+```bash
+npm run build                                   # engine, contracts, api, web
+npm run test:engine
+npm test -w @terrasub-solarda/contracts         # Zod contracts: valid/invalid fixtures
+npm run schemas -w @terrasub-solarda/contracts  # export JSON Schema -> packages/contracts/schemas
+powershell -File scripts/gen_models.ps1         # regenerate Pydantic models in services/agents/app/models
+
+# Python services (CPython 3.11, separate venvs)
+py -3.11 -m venv services/agents/.venv && services/agents/.venv/Scripts/pip install -r services/agents/requirements.lock
+py -3.11 -m venv services/twin/.venv   && services/twin/.venv/Scripts/pip install -r services/twin/requirements.lock
+cd services/agents && .venv/Scripts/python -m pytest -q && .venv/Scripts/python -m uvicorn app.main:app --port 8000
+```
+
+Audit of existing features: `docs/AUDIT.md`. Decisions (theme, interpreters, owners): `docs/DECISIONS.md`.

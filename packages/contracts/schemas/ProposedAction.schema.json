@@ -1,4 +1,5 @@
 {
+  "title": "ProposedAction",
   "type": "object",
   "properties": {
     "id": {

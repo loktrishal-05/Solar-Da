@@ -1,4 +1,5 @@
 {
+  "title": "SafetyVerdict",
   "type": "object",
   "properties": {
     "proposal_id": {

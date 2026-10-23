@@ -1,4 +1,5 @@
 {
+  "title": "TelemetryEvent",
   "type": "object",
   "properties": {
     "ts": {
