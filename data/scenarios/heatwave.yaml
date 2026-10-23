@@ -1,0 +1,15 @@
+description: >
+  Heatwave day. Replayed EDEN ISS climate with a simulated +8 C air-temperature and +1.0 kPa VPD
+  ramp (the plant really heats up). Expect ventilation/shade proposals, each with a verdict and an audit entry.
+dataset: eden_iss
+start: "2020-03-03T06:00:00Z"
+end: "2020-03-03T18:00:00Z"
+crop: Butterhead Lettuce
+autonomy: auto_in_envelope
+tick_minutes: 30
+faults:
+  - {type: offset, zone: feg, metric: air_temp, start: "2020-03-03T09:00:00Z", end: "2020-03-03T17:00:00Z", delta: 8.0, ramp_hours: 3}
+  - {type: offset, zone: feg, metric: vpd, start: "2020-03-03T09:00:00Z", end: "2020-03-03T17:00:00Z", delta: 1.0, ramp_hours: 3}
+expected:
+  must_propose: [ventilate]
+  must_dispatch: [ventilate]

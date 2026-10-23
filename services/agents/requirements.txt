@@ -8,3 +8,8 @@ pydantic
 datamodel-code-generator
 pytest
 httpx
+langchain-google-genai
+pandas
+openpyxl
+pyyaml
+sse-starlette

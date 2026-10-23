@@ -82,7 +82,9 @@ const ACTUATOR: Partial<Record<AgentActionKind, ActuatorCommandProposal['actuato
 const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
 const HOUR = 3_600_000;
 
-export function checkAgentProposal(p: AgentProposal, ctx: AgentSafetyContext): AgentVerdict {
+export function checkAgentProposal(p: AgentProposal, ctxIn: AgentSafetyContext): AgentVerdict {
+  // Only actions at or before the replay clock count (a replay can seek backwards).
+  const ctx = { ...ctxIn, history: ctxIn.history.filter((h) => h.atMs <= ctxIn.nowMs) };
   const veto = (invariant: string, reason: string): AgentVerdict => ({
     proposal_id: p.id, verdict: 'veto', invariant, reason, needs_human: false,
   });

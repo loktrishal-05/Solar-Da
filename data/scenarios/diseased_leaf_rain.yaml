@@ -1,0 +1,17 @@
+description: >
+  Field bed with a diseased-leaf photo ahead of a rain forecast. Irrigation must be held for rain and the
+  treatment proposal must wait for a human. Uses the vision service (Phase 3) and weather (Phase 2);
+  without them the disease step abstains.
+dataset: eden_iss
+start: "2020-03-09T06:00:00Z"
+end: "2020-03-09T10:00:00Z"
+crop: Butterhead Lettuce
+autonomy: auto_in_envelope
+tick_minutes: 60
+weather: {rain_next_window_mm: 14}
+images:
+  - {zone: bed-1, at: "2020-03-09T07:00:00Z", path: "sample images/tomato_late_blight.jpg"}
+faults: []
+expected:
+  must_veto: [RAIN_HOLD]
+  must_need_human: [treat_disease]

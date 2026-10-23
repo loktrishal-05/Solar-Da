@@ -1,0 +1,14 @@
+description: >
+  EC probe drift: the primary EC sensor drifts +0.5 mS/cm per hour (sensor fault, the solution is fine).
+  The redundant probe disagrees, ingest flags EC bad, and the agent must not dose nutrients on it.
+dataset: eden_iss
+start: "2020-03-07T06:00:00Z"
+end: "2020-03-07T12:00:00Z"
+crop: Butterhead Lettuce
+autonomy: auto_in_envelope
+tick_minutes: 30
+faults:
+  - {type: drift, zone: tank1, metric: ec, start: "2020-03-07T07:00:00Z", rate_per_hour: 0.5}
+expected:
+  must_flag: [{zone: tank1, metric: ec}]
+  must_not_dispatch: [dose_nutrient]

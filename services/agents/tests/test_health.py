@@ -4,4 +4,5 @@ from app.main import app
 
 
 def test_health():
-    assert TestClient(app).get("/health").json() == {"status": "ok", "service": "agents"}
+    body = TestClient(app).get("/health").json()
+    assert body["status"] == "ok" and body["service"] == "agents" and body["llm"] is False

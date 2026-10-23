@@ -1,0 +1,17 @@
+description: >
+  pH excursion in tank 1 (simulated +1.2 pH over 2 h on replayed EDEN ISS nutrient data). The agent
+  doses pH down; doses take ~30 min to show, so it keeps asking and the hourly dose cap vetoes the
+  extra dose. The broken redundant pH probe (ph_b, real fault in the dataset) is flagged and ignored.
+dataset: eden_iss
+start: "2020-03-05T08:00:00Z"
+end: "2020-03-05T14:00:00Z"
+crop: Butterhead Lettuce
+autonomy: auto_in_envelope
+tick_minutes: 10
+faults:
+  - {type: offset, zone: tank1, metric: ph, start: "2020-03-05T08:30:00Z", delta: 1.2, ramp_hours: 2}
+expected:
+  must_propose: [dose_ph]
+  must_dispatch: [dose_ph]
+  must_veto: [MAX_DOSE_PER_HOUR]
+  must_flag: [{zone: tank1, metric: ph_b}]
