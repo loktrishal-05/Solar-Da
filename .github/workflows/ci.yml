@@ -1,0 +1,59 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PROMPTFOO_DISABLE_TELEMETRY: "1"
+      PROMPTFOO_DISABLE_UPDATE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "20", cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+
+      - name: Install and build (TypeScript)
+        run: |
+          npm ci
+          npm run build:engine && npm run build:contracts && npm run build --workspace=weiqou/api
+      - name: TypeScript tests (engine incl. shared safety fixtures, API, contracts)
+        run: |
+          npm run test:engine
+          npm test -w @terrasub-solarda/api
+          npm test -w @terrasub-solarda/contracts
+
+      - name: Python venvs (pinned)
+        run: |
+          for s in agents twin vision; do
+            python -m venv services/$s/.venv
+            services/$s/.venv/bin/pip install -q -r services/$s/requirements.lock
+          done
+      - name: Vision model (from the GitHub release, if published)
+        continue-on-error: true
+        run: |
+          curl -sfL -o /tmp/v.zip https://github.com/${{ github.repository }}/releases/download/vision-v1/solarda_vision.zip
+          unzip -o /tmp/v.zip -d services/vision/model
+      - name: Python tests (agents start the API, twin and vision services themselves)
+        run: |
+          (cd services/twin && .venv/bin/python -m pytest -q)
+          (cd services/vision && .venv/bin/python -m pytest -q)
+          (cd services/agents && .venv/bin/python -m pytest -q)
+
+      - name: Red team (promptfoo) against the running stack
+        run: |
+          mkdir -p data/runtime
+          (cd weiqou/api && PORT=3001 node dist/server.js &)
+          (cd services/agents && .venv/bin/python -m uvicorn app.main:app --port 8000 &)
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && curl -sf localhost:3001/api/health && break; sleep 1; done
+          npx -y promptfoo@0.124.1 eval -c redteam/advisor.yaml --no-cache --no-progress-bar -o redteam-advisor.json
+          npx -y promptfoo@0.124.1 eval -c redteam/safety.yaml --no-cache --no-progress-bar -o redteam-safety.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redteam-results
+          path: redteam-*.json

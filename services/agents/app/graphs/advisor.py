@@ -33,6 +33,8 @@ INJECTION = re.compile(r"ignore (all |the )?(previous|above|prior) (instructions
                        r"முந்தைய விதிகளை புறக்கணி|விதிகளை மீறு", re.I)
 MIN_SCORE = 6.0  # BM25 score below which the sources are treated as not covering the question
 MIN_COVERAGE = 0.6  # and at least 60% of the question's content words must appear in the best passage
+DOSE_IN_TEXT = re.compile(r"\d+(\.\d+)?\s*(ml|mL|g|gm|grams?|kg|l|litres?|liters?|%)\s*(/|per|a|an|each)\s*"
+                          r"(l|litre|liter|acre|ha|hectare|plant|tank|day|week)\b", re.I)
 TAMIL = re.compile("[஀-௿]")
 PII = re.compile(r"(\+?91[\s-]?)?\b[6-9]\d{9}\b|\b\d{4}\s?\d{4}\s?\d{4}\b")  # Indian mobile numbers, Aadhaar-like IDs
 
@@ -125,6 +127,10 @@ def answer(state: AdvisorState) -> dict:
     if text is None:  # extractive answer: quote the best passage
         lead = "அங்கீகரிக்கப்பட்ட மூலத்திலிருந்து (ஆங்கிலம்):" if state["language"] == "ta" else "From an approved source:"
         text = f"{lead}\n\"{p[0]['text'][:700]}\" [1]"
+    if DOSE_IN_TEXT.search(text):
+        # Output guard: even approved (or poisoned) source text must not deliver a dose/rate to the farmer.
+        return {**escalate_to_human({**state, "trace": _t(state, "answer", "source text contains a dose or rate")}),
+                "trace": _t(state, "answer", "blocked: answer would contain a dose or rate; escalated")}
     if state["risk"] == "pesticide":
         text += ("\n\nஎந்த மருந்தையும் தெளிக்கும் முன் உங்கள் வேளாண் விரிவாக்க அலுவலரை அணுகவும்."
                  if state["language"] == "ta" else

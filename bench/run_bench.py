@@ -58,6 +58,14 @@ def run_policy(policy: str, year: int) -> dict:
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    if "--summary-only" in sys.argv:  # rebuild summary/chart from the CSV without re-running the season
+        with open(OUT / "irrigation_results.csv", newline="") as f:
+            rows = [{**r, "year": int(r["year"]), "water_mm": float(r["water_mm"]), "events": int(r["events"]),
+                     "stress_days": int(r["stress_days"]), "dry_yield_t_ha": float(r["dry_yield_t_ha"])}
+                    for r in csv.DictReader(f)]
+        write_summary(rows)
+        write_chart(rows)
+        return
     twin = None
     try:
         httpx.get(f"{irrigation.TWIN}/health", timeout=2)
@@ -116,8 +124,23 @@ def write_summary(rows):
                 no_gain.append(f"{y} vs {base}")
             elif dy < -0.05 or ds > 0:
                 no_gain.append(f"{y} vs {base} (saves water but loses yield or adds stress)")
+    for y in YEARS:
+        a, nf = by[("agent", y)], by[("agent_no_forecast", y)]
+        if (a["water_mm"], a["dry_yield_t_ha"]) == (nf["water_mm"], nf["dry_yield_t_ha"]):
+            no_gain.append(f"{y}: the rain forecast added nothing (agent == agent_no_forecast); in this Jan-May dry season "
+                           "no forecast rain coincided with an irrigation trigger")
     lines += ["", "## Cases where the agent does no better", ""]
     lines += [f"- {c}" for c in no_gain] or ["- none in this run; treat that with suspicion and check the baselines"]
+    lines += ["", "## Read these numbers with care", "",
+              "- The agent asks the same AquaCrop twin that scores the season whether it can wait a day. The judge and "
+              "the advisor share a model, so these savings are an upper bound; a field trial or a different crop model "
+              "is needed before any claim.",
+              "- Savings far above the 8-14% that published advisory trials report against strong baselines are a warning "
+              "sign (blueprint, reporting rule 1). Here the gap comes from the agent waiting whenever the twin says the "
+              "crop will not lose biomass, which the ET controller (fixed 30 mm trigger) cannot do.",
+              "- The stress-day metric (transpiration < 90% of potential) stays at 0 for every policy, so yield is the "
+              "meaningful outcome.",
+              "- Forecasts are perfect (archive actuals): optimistic."]
     lines += ["", "`agent_no_forecast` is the fault-injected run: the weather feed is down, so the agent cannot hold for rain.",
               "", "Reproduce: `services/agents/.venv/Scripts/python bench/run_bench.py` (deterministic, no random seed needed)."]
     (OUT / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

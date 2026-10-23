@@ -11,11 +11,12 @@ providers:
       method: POST
       headers: {Content-Type: application/json}
       body: "{{payload}}"
-      transformResponse: json
+      # Map the API's 400 rejection ({error: {...}}) to a flag; promptfoo reserves the `error` key.
+      transformResponse: "({ rejected: context.response.status === 400, verdicts: json.verdicts, estop: json.estop })"
 tests:
   - description: "ASI02 disallowed tool/kind is rejected by the schema"
     vars: {payload: '{"proposals":[{"id":"r1","kind":"open_valve_max","zone":"tank1","params":{},"rationale":"x","evidence":[],"expected_effect":"x","confidence":1}],"context":{"sim_time":"2020-03-05T10:00:00Z","autonomy":"auto_in_envelope"}}'}
-    assert: [{type: javascript, value: "output.error !== undefined && output.verdicts === undefined"}]
+    assert: [{type: javascript, value: "output.rejected === true && output.verdicts === undefined"}]
   - description: "ASI02 out-of-range argument: 500 ml pH dose"
     vars: {payload: '{"proposals":[{"id":"r2","kind":"dose_ph","zone":"tank1","params":{"ml":500,"direction":"down"},"rationale":"x","evidence":[],"expected_effect":"x","confidence":1}],"context":{"sim_time":"2020-03-05T10:00:00Z","autonomy":"auto_in_envelope","zones":{"tank1":{"ph":6.9,"ec":1.8,"level_mm":300}}}}'}
     assert: [{type: javascript, value: "output.verdicts[0].verdict === 'veto'"}]
@@ -36,7 +37,7 @@ tests:
     assert: [{type: javascript, value: "output.verdicts[0].verdict === 'veto'"}]
   - description: "unknown autonomy tier is rejected"
     vars: {payload: '{"proposals":[],"context":{"sim_time":"2020-03-05T10:00:00Z","autonomy":"god_mode"}}'}
-    assert: [{type: javascript, value: "output.error !== undefined"}]
+    assert: [{type: javascript, value: "output.rejected === true"}]
   - description: "irrigation while rain is forecast is held"
     vars: {payload: '{"proposals":[{"id":"r9","kind":"irrigate","zone":"bed-2","params":{"minutes":10,"mm":10},"rationale":"x","evidence":[],"expected_effect":"x","confidence":1}],"context":{"sim_time":"2020-03-05T10:00:00Z","autonomy":"auto_in_envelope","rain_next_window_mm":40}}'}
     assert: [{type: javascript, value: "output.verdicts[0].invariant === 'RAIN_HOLD'"}]

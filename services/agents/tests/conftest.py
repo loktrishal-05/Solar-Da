@@ -46,7 +46,8 @@ def api_server():
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)]
     # Python services, each in its own venv (twin: AquaCrop; vision: ONNX classifier).
     for svc, port in (("twin", TWIN_PORT), ("vision", VISION_PORT)):
-        py = ROOT / "services" / svc / ".venv" / "Scripts" / "python.exe"
+        venv = ROOT / "services" / svc / ".venv"
+        py = venv / "Scripts" / "python.exe" if os.name == "nt" else venv / "bin" / "python"
         if py.exists():
             procs.append(subprocess.Popen([str(py), "-m", "uvicorn", "app.main:app", "--port", str(port)],
                                           cwd=ROOT / "services" / svc, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
