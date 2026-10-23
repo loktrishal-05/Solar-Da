@@ -52,3 +52,13 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 |---|---|---|
 | `services/agents` venv (LangGraph 1.2.16, LangChain 1.4.7, FastAPI 0.161.1, uvicorn 0.54.0, Pydantic 2.14.1) | real | installs on CPython 3.11.9; `uvicorn app.main:app` serves `GET /health` 200; `pytest services/agents/tests` passes |
 | `services/twin` (AquaCrop-OSPy 3.1.0) | real | smoke test runs a full season; 3.0.10 on 3.10 fails (docs/DECISIONS.md D2) |
+
+## Findings while building Phases 1-4
+| Item | Status | Evidence / action |
+|---|---|---|
+| Fullscreen sections (`App.tsx` `FullscreenSection`) | broken -> fixed | sticky bar used `top-[64px]` inside a container already padded 64 px, leaving a gap and hiding the first row of content; changed to `top-0` |
+| Profile menu "All 13 Invariants Verified", hero "ALL 13 INVARIANTS PASS" | UI-only | static text; no check runs. Left in place (rule 5); the Agent Console shows real verdicts |
+| Engine interlocks vs agent proposals | extended | `packages/engine/src/agent_safety.ts` maps agent proposals onto the existing `evaluateSafetyInterlocks` and adds the six envelope rules; shared fixtures in `packages/contracts/fixtures/safety_cases.json` |
+| EDEN ISS redundant pH probe `ph-tank1_2` | real data fault | reads 6.1-12 while the primary reads ~6.1 (drifts ~0.3 pH/h); ingest flags it and fuses on the primary |
+| HydroGrowNet workbook dates | data issue | mixed d/m/Y text, `\`-separated text and Excel datetimes with day/month swapped; `build_slices.py` normalises them |
+| HydroGrowNet sampling | read from files | water quality is a portable-meter reading at 10:00 and 14:00 per replicate; air RH/temp/CO2 is hourly |
