@@ -11,9 +11,9 @@
     "build:engine": "npm run build --workspace=@terrasub-solarda/engine",
     "test:engine": "npm run test --workspace=@terrasub-solarda/engine",
     "build:contracts": "npm run build --workspace=@terrasub-solarda/contracts",
-    "build": "npm run build:engine && npm run build:contracts && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
-    "dev:api": "npm run dev --workspace=apps/api",
-    "dev:web": "npm run dev --workspace=apps/web",
+    "build": "npm run build:engine && npm run build:contracts && npm run build --workspace=weiqou/api && npm run build --workspace=weiqou/web",
+    "dev:api": "npm run dev --workspace=weiqou/api",
+    "dev:web": "npm run dev --workspace=weiqou/web",
     "dev": "npm run build && concurrently \"npm:dev:api\" \"npm:dev:web\""
   },
   "devDependencies": {
