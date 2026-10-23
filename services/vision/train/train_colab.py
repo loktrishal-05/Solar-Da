@@ -74,6 +74,15 @@ pv = [(str(f), i) for i, c in enumerate(CLASSES) for f in sorted((PV / c).iterdi
 random.shuffle(pv); random.shuffle(pd_train_all)
 n = len(pv)
 pv_train, pv_val, pv_test = pv[:int(.8*n)], pv[int(.8*n):int(.9*n)], pv[int(.9*n):]
+# Cap lab images per class in training (Colab has 2 CPUs; JPEG decoding is the bottleneck). Val/test keep the full splits.
+PV_PER_CLASS = 500
+per_class = {}
+capped = []
+for item in pv_train:
+    per_class[item[1]] = per_class.get(item[1], 0) + 1
+    if per_class[item[1]] <= PV_PER_CLASS:
+        capped.append(item)
+pv_train = capped
 k = int(.85 * len(pd_train_all))
 pd_train, pd_val = pd_train_all[:k], pd_train_all[k:]
 print('PV', len(pv_train), len(pv_val), len(pv_test), '| PD', len(pd_train), len(pd_val), len(pd_test))
@@ -105,14 +114,19 @@ train_ds = ds(train_items, train=True)
 val_ds = ds(pv_val + pd_val)
 
 # %%
-base = tf.keras.applications.EfficientNetV2B0(include_top=False, weights='imagenet',
-                                              input_shape=(IMG, IMG, 3), include_preprocessing=True)
-inp = tf.keras.Input((IMG, IMG, 3), name='image')  # raw RGB 0..255
-x = base(inp, training=False)
-x = tf.keras.layers.GlobalAveragePooling2D()(x)
-x = tf.keras.layers.Dropout(0.3)(x)
-logits = tf.keras.layers.Dense(len(CLASSES), name='logits')(x)  # softmax applied after temperature scaling
-model = tf.keras.Model(inp, logits)
+def build(weights='imagenet'):
+    base = tf.keras.applications.EfficientNetV2B0(include_top=False, weights=weights,
+                                                  input_shape=(IMG, IMG, 3), include_preprocessing=True)
+    inp = tf.keras.Input((IMG, IMG, 3), name='image')  # raw RGB 0..255
+    x = base(inp, training=False)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    # float32 logits even under mixed precision; softmax is applied after temperature scaling
+    logits = tf.keras.layers.Dense(len(CLASSES), name='logits', dtype='float32')(x)
+    return tf.keras.Model(inp, logits), base
+
+tf.keras.mixed_precision.set_global_policy('mixed_float16')  # T4 tensor cores
+model, base = build()
 loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
 base.trainable = False
@@ -123,8 +137,14 @@ base.trainable = True
 for layer in base.layers:
     if isinstance(layer, tf.keras.layers.BatchNormalization): layer.trainable = False
 model.compile(tf.keras.optimizers.Adam(1e-4), loss, metrics=['accuracy'])
-model.fit(train_ds, validation_data=val_ds, epochs=5,
+model.fit(train_ds, validation_data=val_ds, epochs=4,
           callbacks=[tf.keras.callbacks.EarlyStopping(patience=2, restore_best_weights=True)])
+
+# Rebuild in float32 for evaluation and ONNX export, with the trained weights.
+tf.keras.mixed_precision.set_global_policy('float32')
+fp32, _ = build(weights=None)
+fp32.set_weights(model.get_weights())
+model = fp32
 
 # %%
 def logits_of(items):
@@ -169,7 +189,9 @@ def report(items, name):
 
 metrics = {'model': 'EfficientNetV2-B0', 'img_size': IMG, 'seed': SEED, 'temperature': T,
            'abstain_threshold': threshold, 'classes': len(CLASSES),
-           'train': {'plantvillage': len(pv_train), 'plantdoc': len(pd_train), 'plantdoc_oversample': 6},
+           'train': {'plantvillage': len(pv_train), 'plantvillage_cap_per_class': PV_PER_CLASS,
+                     'plantdoc': len(pd_train), 'plantdoc_oversample': 6, 'epochs': '2 frozen + up to 4 fine-tune',
+                     'mixed_precision': True},
            **report(pv_test, 'lab_plantvillage_test'), **report(pd_test, 'field_plantdoc_test'),
            'note': 'Field = PlantDoc test split, mapped classes only. PlantWild not evaluated.'}
 print(json.dumps(metrics, indent=2))
