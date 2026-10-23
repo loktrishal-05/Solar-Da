@@ -249,7 +249,23 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
                           {e.node === 'arbiter' && (e.data?.plan?.length ?? 0) > 0 && (
                             <div className="ml-28 mt-1 font-mono text-[11px] text-gray-600">{e.data!.plan.map((p: any) => `${p.kind}@${p.zone} ${JSON.stringify(p.params)}`).join(' · ')}</div>
                           )}
-                          {e.node === 'ingest' && (e.data?.flags?.length ?? 0) > 0 && (
+                          {e.node === 'arbiter' && [...(e.data?.plan ?? []), ...(e.data?.holds ?? [])].filter((p: any) => p.params?.options?.length).map((p: any, k: number) => (
+                            <div key={k} className="ml-28 mt-1 rounded-lg border border-sky-200 bg-sky-50 p-2 text-[11px]">
+                              <div className="text-gray-700 mb-1">{p.rationale?.split('Twin')[0]}</div>
+                              <table className="font-mono w-full">
+                                <thead><tr className="text-left text-gray-500"><th>twin option</th><th>stress days</th><th>biomass</th><th>water mm</th><th>run id</th></tr></thead>
+                                <tbody>{p.params.options.map((o: any) => (
+                                  <tr key={o.option} className={p.params.decision === 'hold' ? (o.option === 'hold' ? 'font-bold' : '') : (o.option === `irrigate_${p.params.when}` ? 'font-bold' : '')}>
+                                    <td>{o.option}</td><td>{o.stress_days}</td><td>{o.biomass}</td><td>{o.water_used_mm}</td><td className="text-gray-500">{o.run_id}</td>
+                                  </tr>
+                                ))}</tbody>
+                              </table>
+                            </div>
+                          ))}
+                          {e.node === 'arbiter' && (e.data?.holds ?? []).filter((p: any) => !p.params?.options?.length).map((p: any, k: number) => (
+                            <div key={'h' + k} className="ml-28 mt-1 font-mono text-[11px] text-sky-800">{p.zone}: {p.rationale}</div>
+                          ))}
+                          {e.node === 'ingest' &&(e.data?.flags?.length ?? 0) > 0 && (
                             <div className="ml-28 mt-1 font-mono text-[11px] text-amber-800">{e.data!.flags.map((f: any) => `${f.zone}.${f.metric}: ${f.check} (${f.detail})`).join(' · ')}</div>
                           )}
                           {e.node === 'audit' && e.data?.summary_ta && <div className="ml-28 mt-1 text-[11px] text-gray-600">{e.data.summary_ta}</div>}

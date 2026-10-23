@@ -1,0 +1,9 @@
+# Vision service. Interpreter: CPython 3.11.9. Exact pins in requirements.lock.
+onnxruntime
+pillow
+numpy
+fastapi
+uvicorn[standard]
+python-multipart
+pytest
+httpx
