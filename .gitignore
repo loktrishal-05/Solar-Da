@@ -78,3 +78,6 @@ data/**/*.zip
 *.onnx
 *.pt
 bench/results/raw/
+data/runtime/
+*.sqlite-shm
+*.sqlite-wal

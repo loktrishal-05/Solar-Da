@@ -8,3 +8,4 @@ export * from './crop_doctor.js';
 export * from './crop_recommender.js';
 export * from './power_scheduler.js';
 export * from './passport.js';
+export * from './agent_safety.js';
