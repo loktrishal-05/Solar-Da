@@ -11,8 +11,8 @@ interface LightNavbarProps {
   onToggleAssistant: () => void;
   alerts: Array<{ id: string; type: 'CRITICAL' | 'WARNING' | 'INFO'; message: string; timestamp: string }>;
   onDismissAlert: (id: string) => void;
-  activeSection: 'live-dashboard' | 'irrigation' | 'crop-doctor' | 'market' | 'community' | 'sms-alerts' | null;
-  onOpenSection: (id: 'live-dashboard' | 'irrigation' | 'crop-doctor' | 'market' | 'community' | 'sms-alerts') => void;
+  activeSection: 'agent-console' | 'live-dashboard' | 'irrigation' | 'crop-doctor' | 'market' | 'community' | 'sms-alerts' | null;
+  onOpenSection: (id: 'agent-console' | 'live-dashboard' | 'irrigation' | 'crop-doctor' | 'market' | 'community' | 'sms-alerts') => void;
 }
 
 export const LightNavbar: React.FC<LightNavbarProps> = ({
@@ -44,6 +44,12 @@ export const LightNavbar: React.FC<LightNavbarProps> = ({
             </span>
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#E8F5E9] text-[#1B4332] border border-[#A5D6A7]">
               v3.0 OS
+            </span>
+            <span
+              className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300"
+              title="No live sensors. All sensor values are replayed from public datasets or simulated, and are labelled so."
+            >
+              REPLAY MODE
             </span>
           </div>
         </a>
@@ -79,6 +85,12 @@ export const LightNavbar: React.FC<LightNavbarProps> = ({
       <div className="flex items-center space-x-4">
         {/* Navigation Buttons - open section in fullscreen mode */}
         <nav className="hidden lg:flex items-center space-x-5 text-xs font-semibold text-gray-700">
+          <button
+            onClick={() => onOpenSection('agent-console')}
+            className={`transition px-2.5 py-1 rounded-full border ${activeSection === 'agent-console' ? 'bg-[#1B4332] text-white border-[#1B4332]' : 'border-[#A5D6A7] text-[#1B4332] hover:bg-[#E8F5E9]'}`}
+          >
+            Agent Console
+          </button>
           <button
             onClick={() => onOpenSection('live-dashboard')}
             className={`transition ${activeSection === 'live-dashboard' ? 'text-[#1B4332] font-extrabold' : 'hover:text-[#1B4332]'}`}

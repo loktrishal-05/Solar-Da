@@ -97,4 +97,5 @@ def sensor_alerts(state: dict) -> list[dict]:
     run = _run(state)
     return [_action(run, "alert", f["zone"], {"message": f"{f['metric']} {f['check']}: {f['detail']}"},
                     "Sensor reading failed a quality check; not acted on", [], "none", 1.0)
-            for f in state.get("quality_flags", []) if f["severity"] == "bad"][:5]
+            # Backup-probe faults are maintenance notes (shown in the trace), not farmer alerts every tick.
+            for f in state.get("quality_flags", []) if f["severity"] == "bad" and not f["metric"].endswith("_b")][:5]

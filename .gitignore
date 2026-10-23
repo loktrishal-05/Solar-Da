@@ -81,3 +81,6 @@ bench/results/raw/
 data/runtime/
 *.sqlite-shm
 *.sqlite-wal
+
+# vision model weights are fetched, not committed
+services/vision/model/*.onnx

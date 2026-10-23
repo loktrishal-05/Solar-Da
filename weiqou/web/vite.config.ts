@@ -11,6 +11,12 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     proxy: {
+      // Python agent runtime (FastAPI). SSE passes through the proxy unbuffered.
+      '/agents': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/agents/, ''),
+      },
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,

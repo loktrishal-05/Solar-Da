@@ -176,7 +176,7 @@ class Session:
                 try:
                     start_run(self.id, self.tick, self.sc, fmt_ts(self.next_tick), self.autonomy)
                 except Exception as e:  # keep the session alive; the error is visible in the feed
-                    bus.publish("error", {"session_id": self.id, "message": f"{type(e).__name__}: {e}"})
+                    bus.publish("agent_error", {"session_id": self.id, "message": f"{type(e).__name__}: {e}"})
                 self.tick += 1
                 self.next_tick += timedelta(minutes=self.sc["tick_minutes"])
             bus.publish("clock", self.info())

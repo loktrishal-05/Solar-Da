@@ -15,8 +15,10 @@ import { LightAssistantDrawer } from './components/LightAssistantDrawer';
 import { LightSafetyModal } from './components/LightSafetyModal';
 import { LightToastContainer } from './components/LightToastContainer';
 import { LightFooter } from './components/LightFooter';
+import { AgentConsole } from './components/AgentConsole';
 
 export type FocusedSection =
+  | 'agent-console'
   | 'live-dashboard'
   | 'irrigation'
   | 'crop-doctor'
@@ -173,6 +175,12 @@ export const App: React.FC = () => {
           </>
         )}
 
+        {focusedSection === 'agent-console' && (
+          <FullscreenSection title="Agent Console — replayed data" onClose={closeSection}>
+            <AgentConsole eStopActive={eStopActive} onToggleEStop={toggleEStop} />
+          </FullscreenSection>
+        )}
+
         {focusedSection === 'live-dashboard' && (
           <FullscreenSection title="Live Dashboard" onClose={closeSection}>
             <LightLiveDashboardSection onActionClick={handleActionClick} />
@@ -258,7 +266,7 @@ const FullscreenSection: React.FC<FullscreenSectionProps> = ({ title, onClose, c
       className="fixed inset-0 top-0 z-30 bg-[#FAFAF8] overflow-y-auto animate-[fadeIn_200ms_ease-out]"
       style={{ paddingTop: '64px' }}
     >
-      <div className="sticky top-[64px] z-10 bg-[#1B4332] text-white border-b border-[#143326] px-4 lg:px-8 py-3 flex items-center justify-between shadow-md">
+      <div className="sticky top-0 z-10 bg-[#1B4332] text-white border-b border-[#143326] px-4 lg:px-8 py-3 flex items-center justify-between shadow-md">
         <button
           onClick={onClose}
           className="flex items-center space-x-2 text-sm font-bold text-white hover:text-[#7CB342] transition"
