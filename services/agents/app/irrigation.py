@@ -18,7 +18,7 @@ TWIN = os.environ.get("SOLARDA_TWIN", "http://127.0.0.1:8100")
 KC_FILE = Path(__file__).resolve().parents[3] / "data" / "kc.yaml"
 DEPTH_MM = 20.0          # application depth for one irrigation event
 RAIN_HOLD_MM = 5.0       # same threshold as the engine's RAIN_HOLD envelope rule
-BIOMASS_GAIN = 0.005     # irrigate if the twin projects >= 0.5% more biomass over the horizon than holding
+BIOMASS_GAIN = 0.005     # waiting a day is acceptable if the twin projects < 0.5% biomass loss and no extra stress
 _client = httpx.Client(timeout=60)
 
 
@@ -74,29 +74,59 @@ def prior_history(planting: str, before: str, policy: str | None) -> list[dict]:
     return [{"date": d, "mm": mm} for d, mm in _prior(planting, before, policy or "")]
 
 
-def agent_decide(planting: str, today: str, history: list[dict], use_forecast: bool = True) -> dict:
-    """Returns {option, depth_mm, rationale, evidence, options}. Evidence cites ET0/forecast and twin run ids."""
+def deficit_mm(planting: str, today: str, history: list[dict]) -> float:
+    """FAO-56 style root-zone deficit through today: sum(Kc x ET0 - effective rain - irrigation), floored at 0.
+    Same accounting as the EtController baseline, recomputed from the history so the agent keeps no hidden state."""
+    irr: dict[str, float] = {}
+    for h in history:
+        irr[h["date"]] = irr.get(h["date"], 0.0) + float(h["mm"])
+    p, t, d, deficit = date.fromisoformat(planting), date.fromisoformat(today), date.fromisoformat(planting), 0.0
+    while d <= t:
+        wx = weather.day(d.isoformat())
+        etc = kc((d - p).days) * wx["et0_fao_evapotranspiration"]
+        deficit = max(0.0, deficit + etc - effective_rain(wx["precipitation_sum"]) - irr.get(d.isoformat(), 0.0))
+        d = date.fromordinal(d.toordinal() + 1)
+    return round(deficit, 1)
+
+
+def effective_rain(mm: float) -> float:
+    return max(0.0, 0.8 * mm - 2.0)  # ponytail: simple effective-rain rule (USDA-SCS is better)
+
+
+def agent_decide(planting: str, today: str, history: list[dict], use_forecast: bool = True,
+                 threshold_mm: float = 30.0) -> dict:
+    """Returns {option, depth_mm, rationale, evidence, options}. Evidence cites ET0/forecast and twin run ids.
+
+    1. Below the FAO-56 deficit threshold: hold (the crop has water).
+    2. At the threshold but rain is forecast: hold (let the rain refill the root zone).
+    3. Otherwise run hold / irrigate now / irrigate tonight in the twin. Hold one more day only if the twin projects
+       no extra stress days and < BIOMASS_GAIN biomass loss; else pick the irrigation option with the best outcome.
+    (v1 used twin stress days alone and lost ~4% yield; v2 irrigated whenever biomass rose >= 0.5% and used more
+    water than the ET controller. Both runs are kept in bench/results/.)"""
     wx = weather.day(today)
     out = weather.outlook(today, 2)
+    deficit = deficit_mm(planting, today, history)
     evidence = [wx["id"]] + (out["ids"] if use_forecast else [])
+    head = f"ET0 today {wx['et0_fao_evapotranspiration']} mm, root-zone deficit {deficit} mm (threshold {threshold_mm} mm)"
+    if deficit < threshold_mm:
+        return {"option": "hold", "depth_mm": 0.0, "options": [], "evidence": evidence, "deficit_mm": deficit,
+                "rationale": f"Hold: {head}."}
     if use_forecast and out["rain_mm"] >= RAIN_HOLD_MM:
-        return {"option": "hold", "depth_mm": 0.0, "options": [], "evidence": evidence,
-                "rationale": f"Hold: {out['rain_mm']} mm rain forecast in the next 2 days ({out['kind']}); "
-                             f"ET0 today {wx['et0_fao_evapotranspiration']} mm."}
+        return {"option": "hold", "depth_mm": 0.0, "options": [], "evidence": evidence, "deficit_mm": deficit,
+                "rationale": f"Hold for rain: {out['rain_mm']} mm rain forecast in the next 2 days ({out['kind']}); {head}."}
     opts = twin_options(planting, today, history)
     hold = next(o for o in opts if o["option"] == "hold")
-    # Irrigate only if the twin says it pays: fewer stress days, or at least BIOMASS_GAIN more biomass by the
-    # end of the horizon (mild stress slows growth before transpiration drops). Otherwise hold and save water.
-    worth = [o for o in opts if o["option"] != "hold" and (o["stress_days"] < hold["stress_days"]
-             or o.get("biomass", 0) >= hold.get("biomass", 0) * (1 + BIOMASS_GAIN))]
-    best = min(worth, key=lambda o: (o["stress_days"], -o.get("biomass", 0), o["option"] != "irrigate_tonight")) if worth else hold
+    irrigate = min((o for o in opts if o["option"] != "hold"),
+                   key=lambda o: (o["stress_days"], -o.get("biomass", 0), o["option"] != "irrigate_tonight"))
+    can_wait = (hold["stress_days"] <= irrigate["stress_days"]
+                and hold.get("biomass", 0) >= irrigate.get("biomass", 0) * (1 - BIOMASS_GAIN))
+    best = hold if can_wait else irrigate
     summary = "; ".join(f"{o['option']}: {o['stress_days']} stress days, biomass {o.get('biomass')}, {o['water_used_mm']} mm"
                         for o in opts)
-    return {"option": best["option"], "depth_mm": best["depth_mm"], "options": opts,
+    return {"option": best["option"], "depth_mm": best["depth_mm"], "options": opts, "deficit_mm": deficit,
             "evidence": evidence + [o["run_id"] for o in opts],
-            "rationale": f"ET0 today {wx['et0_fao_evapotranspiration']} mm, rain next 2 days "
-                         f"{out['rain_mm'] if use_forecast else 'unknown'} mm. Twin (7-day horizon): {summary}. "
-                         f"Chose {best['option']}."}
+            "rationale": f"{head}; rain next 2 days {out['rain_mm'] if use_forecast else 'unknown'} mm. "
+                         f"Twin (7-day horizon): {summary}. Chose {best['option']}."}
 
 
 class EtController:
@@ -108,8 +138,7 @@ class EtController:
     def step(self, today: str) -> float:
         wx = weather.day(today)
         etc = kc((date.fromisoformat(today) - self.planting).days) * wx["et0_fao_evapotranspiration"]
-        eff_rain = max(0.0, 0.8 * wx["precipitation_sum"] - 2.0)  # ponytail: simple effective-rain rule (USDA-SCS is better)
-        self.deficit = max(0.0, self.deficit + etc - eff_rain)
+        self.deficit = max(0.0, self.deficit + etc - effective_rain(wx["precipitation_sum"]))
         if self.deficit >= self.threshold:
             self.deficit = max(0.0, self.deficit - self.depth)
             return self.depth

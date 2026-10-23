@@ -55,6 +55,13 @@ const history = (): DispatchedRecord[] =>
     minutes: a.action.params.minutes, ml: a.action.params.ml,
   }));
 
+// Physically plausible ranges (mirror services/agents/app/quality.py RANGES).
+const PLAUSIBLE: Record<string, [number, number]> = {
+  ph: [3.5, 8.5], ec: [0.05, 6], solution_temp: [5, 40], level_mm: [0, 2000], do_mg_l: [0, 20],
+};
+const plausible = (z: Record<string, number | undefined>) =>
+  Object.entries(PLAUSIBLE).every(([k, [lo, hi]]) => z[k] === undefined || (z[k]! >= lo && z[k]! <= hi));
+
 function check(action: z.infer<typeof ProposedActionSchema>, ctx: SafetyRequest['context']): AgentVerdict {
   const limits = store.limits[ctx.crop] ?? store.limits['Butterhead Lettuce'];
   const z0 = ctx.zones[action.zone] ?? {};
@@ -66,7 +73,8 @@ function check(action: z.infer<typeof ProposedActionSchema>, ctx: SafetyRequest[
     limits,
     telemetry: {
       timestampMs: nowMs, ph: z0.ph ?? (limits.phMin + limits.phMax) / 2, ecMsCm: z0.ec ?? limits.ecMinMsCm,
-      solutionTempC: z0.solution_temp, levelMm: z0.level_mm, doMgL: z0.do_mg_l, qualityStatus: 'VALID',
+      solutionTempC: z0.solution_temp, levelMm: z0.level_mm, doMgL: z0.do_mg_l,
+      qualityStatus: plausible(z0) ? 'VALID' : 'IMPLAUSIBLE', // spoofed/impossible readings trip INVALID_TELEMETRY
     },
     badMetrics: ctx.bad_metrics[action.zone] ?? [],
     rainNextWindowMm: ctx.rain_next_window_mm,
