@@ -16,6 +16,7 @@ export type DiseaseDetectorState = {
   loading: boolean;
   error: string | null;
   ready: boolean;
+  backend: string | null;
 };
 
 const MODEL_URL = '/models/plant-disease/model.json';
@@ -30,6 +31,7 @@ export function useDiseaseDetector() {
     loading: true,
     error: null,
     ready: false,
+    backend: null,
   });
   const modelRef = useRef<tf.LayersModel | null>(null);
   const classNamesRef = useRef<Record<string, string>>({});
@@ -61,6 +63,37 @@ export function useDiseaseDetector() {
           return;
         }
 
+        await tf.nextFrame();
+        const backend = tf.getBackend();
+        const warmupStart = performance.now();
+        let fallbackToCpu = false;
+        try {
+          const output = tf.tidy(() => model.predict(tf.zeros([1, 224, 224, 3])));
+          try {
+            await Promise.all((Array.isArray(output) ? output : [output]).map((t) => t.data()));
+          } finally {
+            tf.dispose(output);
+          }
+          fallbackToCpu = backend === 'webgl' && performance.now() - warmupStart > 5000;
+        } catch (err) {
+          if (backend !== 'webgl') {
+            model.dispose();
+            throw err;
+          }
+          fallbackToCpu = true;
+        }
+
+        if (fallbackToCpu) {
+          // Synchronous shader compilation cannot be interrupted by a timeout.
+          await tf.setBackend('cpu');
+          await tf.ready();
+        }
+
+        if (cancelled) {
+          model.dispose();
+          return;
+        }
+
         modelRef.current = model;
         classNamesRef.current = classNames;
 
@@ -70,6 +103,7 @@ export function useDiseaseDetector() {
           loading: false,
           error: null,
           ready: true,
+          backend: tf.getBackend(),
         });
       } catch (err: any) {
         if (cancelled) return;
@@ -79,6 +113,7 @@ export function useDiseaseDetector() {
           loading: false,
           error: err?.message || 'Failed to load model',
           ready: false,
+          backend: tf.getBackend() || null,
         });
       }
     }
