@@ -62,3 +62,4 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | EDEN ISS redundant pH probe `ph-tank1_2` | real data fault | reads 6.1-12 while the primary reads ~6.1 (drifts ~0.3 pH/h); ingest flags it and fuses on the primary |
 | HydroGrowNet workbook dates | data issue | mixed d/m/Y text, `\`-separated text and Excel datetimes with day/month swapped; `build_slices.py` normalises them |
 | HydroGrowNet sampling | read from files | water quality is a portable-meter reading at 10:00 and 14:00 per replicate; air RH/temp/CO2 is hourly |
+| Crop Doctor (browser TF.js) after `scripts/download_tfjs_model.ps1` | real, with a performance issue | model loads ("TF.js Model Ready"); clicking a reference sample froze the Chrome renderer for >60 s on this laptop under browser automation (first WebGL inference compiles shaders on the main thread). Not fixed; the server-side vision service is the primary classifier now |
