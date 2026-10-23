@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc",
     "schemas": "npm run build && node scripts/export-schemas.mjs",
-    "test": "npm run build && node --test dist/**/*.test.js"
+    "test": "npm run build && node --test \"dist/**/*.test.js\""
   },
   "dependencies": {
     "zod": "^3.23.8"
