@@ -6,36 +6,41 @@ AquaCrop-OSPy 3.1.0 twin, tomato on sandy loam, planted 15 Jan; weather: Open-Me
 |---|---|---|---|---|---|
 | 2021 | fixed_schedule | 840 | 42 | 0 | 8.75 |
 | 2021 | et_controller | 560 | 28 | 0 | 8.73 |
-| 2021 | agent | 340 | 17 | 0 | 8.41 |
-| 2021 | agent_no_forecast | 340 | 17 | 0 | 8.41 |
+| 2021 | agent | 380 | 19 | 0 | 8.71 |
+| 2021 | agent_no_forecast | 380 | 19 | 0 | 8.71 |
 | 2022 | fixed_schedule | 840 | 42 | 0 | 8.80 |
 | 2022 | et_controller | 520 | 26 | 0 | 8.77 |
-| 2022 | agent | 380 | 19 | 0 | 8.48 |
-| 2022 | agent_no_forecast | 380 | 19 | 0 | 8.48 |
+| 2022 | agent | 420 | 21 | 0 | 8.77 |
+| 2022 | agent_no_forecast | 420 | 21 | 0 | 8.77 |
 | 2023 | fixed_schedule | 840 | 42 | 0 | 8.84 |
 | 2023 | et_controller | 500 | 25 | 0 | 8.78 |
-| 2023 | agent | 300 | 15 | 0 | 8.45 |
-| 2023 | agent_no_forecast | 300 | 15 | 0 | 8.45 |
+| 2023 | agent | 340 | 17 | 0 | 8.77 |
+| 2023 | agent_no_forecast | 340 | 17 | 0 | 8.77 |
 
 ## Paired differences: agent minus each baseline (same year)
 
 | Year | vs | Water (mm) | Water (%) | Stress days | Yield (t/ha) |
 |---|---|---|---|---|---|
-| 2021 | fixed_schedule | -500 | -59.5% | +0 | -0.34 |
-| 2021 | et_controller | -220 | -39.3% | +0 | -0.32 |
-| 2022 | fixed_schedule | -460 | -54.8% | +0 | -0.32 |
-| 2022 | et_controller | -140 | -26.9% | +0 | -0.29 |
-| 2023 | fixed_schedule | -540 | -64.3% | +0 | -0.38 |
-| 2023 | et_controller | -200 | -40.0% | +0 | -0.33 |
+| 2021 | fixed_schedule | -460 | -54.8% | +0 | -0.04 |
+| 2021 | et_controller | -180 | -32.1% | +0 | -0.02 |
+| 2022 | fixed_schedule | -420 | -50.0% | +0 | -0.02 |
+| 2022 | et_controller | -100 | -19.2% | +0 | +0.00 |
+| 2023 | fixed_schedule | -500 | -59.5% | +0 | -0.07 |
+| 2023 | et_controller | -160 | -32.0% | +0 | -0.01 |
 
 ## Cases where the agent does no better
 
-- 2021 vs fixed_schedule (saves water but loses yield or adds stress)
-- 2021 vs et_controller (saves water but loses yield or adds stress)
-- 2022 vs fixed_schedule (saves water but loses yield or adds stress)
-- 2022 vs et_controller (saves water but loses yield or adds stress)
 - 2023 vs fixed_schedule (saves water but loses yield or adds stress)
-- 2023 vs et_controller (saves water but loses yield or adds stress)
+- 2021: the rain forecast added nothing (agent == agent_no_forecast); in this Jan-May dry season no forecast rain coincided with an irrigation trigger
+- 2022: the rain forecast added nothing (agent == agent_no_forecast); in this Jan-May dry season no forecast rain coincided with an irrigation trigger
+- 2023: the rain forecast added nothing (agent == agent_no_forecast); in this Jan-May dry season no forecast rain coincided with an irrigation trigger
+
+## Read these numbers with care
+
+- The agent asks the same AquaCrop twin that scores the season whether it can wait a day. The judge and the advisor share a model, so these savings are an upper bound; a field trial or a different crop model is needed before any claim.
+- Savings far above the 8-14% that published advisory trials report against strong baselines are a warning sign (blueprint, reporting rule 1). Here the gap comes from the agent waiting whenever the twin says the crop will not lose biomass, which the ET controller (fixed 30 mm trigger) cannot do.
+- The stress-day metric (transpiration < 90% of potential) stays at 0 for every policy, so yield is the meaningful outcome.
+- Forecasts are perfect (archive actuals): optimistic.
 
 `agent_no_forecast` is the fault-injected run: the weather feed is down, so the agent cannot hold for rain.
 

@@ -1,0 +1,7 @@
+2021 fixed_schedule     water    840 mm  stress   0 d  yield 8.75 t/ha  (2s)
+2021 et_controller      water    560 mm  stress   0 d  yield 8.73 t/ha  (2s)
+2021 agent              water    860 mm  stress   0 d  yield 8.74 t/ha  (184s)
+2021 agent_no_forecast  water    900 mm  stress   0 d  yield 8.74 t/ha  (448s)
+2022 fixed_schedule     water    840 mm  stress   0 d  yield 8.80 t/ha  (2s)
+2022 et_controller      water    520 mm  stress   0 d  yield 8.77 t/ha  (2s)
+2022 agent              water    720 mm  stress   0 d  yield 8.79 t/ha  (179s)
