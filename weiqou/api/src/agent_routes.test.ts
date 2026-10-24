@@ -59,3 +59,15 @@ test('needs_human action requires an approval, E-STOP freezes dispatch', async (
   store.eStopActive = false;
   assert.equal((await post('/actions', { run_id: 'r', sim_time: ctx.sim_time, action: t, approval }, { 'Idempotency-Key': 'k-t1b' })).status, 201);
 });
+
+test('the seeded harvest passport verifies and a tampered block does not', async () => {
+  const ok = await (await fetch(base + '/harvest-lots/LOT_2026_LETTUCE_01/passport')).json();
+  assert.equal(ok.isPassportChainValid, true);
+  const { store } = await import('./store.js');
+  const chain = store.harvestLots[0].passportChain;
+  const saved = chain[1].dosagesSummary;
+  chain[1].dosagesSummary = ['Dose 999ml anything'];
+  const bad = await (await fetch(base + '/harvest-lots/LOT_2026_LETTUCE_01/passport')).json();
+  chain[1].dosagesSummary = saved;
+  assert.equal(bad.isPassportChainValid, false);
+});

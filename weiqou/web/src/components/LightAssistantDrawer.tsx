@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Send, Mic, Paperclip, X, AlertTriangle, ShieldCheck, Lock } from 'lucide-react';
 import { ActuatorCommandProposal } from '@terrasub-solarda/engine';
+import { FarmChat } from './FarmChat';
 
 interface LightAssistantDrawerProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export const LightAssistantDrawer: React.FC<LightAssistantDrawerProps> = ({
   const [input, setInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
+  // 'smart' = the real Gemini assistant (streaming, six languages, farm tools); 'actions' = the original keyword assistant that creates proposals.
+  const [mode, setMode] = useState<'smart' | 'actions'>('smart');
 
   if (!isOpen) return null;
 
@@ -76,11 +79,15 @@ export const LightAssistantDrawer: React.FC<LightAssistantDrawerProps> = ({
   };
 
   const handleVoiceInput = () => {
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setMessages((prev) => [...prev, { role: 'assistant', text: 'Voice input is not supported in this browser. Please type.' }]); return; }
+    const rec = new SR();
+    rec.lang = 'en-IN';
+    rec.onresult = (e: any) => handleSend(e.results[0][0].transcript);
+    rec.onend = () => setIsListening(false);
+    rec.onerror = () => setIsListening(false);
     setIsListening(true);
-    setTimeout(() => {
-      setIsListening(false);
-      handleSend('Explain my latest soil moisture reading');
-    }, 2200);
+    rec.start();
   };
 
   return (
@@ -92,7 +99,7 @@ export const LightAssistantDrawer: React.FC<LightAssistantDrawerProps> = ({
             <Sparkles className="w-4 h-4 text-yellow-300" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-white">Gemini Multimodal Assistant</h3>
+            <h3 className="font-bold text-sm text-white">Solarda Assistant</h3>
             <span className="text-[10px] font-mono text-emerald-200 block">Context-Aware Agronomic Agent</span>
           </div>
         </div>
@@ -101,6 +108,13 @@ export const LightAssistantDrawer: React.FC<LightAssistantDrawerProps> = ({
         </button>
       </div>
 
+      <div className="flex text-xs font-bold border-b">
+        <button onClick={() => setMode('smart')} className={`flex-1 py-2 ${mode === 'smart' ? 'bg-[#E8F5E9] text-[#1B4332]' : 'text-gray-500'}`}>Smart assistant</button>
+        <button onClick={() => setMode('actions')} className={`flex-1 py-2 ${mode === 'actions' ? 'bg-[#E8F5E9] text-[#1B4332]' : 'text-gray-500'}`}>Action proposals (classic)</button>
+      </div>
+      {mode === 'smart' && <div className="flex-1 min-h-0 p-2"><FarmChat lowBandwidth={false} fill /></div>}
+
+      {mode === 'actions' && (<>
       {/* Safety Interlock Restriction Banner */}
       <div className="bg-[#FFF8E1] p-3 border-b border-[#FFE082] text-xs text-[#8D6E63] flex items-center space-x-2">
         <Lock className="w-4 h-4 text-[#D97706] flex-shrink-0" />
@@ -228,6 +242,7 @@ export const LightAssistantDrawer: React.FC<LightAssistantDrawerProps> = ({
           </button>
         </div>
       </div>
+      </>)}
     </div>
   );
 };

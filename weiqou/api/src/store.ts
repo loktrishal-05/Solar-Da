@@ -117,10 +117,12 @@ export interface InMemoryStore {
 }
 
 const genesisPassport = createGenesisPassportBlock('LOT_2026_LETTUCE_01', 'Butterhead Lettuce', Date.now() - 86400000);
+const passportBlock1 = appendPassportBlock(genesisPassport, ['Dose 15ml MasterBlend NPK', 'Dose 5ml Calcium Nitrate'], [], true, '94% Solar Power', Date.now() - 43200000);
+// Each block must extend the previous one (the seed used to extend genesis twice, forking the chain).
 const verifiedPassportChain = [
   genesisPassport,
-  appendPassportBlock(genesisPassport, ['Dose 15ml MasterBlend NPK', 'Dose 5ml Calcium Nitrate'], [], true, '94% Solar Power', Date.now() - 43200000),
-  appendPassportBlock(genesisPassport, ['Dose 3ml pH Down'], [], true, '98% Solar Power', Date.now() - 3600000),
+  passportBlock1,
+  appendPassportBlock(passportBlock1, ['Dose 3ml pH Down'], [], true, '98% Solar Power', Date.now() - 3600000),
 ];
 
 export const store: InMemoryStore = {

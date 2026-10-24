@@ -60,14 +60,26 @@ export function appendPassportBlock(
   };
 }
 
+function expectedHash(block: PassportBlock): string {
+  if (block.index === 0) {
+    return simpleSha256(`GENESIS_${block.harvestLotId}_${block.cropName}_${block.timestampMs}`);
+  }
+  const payload = `${block.index}_${block.previousHash}_${block.timestampMs}_${block.dosagesSummary.join(',')}_${block.treatmentApplications.join(',')}_${block.harvestBlockComplianceVerified}_${block.energyMixSummary}`;
+  return simpleSha256(payload);
+}
+
+// Checks the links, the block numbering, and that every block's hash matches its own contents, so editing a
+// dose or treatment after the fact is detected. ponytail: simpleSha256 is a 32-bit checksum, not a cryptographic
+// hash; swap in SHA-256 before the passport is used to settle anything real.
 export function verifyPassportChainIntegrity(chain: PassportBlock[]): { isChainValid: boolean; invalidIndex?: number } {
   if (chain.length === 0) return { isChainValid: false };
+  if (chain[0].index !== 0 || chain[0].blockHash !== expectedHash(chain[0])) return { isChainValid: false, invalidIndex: 0 };
 
   for (let i = 1; i < chain.length; i++) {
     const current = chain[i];
     const previous = chain[i - 1];
 
-    if (current.previousHash !== previous.blockHash) {
+    if (current.index !== i || current.previousHash !== previous.blockHash || current.blockHash !== expectedHash(current)) {
       return { isChainValid: false, invalidIndex: i };
     }
   }

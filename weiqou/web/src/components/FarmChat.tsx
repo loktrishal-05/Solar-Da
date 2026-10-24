@@ -44,7 +44,7 @@ const Rich: React.FC<{ text: string }> = ({ text }) => (
   </div>
 );
 
-export const FarmChat: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidth }) => {
+export const FarmChat: React.FC<{ lowBandwidth: boolean; fill?: boolean }> = ({ lowBandwidth, fill }) => {
   const [lang, setLang] = useState<Lang>('auto');
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState('');
@@ -156,7 +156,7 @@ export const FarmChat: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidth }) 
   const effLang = lang === 'auto' ? lastLang.current : lang;
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm flex flex-col h-[70vh] min-h-[480px]">
+    <section className={`rounded-2xl border border-[#E5E7EB] bg-white shadow-sm flex flex-col ${fill ? 'h-full' : 'h-[70vh] min-h-[480px]'}`}>
       <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b text-xs">
         <h3 className="font-black uppercase tracking-wider text-[#1B4332] mr-auto">Farm assistant</h3>
         <div className="flex flex-wrap rounded-full border overflow-hidden">

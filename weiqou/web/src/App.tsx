@@ -38,17 +38,44 @@ export const App: React.FC = () => {
   const [proposals, setProposals] = useState<ActuatorCommandProposal[]>([]);
 
   const [alerts, setAlerts] = useState<Array<{ id: string; type: 'CRITICAL' | 'WARNING' | 'INFO'; message: string; timestamp: string }>>([
-    { id: 'a1', type: 'CRITICAL', message: 'Reservoir R-02 pH 8.9 (ceiling 8.5)', timestamp: '14:32:10' },
-    { id: 'a2', type: 'WARNING', message: 'G-07 moisture sensor stale 12 min', timestamp: '14:20:00' },
-    { id: 'a3', type: 'INFO', message: 'Market price alert: Methi +12% this week', timestamp: '08:00:00' },
+    { id: 'a1', type: 'CRITICAL', message: '(sample) Reservoir R-02 pH 8.9 (ceiling 8.5)', timestamp: '14:32:10' },
+    { id: 'a2', type: 'WARNING', message: '(sample) G-07 moisture sensor stale 12 min', timestamp: '14:20:00' },
+    { id: 'a3', type: 'INFO', message: '(sample) Market price alert: Methi +12% this week', timestamp: '08:00:00' },
   ]);
 
   const [eventLogs, setEventLogs] = useState<Array<{ id: string; time: string; unit: string; action: string; trigger: 'AUTO' | 'MANUAL' | 'SYSTEM'; status: string }>>([
-    { id: 'e1', time: '14:32:05', unit: 'G-04', action: 'Irrigate 12s', trigger: 'AUTO', status: '✓ Success' },
-    { id: 'e2', time: '14:15:22', unit: 'G-04', action: 'Dose 15ml', trigger: 'MANUAL', status: '✓ Success' },
-    { id: 'e3', time: '13:48:10', unit: 'G-07', action: 'Irrigate 12s', trigger: 'AUTO', status: '✓ Success' },
-    { id: 'e4', time: '13:20:00', unit: 'G-04', action: 'Alert: Low', trigger: 'SYSTEM', status: '⚠ Warning' },
+    { id: 'e1', time: '14:32:05', unit: 'G-04', action: 'Irrigate 12s', trigger: 'AUTO', status: '✓ Success (sample)' },
+    { id: 'e2', time: '14:15:22', unit: 'G-04', action: 'Dose 15ml', trigger: 'MANUAL', status: '✓ Success (sample)' },
+    { id: 'e3', time: '13:48:10', unit: 'G-07', action: 'Irrigate 12s', trigger: 'AUTO', status: '✓ Success (sample)' },
+    { id: 'e4', time: '13:20:00', unit: 'G-04', action: 'Alert: Low', trigger: 'SYSTEM', status: '⚠ Warning (sample)' },
   ]);
+
+  // Real entries from the safety API (agent dispatches and vetoes). Replayed/simulated, so each carries that label.
+  const [liveAlerts, setLiveAlerts] = useState<typeof alerts>([]);
+  const [liveEvents, setLiveEvents] = useState<typeof eventLogs>([]);
+  useEffect(() => {
+    let stop = false;
+    const pull = async () => {
+      try {
+        const [acts, audit] = await Promise.all([
+          fetch('/api/actions').then((r) => r.json()), fetch('/api/audit').then((r) => r.json()),
+        ]);
+        if (stop) return;
+        const clock = (t: string) => `${t.slice(11, 19)} replay`;
+        setLiveEvents((acts.actions ?? []).slice(-12).reverse().map((a: any) => ({
+          id: a.idempotency_key, time: clock(a.sim_time), unit: a.action.zone,
+          action: a.action.kind === 'alert' ? `Alert: ${a.action.params?.message ?? ''}` : `${a.action.kind} ${JSON.stringify(a.action.params).slice(0, 40)}`,
+          trigger: a.approval ? 'MANUAL' : 'AUTO', status: '✓ Dispatched (simulated)',
+        })));
+        setLiveAlerts((audit.entries ?? []).filter((e: any) => e.type === 'verdict' && e.verdict?.verdict === 'veto').slice(-6).reverse()
+          .map((e: any) => ({ id: `${e.proposal.id}`, type: 'WARNING' as const,
+            message: `Blocked ${e.proposal.kind} @ ${e.proposal.zone}: ${e.verdict.invariant ?? 'safety rule'} (replay)`, timestamp: clock(e.sim_time) })));
+      } catch { /* API down: keep the samples */ }
+    };
+    pull();
+    const t = setInterval(pull, 8000);
+    return () => { stop = true; clearInterval(t); };
+  }, []);
 
   useEffect(() => {
     if (focusedSection) {
@@ -131,9 +158,9 @@ export const App: React.FC = () => {
         setMode={setMode}
         eStopActive={eStopActive}
         onToggleEStop={toggleEStop}
-        unreadAlertsCount={alerts.length}
+        unreadAlertsCount={[...liveAlerts, ...alerts].length}
         onToggleAssistant={() => setIsAssistantOpen(!isAssistantOpen)}
-        alerts={alerts}
+        alerts={[...liveAlerts, ...alerts]}
         onDismissAlert={(id) => setAlerts((prev) => prev.filter((a) => a.id !== id))}
         activeSection={focusedSection}
         onOpenSection={openSection}
@@ -156,14 +183,14 @@ export const App: React.FC = () => {
             <LightLiveDashboardSection onActionClick={handleActionClick} />
 
             {/* 6. IRRIGATION AUTOMATION CONTROL CENTER */}
-            <LightIrrigationSection onActionClick={handleActionClick} eventLogs={eventLogs} />
+            <LightIrrigationSection onActionClick={handleActionClick} eventLogs={[...liveEvents, ...eventLogs]} />
 
             {/* 7. CROP DOCTOR — PLANT DISEASE PREDICTION */}
             <LightCropDoctorSection onCreateProposal={() => handleActionClick('DOSE')} />
 
             {/* 8. SMS NOTIFICATIONS & ALERTS CENTER */}
             <LightSmsAlertsSection
-              alerts={alerts}
+              alerts={[...liveAlerts, ...alerts]}
               onDismissAlert={(id) => setAlerts((prev) => prev.filter((a) => a.id !== id))}
             />
 
@@ -189,7 +216,7 @@ export const App: React.FC = () => {
 
         {focusedSection === 'irrigation' && (
           <FullscreenSection title="Irrigation Control" onClose={closeSection}>
-            <LightIrrigationSection onActionClick={handleActionClick} eventLogs={eventLogs} />
+            <LightIrrigationSection onActionClick={handleActionClick} eventLogs={[...liveEvents, ...eventLogs]} />
           </FullscreenSection>
         )}
 
@@ -214,7 +241,7 @@ export const App: React.FC = () => {
         {focusedSection === 'sms-alerts' && (
           <FullscreenSection title="SMS Notifications & Alerts" onClose={closeSection}>
             <LightSmsAlertsSection
-              alerts={alerts}
+              alerts={[...liveAlerts, ...alerts]}
               onDismissAlert={(id) => setAlerts((prev) => prev.filter((a) => a.id !== id))}
             />
           </FullscreenSection>

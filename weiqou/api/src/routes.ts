@@ -294,11 +294,29 @@ router.post('/estop', (req: Request, res: Response) => {
 });
 
 // 5. Crop Doctor & Disease Diagnostics
-router.post('/disease/report', (req: Request, res: Response) => {
+const VISION_URL = process.env.SOLARDA_VISION ?? 'http://127.0.0.1:8200';
+
+// Real classifier (services/vision, calibrated vision-v1) for uploaded images. Only data: URLs are read: fetching
+// arbitrary client-supplied URLs would let a caller make this server request internal addresses.
+async function classifyWithVision(imageUrl: string) {
+  const m = /^data:(image\/[a-z+.-]+);base64,(.+)$/i.exec(imageUrl);
+  if (!m) return null;
+  try {
+    const form = new FormData();
+    form.append('image', new Blob([Buffer.from(m[2], 'base64')], { type: m[1] }), 'leaf.jpg');
+    const r = await fetch(`${VISION_URL}/vision/classify`, { method: 'POST', body: form, signal: AbortSignal.timeout(8000) });
+    return r.ok ? await r.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+router.post('/disease/report', async (req: Request, res: Response) => {
   const parse = DiseaseReportSchema.safeParse(req.body);
   if (!parse.success) return res.status(400).json({ error: parse.error.format() });
 
   const input = parse.data;
+  const vision = input.imageTarget === 'CANOPY' ? await classifyWithVision(input.imageUrl) : null;
   const diagnostic = evaluateCropDoctorDiagnostic({
     imageUrl: input.imageUrl,
     imageTarget: input.imageTarget,
@@ -309,22 +327,27 @@ router.post('/disease/report', (req: Request, res: Response) => {
     connectedTowersCount: 6,
   });
 
+  // When the vision model saw the image its answer replaces the heuristic one (the heuristic stays as the fallback
+  // and for root-port images, which the model was not trained on). It abstains rather than guess.
+  const top = vision && !vision.abstain ? vision.top : null;
   const reportRecord = {
     id: `disease_rep_${Date.now()}`,
     targetId: input.growUnitId || input.reservoirGroupId || 'unit_default',
-    imageUrl: input.imageUrl,
+    imageUrl: input.imageUrl.startsWith('data:') ? 'data:image (not stored)' : input.imageUrl,
     imageTarget: input.imageTarget,
-    predictedClass: diagnostic.primaryDiagnosis,
-    confidence: diagnostic.confidenceScore,
-    abstained: diagnostic.abstained,
-    isTipburn: diagnostic.isTipburn,
-    isPathogen: diagnostic.isPathogen,
-    cureProtocol: diagnostic.cureProtocol,
+    predictedClass: top ? top.label : vision ? 'UNREADABLE_OR_UNCERTAIN_IMAGE' : diagnostic.primaryDiagnosis,
+    confidence: top ? top.confidence : vision ? 0 : diagnostic.confidenceScore,
+    abstained: vision ? !!vision.abstain : diagnostic.abstained,
+    abstainReason: vision?.abstain ? vision.reason : undefined,
+    isTipburn: vision ? false : diagnostic.isTipburn,
+    isPathogen: top ? !top.healthy : diagnostic.isPathogen,
+    cureProtocol: top ? undefined : diagnostic.cureProtocol,
+    diagnosisSource: vision ? 'vision-v1 (calibrated)' : 'heuristic (no image analysis)',
     created_at: new Date().toISOString(),
   };
 
-  store.diseaseReports.push(reportRecord);
-  res.json({ success: true, report: reportRecord, diagnostic });
+  store.diseaseReports.push(reportRecord as any);
+  res.json({ success: true, report: reportRecord, diagnostic, vision });
 });
 
 // 6. Crop Recommendations & CEA Planning

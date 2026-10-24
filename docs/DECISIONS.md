@@ -101,3 +101,10 @@ Gemini is down or rate-limited is an offline layer: advisor regexes plus a multi
 positives). The red-team failure (Malayalam jailbreak while the classifier was rate-limited) was this gap and is fixed.
 Voice uses the browser speech APIs only: output when the browser has a voice for the language, otherwise text; the
 farmer can barge in by speaking, and hands-free mode re-listens after the answer. Mic input is untested end to end.
+
+## D14: Upgrading existing features without deleting them (Phase F)
+Rule 5 (wrap, don't delete): the keyword assistant, sample alerts and the heuristic crop doctor stay, each labelled, and
+real data or models sit in front of them. Features changed: disease report (vision model), harvest passport (valid chain
+and content-hash verification), assistant drawer (real assistant tab, real mic), dashboard alerts/event log (API data).
+Not changed: crop recommender prices, SMS panels, marketplace (all seeded/in-memory); their real-data upgrades need
+sources (a Tamil Nadu price series, an SMS gateway) the project does not have.
