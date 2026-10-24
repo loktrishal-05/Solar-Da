@@ -117,3 +117,10 @@ sources (a Tamil Nadu price series, an SMS gateway) the project does not have.
   (labelled SIMULATED, deduped per 10 min). Setting `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (free bot from @BotFather) also pushes the text to a real phone.
 - The farm replay now starts by itself with the agents service (`SOLARDA_AUTOSTART=0` disables), so the assistant has labelled replayed data to report.
 - Knowledge base gained Wikipedia articles on fenugreek, coriander, spinach, lettuce, hydroponics (`scripts/fetch_wiki_knowledge.py`, CC BY-SA 4.0).
+
+## D16: ONNX for every model; no Docker dependency (2026-10-24)
+Owner decision: the app must not depend on a local Docker, and models run on ONNX. The disease classifier was already ONNX. The 51 scikit-learn
+`HistGradientBoostingRegressor` sensor and soil models are now exported by `bench/export_onnx.py` to `services/agents/model/onnx/` and served by
+onnxruntime (`app/sensor_models.py`, `OnnxModel`). Each exported model is checked against the original on random rows including NaN, and
+`tests/test_onnx_parity.py` compares forecasts and anomaly alarms end to end (forecasts within 0.01; CUSUM score may drift a little in float32, alarms identical).
+The old joblib path stays only as a fallback and for training. The Gemini chat model is a hosted API, not run locally. Release asset: `sensor-models-v2-onnx`.

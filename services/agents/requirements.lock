@@ -53,6 +53,7 @@ matplotlib==3.11.2
 more-itertools==11.2.1
 mypy_extensions==1.1.0
 numpy==2.4.6
+onnxruntime==1.31.0
 openpyxl==3.1.5
 opentelemetry-api==1.45.1
 orjson==3.13.0

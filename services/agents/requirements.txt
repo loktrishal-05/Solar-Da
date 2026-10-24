@@ -16,3 +16,4 @@ sse-starlette
 matplotlib
 scikit-learn
 joblib
+onnxruntime

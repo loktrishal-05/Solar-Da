@@ -6,6 +6,7 @@ band (quantile models). Each forecast is a proposal input only; the TypeScript e
 Training and evaluation: bench/train_sensor_models.py. Weights are not committed: they are attached to the GitHub
 release `sensor-models-v1` and installed by scripts/fetch_sensor_models.ps1 into services/agents/model/.
 """
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -58,11 +59,46 @@ def features(s: pd.Series) -> pd.DataFrame:
     return f
 
 
+ONNX_DIR = MODEL_FILE.parent / "onnx"  # written by bench/export_onnx.py; preferred, runs on onnxruntime alone
+
+
+class OnnxModel:
+    """Drop-in for a fitted scikit-learn regressor: .predict(frame) -> 1-D array, run by onnxruntime."""
+
+    def __init__(self, file: str):
+        self.file, self._s = file, None  # session is created on first use: 51 models would otherwise load at start-up
+
+    @property
+    def s(self):
+        if self._s is None:
+            import onnxruntime as ort
+
+            o = ort.SessionOptions()
+            o.intra_op_num_threads = 1  # 51 small models: one thread each, not a spinning pool per session
+            o.inter_op_num_threads = 1
+            self._s = ort.InferenceSession(str(ONNX_DIR / self.file), o, providers=["CPUExecutionProvider"])
+        return self._s
+
+    def predict(self, X) -> np.ndarray:
+        return self.s.run(None, {"X": np.asarray(X, dtype=np.float32)})[0].ravel()
+
+
+@lru_cache(maxsize=1)
+def _onnx_meta() -> dict | None:
+    f = ONNX_DIR / "meta.json"
+    return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
+
+
 @lru_cache(maxsize=1)
 def bundle() -> dict | None:
+    meta = _onnx_meta()
+    if meta:
+        models = {m: {h: {q: (OnnxModel(v) if isinstance(v, str) else v) for q, v in qs.items()} for h, qs in hs.items()}
+                  for m, hs in meta["models"].items()}
+        return {**{k: meta[k] for k in ("feature_names", "version", "trained_on", "scale_floor", "anomaly")}, "models": models}
     if not MODEL_FILE.exists():
         return None
-    import joblib
+    import joblib  # fallback: only when the ONNX export has not been fetched
 
     return joblib.load(MODEL_FILE)
 
@@ -181,6 +217,10 @@ def soil_features(wr: float, wr_1d_ago: float, wr_3d_ago: float, dap: int, soil:
 
 @lru_cache(maxsize=1)
 def soil_bundle() -> dict | None:
+    meta = _onnx_meta()
+    if meta:
+        return {"feature_names": meta["soil"]["feature_names"], "version": meta["soil"]["version"],
+                "models": {int(d): OnnxModel(f) for d, f in meta["soil"]["models"].items()}}
     if not SOIL_FILE.exists():
         return None
     import joblib

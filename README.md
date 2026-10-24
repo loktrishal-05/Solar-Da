@@ -181,7 +181,7 @@ All numbers are simulation or replay results, not field trials. Full table with 
 | Cases that did not work (kept on purpose) | pH forecaster, rain forecast in dry seasons, harvest-date forecast, two earlier irrigation rules |
 
 ## Tech stack
-React 18 · TypeScript · Vite · Tailwind · Recharts · Express · Zod · LangGraph · LangChain · Gemini (`gemini-3.5-flash-lite` for chat) · FastAPI · AquaCrop-OSPy · ONNX Runtime · TensorFlow.js (browser Crop Doctor) · npm workspaces · GitHub Actions CI.
+React 18 · TypeScript · Vite · Tailwind · Recharts · Express · Zod · LangGraph · LangChain · Gemini (`gemini-3.5-flash-lite` for chat) · FastAPI · AquaCrop-OSPy · ONNX Runtime (every model runs on it) · TensorFlow.js (browser Crop Doctor) · npm workspaces · GitHub Actions CI.
 
 ## Repository layout
 ```

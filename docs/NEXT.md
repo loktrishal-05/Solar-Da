@@ -7,7 +7,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 ## Get the environment running (a fresh VS Code session)
 1. `npm install; npm run build`
 2. Python 3.11 venvs: `services/{agents,twin,vision}` -> `py -3.11 -m venv .venv` and `pip install -r requirements.lock`
-3. Models (GitHub releases, not in git): `scripts/fetch_vision_model.ps1`, `scripts/fetch_sensor_models.ps1`
+3. Models (GitHub releases, not in git): `scripts/fetch_vision_model.ps1`, `scripts/fetch_sensor_models.ps1` (ONNX, release `sensor-models-v2-onnx`)
 4. Replay data for retraining only: `python -m app.replay.build_slices` (from `services/agents`); field-eval images land in `data/raw/` (gitignored)
 5. Chat needs `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) in the environment. It is a free-tier key: `gemini-3.5-flash` allows 20 requests/day, so
    chat defaults to lite models. Tests use a fake model (`tests/test_chat.py`); don't burn quota in loops.

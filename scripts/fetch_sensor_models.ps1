@@ -1,10 +1,11 @@
 # Download the trained sensor models (forecasters, anomaly thresholds, soil-water emulator) into services/agents/model/.
-# Weights are not committed; they are attached to the GitHub release sensor-models-v1. Rebuild them with
+# Weights are not committed; they are attached to the GitHub release sensor-models-v2-onnx (ONNX, runs on onnxruntime alone; v1 was scikit-learn joblib).
+# Rebuild the ONNX files from the joblib models with bench/export_onnx.py. Rebuild them with
 # bench/train_sensor_models.py, bench/eval_anomaly.py and bench/train_soil_model.py.
 # Run from the repo root:  powershell -ExecutionPolicy Bypass -File scripts/fetch_sensor_models.ps1
 param(
     [string]$Zip = '',
-    [string]$Url = 'https://github.com/loktrishal-05/Solar-Da/releases/download/sensor-models-v1/solarda_sensor_models.zip'
+    [string]$Url = 'https://github.com/loktrishal-05/Solar-Da/releases/download/sensor-models-v2-onnx/solarda_sensor_models_onnx.zip'
 )
 $ErrorActionPreference = 'Stop'
 $dest = Join-Path (Split-Path -Parent $PSScriptRoot) 'services\agents\model'
@@ -16,7 +17,7 @@ if (-not $Zip) {
 }
 Expand-Archive -Path $Zip -DestinationPath $dest -Force
 Get-ChildItem $dest | Format-Table Name, Length
-foreach ($f in 'sensor_models.joblib', 'soil_model.joblib') {
+foreach ($f in 'onnx\meta.json') {
     if (-not (Test-Path (Join-Path $dest $f))) { throw "$f missing from the archive" }
 }
 Write-Host 'Sensor models installed.'

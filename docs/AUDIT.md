@@ -82,3 +82,4 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Farm assistant answers | fixed | said "no replayed data" because no session ran; replay now autostarts. Verified live: farm status and Chennai weather answered with tool data |
 | Assistant weather / price tools | new | `weather_now` (Open-Meteo, real) and `market_price` (Agmarknet, needs the owner's DATA_GOV_API_KEY) tested with fakes; price not verified live without a key |
 | SMS demo gateway | new, simulated | `/api/sms/outbox`, `/api/sms/test`; test in `agent_routes.test.ts`; Telegram delivery verified live to the owner's phone (`evidence/phase-e/telegram_alert_delivery.txt`) |
+| Sensor and soil models runtime | now ONNX | 51 sklearn models exported to ONNX; parity test passes; runtime needs onnxruntime, not scikit-learn (D16) |
