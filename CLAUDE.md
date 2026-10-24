@@ -1,4 +1,4 @@
-﻿# Project rules
+# Project rules
 
 This repo extends Solarda into an agentic smart-agriculture system for the Agentic AI Hackathon 2026.
 The full spec is docs/BLUEPRINT.md. Follow it phase by phase.
@@ -13,3 +13,6 @@ The full spec is docs/BLUEPRINT.md. Follow it phase by phase.
 7. The LLM only proposes. The TypeScript engine safety check decides.
 8. Every task is done only when it has code, a test, and a docs update.
 9. When something is unclear or the blueprint conflicts with the code, stop and ask.
+
+## Continuing work
+When the user says "continue", read `docs/NEXT.md` (current state, how to start the stack, ordered task list) and resume from its first open item.
