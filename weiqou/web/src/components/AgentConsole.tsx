@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AdvisorPanel } from './AdvisorPanel';
+import { FarmChat } from './FarmChat';
 import { BenchmarkPage } from './BenchmarkPage';
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle, Zap } from 'lucide-react';
 
@@ -45,7 +46,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   const [openRun, setOpenRun] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<'console' | 'advisor' | 'benchmark'>('console');
+  const [tab, setTab] = useState<'console' | 'assistant' | 'advisor' | 'benchmark'>('console');
   const [lowBandwidth, setLowBandwidth] = useState(false);
   const [triggers, setTriggers] = useState<{ sim_time: string; triggers: Trigger[]; suppressed?: boolean }[]>([]);
   const esRef = useRef<EventSource | null>(null);
@@ -158,7 +159,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
       {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800 font-mono">{error}</div>}
 
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        {([['console', 'Agent console'], ['advisor', 'Farmer advisor (தமிழ்)'], ['benchmark', 'Benchmark']] as const).map(([k, label]) => (
+        {([['console', 'Agent console'], ['assistant', 'Farm assistant (chat + voice)'], ['advisor', 'Offline advisor (தமிழ்)'], ['benchmark', 'Benchmark']] as const).map(([k, label]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-3 py-1.5 rounded-full border font-bold ${tab === k ? 'bg-[#1B4332] text-white border-[#1B4332]' : 'bg-white'}`}>{label}</button>
         ))}
         <label className="ml-auto flex items-center gap-1.5 text-gray-600">
@@ -166,6 +167,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
         </label>
       </div>
 
+      {tab === 'assistant' && <FarmChat lowBandwidth={lowBandwidth} />}
       {tab === 'advisor' && <AdvisorPanel lowBandwidth={lowBandwidth} />}
       {tab === 'benchmark' && <BenchmarkPage lowBandwidth={lowBandwidth} />}
       {tab === 'console' && (<>

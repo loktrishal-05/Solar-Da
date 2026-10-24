@@ -91,7 +91,15 @@ def _drive(run_id: str, payload) -> dict:
     if not snap.next:
         _save_run(run_id, status="done", approval_request=None)
         bus.publish("run_done", {"run_id": run_id})
-    return snap.values
+    v = snap.values
+    if v.get("snapshot") is not None:
+        latest.update({k: v.get(k) for k in ("run_id", "sim_time", "snapshot", "quality_flags", "bad_metrics", "model_signals",
+                                             "situation", "plan", "verdicts", "weather", "triggers")})
+    return v
+
+
+# Latest completed run state (read-only for the chat assistant's tools).
+latest: dict = {}
 
 
 def start_run(session_id: str, tick: int, scenario: dict, sim_time: str, autonomy: str,

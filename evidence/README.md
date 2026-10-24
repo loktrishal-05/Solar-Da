@@ -25,3 +25,6 @@ not a field trial. Re-run commands are listed with each.
 
 Screenshots for the two screenshot slides (Agent Console mid-scenario with the trace open; Benchmark page) go in
 `evidence/screenshots/`.
+
+Phase D (chat assistant) red team: `bench/results/redteam/chat.json`, 21 of 22 cases pass (1 failure under review; some
+runs hit the Gemini free-tier rate limit). Not yet recorded: voice and per-language test sets (Phase E).

@@ -20,7 +20,7 @@ session: runner.Session | None = None
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "agents", "llm": llm.enabled(), "api": api_client.health()}
+    return {"status": "ok", "service": "agents", "llm": llm.enabled(), "chat": llm.chat_enabled() and llm.CHAT_MODEL, "api": api_client.health()}
 
 
 class ReplayStart(BaseModel):
@@ -212,6 +212,49 @@ def bench_results():
     s = BENCH / "summary.md"
     out["summary_md"] = s.read_text(encoding="utf-8") if s.exists() else ""
     return out
+
+
+class ChatMessage(BaseModel):
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage] = Field(max_length=40)
+    language: str | None = Field(None, pattern="^(en|ta|hi|te|kn|ml)$")
+    mode: str = Field("chat", pattern="^(chat|guide)$")
+
+
+def _chat_trigger(reason: str) -> bool:
+    if not session or session.clock.finished:
+        return False
+    session.manual_trigger(f"farmer asked in chat: {reason}")
+    return True
+
+
+@app.post("/chat")
+def chat_once(req: ChatRequest):
+    """Farm assistant, one JSON reply (tests, red team). The UI uses /chat/stream."""
+    from . import chat
+
+    return chat.ask([m.model_dump() for m in req.messages], req.language, _chat_trigger, req.mode)
+
+
+@app.post("/chat/stream")
+def chat_stream(req: ChatRequest):
+    """Farm assistant, server-sent events: meta, tool, token, retract, done."""
+    from fastapi.responses import StreamingResponse
+
+    from . import chat
+
+    def gen():
+        try:
+            for e in chat.stream([m.model_dump() for m in req.messages], req.language, _chat_trigger, req.mode):
+                yield f"event: {e['type']}\ndata: {json.dumps(e, default=str)}\n\n"
+        except Exception as e:  # never leave the client hanging
+            yield f"event: error\ndata: {json.dumps({'message': type(e).__name__})}\n\n"
+
+    return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/models/status")

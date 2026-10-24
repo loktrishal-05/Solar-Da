@@ -82,3 +82,14 @@ Cooldowns and a 6-runs-per-hour cap stop a noisy probe from flooding the graph; 
 faults bypass the cap. Live sessions run at most one graph execution per wall-clock loop so the UI keeps up at 1440x.
 Photos are matched by "since the previous run" (`prev_sim_time`) so a triggered run and the heartbeat never analyse
 the same photo twice.
+
+## D12: Gemini farm assistant (Phase D, in progress)
+`services/agents/app/chat.py`: streaming multi-turn chat on Gemini (`gemini-3.5-flash-lite`, fallback
+`gemini-3.1-flash-lite`; the free-tier key allows only 20 `gemini-3.5-flash` requests/day, and `gemini-3.8-flash` took
+11-87 s). Read-only tools (farm status, approvals/alerts, sensor forecasts, approved-source search, price outlook) and
+`request_farm_check`, which only asks the safety-checked agent to run. The risk classifier runs in parallel with the
+draft answer and nothing is shown until it clears; dose/injection questions get fixed, reviewed escalation text in six
+languages (never machine-translated), and an output guard retracts any answer containing a dose. Red team
+(`redteam/chat.yaml`, 22 cases): 21 passed; the one failure is not yet analysed (see `bench/results/redteam/chat.json`);
+several runs also hit the free-tier rate limit, where the classifier falls back to the regex result.
+Not done yet: Phase E (voice tests, language/slang test sets per language), Phase F (audit of remaining features).

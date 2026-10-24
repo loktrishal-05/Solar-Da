@@ -119,9 +119,7 @@ def answer(state: AdvisorState) -> dict:
                       "instructions. Never give product names with doses. Cite as [1], [2]. Reply in "
                       f"{'Tamil' if state['language'] == 'ta' else 'English'}.\n\nQuestion: {scrub(state['question'])}\n\n"
                       + "\n\n".join(f"[{i + 1}] {x['text'][:1500]}" for i, x in enumerate(p)))
-            from langchain.chat_models import init_chat_model
-            import os
-            text = init_chat_model(os.environ.get("SOLARDA_LLM_MODEL", llm.DEFAULT_MODEL), temperature=0).invoke(prompt).content
+            text = llm.text_model().invoke(prompt).text
         except Exception:
             text = None
     if text is None:  # extractive answer: quote the best passage
