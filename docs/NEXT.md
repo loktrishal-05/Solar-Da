@@ -18,7 +18,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 1. **Microphone and hands-free voice test** (needs a person speaking): Farm assistant tab -> mic / headphone buttons, in Tamil, Hindi, English.
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
 2. **Phase F remainder** (audit row first, then wrap, then test + docs):
-   - Crop recommender / market mandi prices are hardcoded. Needs a real price source (Tamil Nadu Agmarknet series) before it can change.
+   - Crop recommender prices are hardcoded but now labelled SAMPLE. Replacing them needs a data.gov.in API key from the user (Tamil Nadu Agmarknet series for methi/palak/coriander).
    - ~~Marketplace persistence, SMS panel honesty~~ done (JSONL; SMS gateway still not connected: needs a Twilio/MSG91 account from the user).
    - `/api/chat` keyword mock kept but labelled as non-LLM in its citations.
    - ~~Real SHA-256 in `passport.ts`~~ done (pure-JS, browser-safe, known-vector test in `engine.test.ts`).

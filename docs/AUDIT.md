@@ -78,3 +78,4 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Crop recommender / market mandi prices | unchanged, still hardcoded | the real series covers onion at Bangalore only (`/agents/market/outlook`), not the recommender's crops |
 | SMS alerts panels | was UI-only, now honest | claimed "Twilio ONLINE" and "Delivered"; no gateway exists. Relabelled "NOT CONNECTED", sample text marked not sent; the log is fed by the safety API audit trail |
 | `/api/chat` keyword mock | kept, labelled | every non-veto reply now cites "Keyword rules, not an LLM" |
+| Crop recommender price header | was misleading, now labelled | claimed "Real Mandi Price Integration (data.gov.in)" over hand-entered numbers; now says SAMPLE prices, real series is onion/Bangalore only |
