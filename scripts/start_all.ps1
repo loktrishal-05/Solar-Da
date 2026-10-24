@@ -14,6 +14,13 @@ function Start-Svc($name, $dir, $exe, $argList) {
     Write-Host ("{0,-7} pid {1}" -f $name, $p.Id)
 }
 
+# Keys live in the gitignored .env at the repo root (copy .env.example); every service inherits them.
+$envFile = Join-Path $root '.env'
+if (Test-Path $envFile) {
+    foreach ($line in Get-Content $envFile) {
+        if ($line -match '^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.+?)\s*$') { Set-Item "env:$($Matches[1])" $Matches[2] }
+    }
+}
 $env:PORT = '3001'
 Start-Svc 'api' 'weiqou\api' 'node' @('dist/server.js')
 Start-Svc 'twin' 'services\twin' (Join-Path $root 'services\twin\.venv\Scripts\python.exe') @('-m', 'uvicorn', 'app.main:app', '--port', '8100')

@@ -208,7 +208,7 @@ foreach ($s in "agents","twin","vision") { py -3.11 -m venv services/$s/.venv; s
 powershell -ExecutionPolicy Bypass -File scripts/fetch_vision_model.ps1
 powershell -ExecutionPolicy Bypass -File scripts/fetch_sensor_models.ps1
 
-$env:GEMINI_API_KEY = "<your key>"      # chat assistant; the free tier is enough for a demo
+# put GEMINI_API_KEY (and optional TELEGRAM_*) in .env (copy .env.example; gitignored); start_all.ps1 loads it
 powershell -ExecutionPolicy Bypass -File scripts/start_all.ps1
 # open http://localhost:3000  ->  Agent Console, Farm assistant
 powershell -File scripts/stop_all.ps1   # when finished
