@@ -1,0 +1,63 @@
+{
+ "method": "5-min trigger checks vs the scenario's fixed tick; same graph, same safety gate",
+ "results": {
+  "heatwave": {
+   "event_at": "2020-03-03T10:55:00Z",
+   "tick_minutes": 30,
+   "fixed_tick": {
+    "graph_runs": 24,
+    "reacted_at": "2020-03-03T11:00:00Z",
+    "reaction_minutes": 5.0
+   },
+   "triggered": {
+    "graph_runs": 40,
+    "reacted_at": "2020-03-03T10:55:00Z",
+    "reaction_minutes": 0.0
+   },
+   "triggered_6h_heartbeat": {
+    "graph_runs": 21,
+    "reacted_at": "2020-03-03T10:55:00Z",
+    "reaction_minutes": 0.0
+   }
+  },
+  "ph_excursion": {
+   "event_at": "2020-03-05T09:05:00Z",
+   "tick_minutes": 10,
+   "fixed_tick": {
+    "graph_runs": 36,
+    "reacted_at": "2020-03-05T09:10:00Z",
+    "reaction_minutes": 5.0
+   },
+   "triggered": {
+    "graph_runs": 42,
+    "reacted_at": "2020-03-05T09:05:00Z",
+    "reaction_minutes": 0.0
+   },
+   "triggered_6h_heartbeat": {
+    "graph_runs": 8,
+    "reacted_at": "2020-03-05T09:05:00Z",
+    "reaction_minutes": 0.0
+   }
+  },
+  "sensor_drift": {
+   "event_at": "2020-03-07T07:20:00Z",
+   "tick_minutes": 30,
+   "fixed_tick": {
+    "graph_runs": 12,
+    "reacted_at": "2020-03-07T07:30:00Z",
+    "reaction_minutes": 10.0
+   },
+   "triggered": {
+    "graph_runs": 13,
+    "reacted_at": "2020-03-07T07:20:00Z",
+    "reaction_minutes": 0.0
+   },
+   "triggered_6h_heartbeat": {
+    "graph_runs": 11,
+    "reacted_at": "2020-03-07T07:20:00Z",
+    "reaction_minutes": 0.0
+   }
+  }
+ },
+ "no_gain": []
+}

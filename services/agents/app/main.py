@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from . import api_client, llm, runner
@@ -84,6 +84,19 @@ def replay_speed(speed: int):
     except ValueError as e:
         raise HTTPException(400, str(e))
     return s.info()
+
+
+class ManualTrigger(BaseModel):
+    detail: str = Field("operator asked for a check", max_length=200)
+    zone: str = Field("*", max_length=40)
+
+
+@app.post("/replay/trigger")
+def replay_trigger(req: ManualTrigger):
+    """Ask the agent to run now (fires at the next 5-min trigger check, sim time)."""
+    s = _session()
+    s.manual_trigger(req.detail, req.zone)
+    return {"queued": True, **s.info()}
 
 
 @app.get("/replay/state")

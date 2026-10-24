@@ -20,6 +20,7 @@ from .replay.adapters import DATASETS, load_events
 from .replay.clock import ReplayClock, fmt_ts, parse_ts
 from .replay.faults import apply_faults
 from .replay.scenario import load_scenario
+from .triggers import TriggerEngine
 
 RUNTIME = Path(os.environ.get("SOLARDA_RUNTIME_DIR") or Path(__file__).resolve().parents[3] / "data" / "runtime")
 RUNS_FILE = RUNTIME / "runs.json"
@@ -93,12 +94,15 @@ def _drive(run_id: str, payload) -> dict:
     return snap.values
 
 
-def start_run(session_id: str, tick: int, scenario: dict, sim_time: str, autonomy: str) -> dict:
+def start_run(session_id: str, tick: int, scenario: dict, sim_time: str, autonomy: str,
+              triggers: list[dict] | None = None, prev_sim_time: str | None = None) -> dict:
     run_id = f"{session_id}:{tick:03d}"
-    _save_run(run_id, session_id=session_id, scenario=scenario["name"], sim_time=sim_time, autonomy=autonomy)
+    triggers = triggers or [{"kind": "schedule", "zone": "*", "metric": "*", "detail": "tick", "at": sim_time}]
+    _save_run(run_id, session_id=session_id, scenario=scenario["name"], sim_time=sim_time, autonomy=autonomy, triggers=triggers)
     state = {"run_id": run_id, "session_id": session_id, "site_id": DATASETS.get(scenario["dataset"], {}).get("site_id", "chennai-field"),
-             "sim_time": sim_time, "autonomy": autonomy, "scenario": scenario, "attempt": 0}
-    bus.publish("run_start", {"run_id": run_id, "sim_time": sim_time})
+             "sim_time": sim_time, "autonomy": autonomy, "scenario": scenario, "attempt": 0,
+             "triggers": triggers, "prev_sim_time": prev_sim_time}
+    bus.publish("run_start", {"run_id": run_id, "sim_time": sim_time, "triggers": triggers})
     return _drive(run_id, state)
 
 
@@ -138,8 +142,42 @@ def run_scenario_headless(name: str, autonomy: str | None = None, approve=None, 
     return results
 
 
+def _window(events: list[dict], now) -> list[dict]:
+    lo, hi = fmt_ts(now - timedelta(hours=24)), fmt_ts(now)
+    return [e for e in events if lo <= e["ts"] <= hi]
+
+
+def run_scenario_triggered(name: str, autonomy: str | None = None, approve=None, session_id: str | None = None,
+                           heartbeat_minutes: int | None = None) -> dict:
+    """Deterministic event-driven run: check triggers every 5 sim minutes, run the graph only when one fires
+    (the scenario tick, or `heartbeat_minutes`, stays as a heartbeat). Returns {"runs": [...state values], "checks": n}."""
+    sc = load_scenario(name)
+    if heartbeat_minutes:
+        sc = {**sc, "tick_minutes": heartbeat_minutes}
+    session_id = session_id or f"{name}-trg-{uuid.uuid4().hex[:6]}"
+    events = apply_faults(load_events(sc["dataset"], sc["start"], sc["end"]), sc["faults"]) if sc["dataset"] != "none" else []
+    eng = TriggerEngine(sc)
+    t, end = parse_ts(sc["start"]), parse_ts(sc["end"])
+    results, tick, checks, prev = [], 0, 0, None
+    while t < end:
+        checks += 1
+        d = eng.check(t, _window(events, t), prev)
+        if d["run"]:
+            run_id = f"{session_id}:{tick:03d}"
+            vals = start_run(session_id, tick, sc, fmt_ts(t), autonomy or sc["autonomy"], d["triggers"],
+                             fmt_ts(prev) if prev else None)
+            if approve and _load_runs()[run_id]["status"] == "awaiting_approval":
+                vals = resume_run(run_id, approve(_load_runs()[run_id]["approval_request"]))
+            results.append(vals)
+            prev = t
+            tick += 1
+        t += timedelta(minutes=5)
+    return {"runs": results, "checks": checks}
+
+
 class Session:
-    """Live session: wall-clock driven replay at 1x/60x/1440x, with pause, seek and loop."""
+    """Live session: wall-clock driven replay at 1x/60x/1440x, with pause, seek and loop. Runs are event-triggered
+    (app/triggers.py) with the scenario tick as a heartbeat."""
 
     def __init__(self, name: str, speed: int = 60, autonomy: str | None = None, loop: bool = False):
         self.sc = load_scenario(name)
@@ -147,7 +185,9 @@ class Session:
         self.autonomy = autonomy or self.sc["autonomy"]
         self.clock = ReplayClock(self.sc["start"], self.sc["end"], speed, loop)
         self.tick = 0
-        self.next_tick = parse_ts(self.sc["start"])
+        self.next_tick = parse_ts(self.sc["start"])  # next trigger check (5-min sim steps)
+        self.prev_run = None
+        self.triggers = TriggerEngine(self.sc)
         self.stopped = False
         self._last_emit = None
         self._events = (apply_faults(load_events(self.sc["dataset"], self.sc["start"], self.sc["end"]), self.sc["faults"])
@@ -173,13 +213,24 @@ class Session:
         while not self.stopped:
             now = self.clock.now()
             self._emit_telemetry(fmt_ts(now))
-            if now >= self.next_tick and self.next_tick < self.clock.end:
+            # Catch up on trigger checks in 5-min sim steps; at most one graph run per loop so the UI keeps up.
+            while now >= self.next_tick and self.next_tick < self.clock.end:
+                t = self.next_tick
+                self.next_tick += timedelta(minutes=5)
+                d = self.triggers.check(t, _window(self._events, t), self.prev_run)
+                if d["suppressed"]:
+                    bus.publish("trigger_suppressed", {"session_id": self.id, "sim_time": fmt_ts(t), "triggers": d["suppressed"]})
+                if not d["run"]:
+                    continue
+                bus.publish("trigger", {"session_id": self.id, "sim_time": fmt_ts(t), "triggers": d["triggers"]})
                 try:
-                    start_run(self.id, self.tick, self.sc, fmt_ts(self.next_tick), self.autonomy)
+                    start_run(self.id, self.tick, self.sc, fmt_ts(t), self.autonomy, d["triggers"],
+                              fmt_ts(self.prev_run) if self.prev_run else None)
                 except Exception as e:  # keep the session alive; the error is visible in the feed
                     bus.publish("agent_error", {"session_id": self.id, "message": f"{type(e).__name__}: {e}"})
+                self.prev_run = t
                 self.tick += 1
-                self.next_tick += timedelta(minutes=self.sc["tick_minutes"])
+                break
             bus.publish("clock", self.info())
             if self.clock.finished:
                 bus.publish("session_done", {"session_id": self.id})
@@ -189,4 +240,9 @@ class Session:
     def seek(self, ts: str):
         self.clock.seek(ts)
         self.next_tick = parse_ts(ts)
+        self.prev_run = None
+        self.triggers = TriggerEngine(self.sc)
         self._last_emit = None
+
+    def manual_trigger(self, detail: str, zone: str = "*"):
+        self.triggers.manual.append({"zone": zone, "metric": "*", "detail": detail})

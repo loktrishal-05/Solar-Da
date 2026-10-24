@@ -14,6 +14,16 @@ Built from `docs/BLUEPRINT.md`. Every sensor value is replayed, simulated or fro
 
 Start everything: `powershell -File scripts/start_all.ps1`; stop: `scripts/stop_all.ps1`.
 
+## Triggers (`services/agents/app/triggers.py`)
+
+Runs start on events, not only on a clock. Every 5 sim minutes the trigger engine checks the replay window:
+`threshold` (a reading crosses a planner target; re-fires hourly while out), `quality_fault`, `forecast_breach`
+(learned forecaster, central forecast), `anomaly` (learned detector), `photo`, `weather` (rain ahead of a field bed),
+`manual` (`POST /replay/trigger`, the console's Check now), and `schedule` (the scenario tick, kept as a heartbeat).
+Keys `(kind, zone, metric)` have cooldowns; at most 6 triggered runs per sim hour (photo, manual and quality faults
+are never dropped). Triggers that fire together share one run; the run's state, ingest trace and audit entry record
+them, and the console shows them in a Triggers panel. `runner.run_scenario_triggered` is the deterministic version.
+
 ## Farm-shift graph (`services/agents/app/graphs/farm_shift.py`)
 
 `ingest -> assess -> [irrigation | fertigation | climate | disease] (parallel Send) -> arbiter -> safety_gate ->

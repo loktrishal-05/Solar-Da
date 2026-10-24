@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AdvisorPanel } from './AdvisorPanel';
 import { BenchmarkPage } from './BenchmarkPage';
-import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle, Zap } from 'lucide-react';
 
 // Agent Console: replay controls, live (replayed) feed, per-node reasoning trace, approvals inbox.
 // Talks to the Python agent runtime through the Vite proxy at /agents.
@@ -22,6 +22,14 @@ const post = (path: string, body?: unknown) =>
 
 const NODE_ORDER = ['ingest', 'assess', 'irrigation', 'fertigation', 'climate', 'disease', 'arbiter', 'safety_gate', 'human_approval', 'dispatch', 'verify', 'audit'];
 
+type Trigger = { kind: string; zone: string; metric: string; detail: string; at: string };
+const TRIGGER_STYLE: Record<string, string> = {
+  threshold: 'border-orange-300 bg-orange-50 text-orange-800', quality_fault: 'border-red-300 bg-red-50 text-red-800',
+  forecast_breach: 'border-indigo-300 bg-indigo-50 text-indigo-800', anomaly: 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-800',
+  photo: 'border-emerald-300 bg-emerald-50 text-emerald-800', weather: 'border-sky-300 bg-sky-50 text-sky-800',
+  manual: 'border-gray-400 bg-gray-50 text-gray-800', schedule: 'border-gray-200 text-gray-500',
+};
+
 const sourceStyle = (s: string) =>
   s === 'replay' ? 'bg-sky-50 text-sky-800 border-sky-200' : 'bg-violet-50 text-violet-800 border-violet-200';
 
@@ -39,6 +47,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'console' | 'advisor' | 'benchmark'>('console');
   const [lowBandwidth, setLowBandwidth] = useState(false);
+  const [triggers, setTriggers] = useState<{ sim_time: string; triggers: Trigger[]; suppressed?: boolean }[]>([]);
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
@@ -73,6 +82,14 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
       setApprovals((prev) => ({ ...prev, [r.run_id]: r }));
     });
     es.addEventListener('clock', (e) => setSession(JSON.parse((e as MessageEvent).data)));
+    es.addEventListener('trigger', (e) => {
+      const d = JSON.parse((e as MessageEvent).data);
+      setTriggers((prev) => [d, ...prev].slice(0, 40));
+    });
+    es.addEventListener('trigger_suppressed', (e) => {
+      const d = JSON.parse((e as MessageEvent).data);
+      setTriggers((prev) => [{ ...d, suppressed: true }, ...prev].slice(0, 40));
+    });
     es.addEventListener('agent_error', (e) => {
       const data = (e as MessageEvent).data;
       if (data) setError(JSON.parse(data).message);
@@ -81,7 +98,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   }, []);
 
   const start = async () => {
-    setError(null); setTrace([]); setFeed({});
+    setError(null); setTrace([]); setFeed({}); setTriggers([]);
     const r = await post('/replay/start', { scenario, speed, autonomy });
     if (!r.ok) setError((await r.json()).detail ?? 'could not start');
     else setSession(await r.json());
@@ -96,6 +113,11 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
     const a = Date.parse(session.start), b = Date.parse(session.end);
     const ts = new Date(a + (b - a) * frac).toISOString().replace(/\.\d+Z$/, 'Z');
     setSession(await (await post('/replay/seek', { ts })).json());
+  };
+
+  const checkNow = async () => {
+    const r = await post('/replay/trigger', { detail: 'operator pressed Check now' });
+    if (!r.ok) setError((await r.json()).detail ?? 'trigger failed');
   };
 
   const decide = useCallback(async (req: ApprovalRequest, decision: 'approve' | 'reject') => {
@@ -174,6 +196,8 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
           <button onClick={pause} disabled={!session.session_id} className="px-4 py-2 rounded-full border font-bold flex items-center gap-1.5 disabled:opacity-40">
             {session.paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />} {session.paused ? 'Resume' : 'Pause'}
           </button>
+          <button onClick={checkNow} disabled={!session.session_id} title="Run the agent at the next trigger check"
+                  className="px-4 py-2 rounded-full border font-bold flex items-center gap-1.5 disabled:opacity-40"><Zap className="w-3.5 h-3.5" /> Check now</button>
           <button onClick={onToggleEStop} className={`ml-auto px-4 py-2 rounded-full font-black flex items-center gap-1.5 ${eStopActive ? 'bg-red-600 text-white animate-pulse' : 'bg-red-50 text-red-700 border border-red-200'}`}>
             <AlertTriangle className="w-3.5 h-3.5" /> {eStopActive ? 'E-STOP ACTIVE (click to clear)' : 'E-STOP'}
           </button>
@@ -191,6 +215,26 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
           sim time <b>{session.sim_time?.replace('T', ' ').replace('Z', ' UTC') ?? '—'}</b>
           {session.session_id && <> · session {session.session_id} · {session.speed}x · {session.autonomy}{session.finished ? ' · finished' : ''}</>}
         </div>
+      </section>
+
+      {/* Triggers: why the agent ran */}
+      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <h3 className="text-xs font-black uppercase tracking-wider text-[#1B4332] mb-2">Triggers (why the agent ran)</h3>
+        {!triggers.length && <p className="text-xs text-gray-500">The agent runs when something happens: a reading crosses a target, a quality check fails, a model forecasts a limit crossing or flags a probe, a new leaf photo, rain ahead, or you press Check now. A scheduled check runs as a fallback.</p>}
+        <ul className="space-y-1 max-h-40 overflow-y-auto text-[11px] font-mono">
+          {triggers.map((d, i) => (
+            <li key={i} className={d.suppressed ? 'text-gray-400' : ''}>
+              <span className="text-gray-500">{d.sim_time.slice(5, 16).replace('T', ' ')}</span>{' '}
+              {d.suppressed && <span className="px-1.5 rounded-full border border-gray-200 mr-1">rate-limited</span>}
+              {d.triggers.map((t, j) => (
+                <span key={j} className={`inline-block mr-1 px-1.5 rounded-full border ${TRIGGER_STYLE[t.kind] ?? 'border-gray-200'}`} title={t.detail}>
+                  {t.kind}{t.zone !== '*' ? ` ${t.zone}/${t.metric}` : ''}
+                </span>
+              ))}
+              <span className="text-gray-600">{d.triggers.find((t) => t.kind !== 'schedule')?.detail}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <div className="grid lg:grid-cols-3 gap-5">

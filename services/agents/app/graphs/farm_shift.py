@@ -34,6 +34,8 @@ class FarmState(TypedDict, total=False):
     sim_time: str  # replay clock, never wall clock
     autonomy: Literal["advise", "propose", "auto_in_envelope"]
     scenario: dict
+    triggers: list[dict]  # why this run started (app/triggers.py)
+    prev_sim_time: str | None  # previous run in the session (new photos are those since then)
     attempt: int
     snapshot: dict
     quality_flags: list[dict]
@@ -149,11 +151,19 @@ def ingest(state: FarmState) -> dict:
     n_warn = sum(1 for f in q["quality_flags"] if f["check"] == "model_anomaly")
     n_breach = sum(1 for ms in sig.values() for s in ms.values() for b in s["breaches"] if b["likely"])
     return {**q, "weather": wx, "model_signals": sig,
-            "trace": _trace(state, "ingest", f"{len(events)} readings, {len(q['quality_flags'])} quality flags, "
+            "trace": _trace(state, "ingest", _trigger_text(state) + f"{len(events)} readings, {len(q['quality_flags'])} quality flags, "
                                              f"{n_bad} metric(s) unusable"
                                              + (f", {n_warn} model anomaly warning(s), {n_breach} forecast limit crossing(s)" if sig else "")
                                              + (f"; plant effects: {', '.join(applied)}" if applied else ""),
                             flags=q["quality_flags"], snapshot=q["snapshot"], model_signals=sig)}
+
+
+def _trigger_text(state: FarmState) -> str:
+    t = [x for x in state.get("triggers") or [] if x["kind"] != "schedule"]
+    if not t:
+        return "Scheduled check: "
+    return "Triggered by " + "; ".join(f"{x['kind']} {x['zone']}/{x['metric']} ({x['detail']})" for x in t[:3]) + \
+        (f" (+{len(t) - 3} more)" if len(t) > 3 else "") + ". "
 
 
 def _rules_situation(state: FarmState) -> dict:
@@ -330,7 +340,8 @@ def audit(state: FarmState) -> dict:
           f"{len(vetoed)} பாதுகாப்பு விதிகளால் தடுக்கப்பட்டன. இது மீண்டும் இயக்கப்பட்ட தரவு.")
     entry = {"run_id": state["run_id"], "sim_time": state["sim_time"], "kind": "shift_summary",
              "verdicts": state.get("verdicts", []), "dispatched": done, "verification": state.get("verification", []),
-             "escalations": state.get("escalations", []), "summary_en": en, "summary_ta": ta}
+             "escalations": state.get("escalations", []), "summary_en": en, "summary_ta": ta,
+             "triggers": state.get("triggers") or []}
     api_client.audit(entry)
     return {"trace": _trace(state, "audit", en, summary_ta=ta, escalations=state.get("escalations", []))}
 

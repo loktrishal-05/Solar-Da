@@ -75,3 +75,10 @@ exceed the tuned target. A likely forecast limit crossing can propose early vent
 human alerts for level, humidity and solution temperature; nothing is dosed on a forecast alone. Soil water uses a
 learned emulator of the AquaCrop twin (simulated training data, labelled). Weights ship as release
 `sensor-models-v1` (`scripts/fetch_sensor_models.ps1`), not in git.
+
+## D11: Event-triggered runs (Phase C)
+The scenario tick stays as a heartbeat (rule 5: wrap, don't delete) and the trigger engine adds runs between ticks.
+Cooldowns and a 6-runs-per-hour cap stop a noisy probe from flooding the graph; photos, manual checks and quality
+faults bypass the cap. Live sessions run at most one graph execution per wall-clock loop so the UI keeps up at 1440x.
+Photos are matched by "since the previous run" (`prev_sim_time`) so a triggered run and the heartbeat never analyse
+the same photo twice.

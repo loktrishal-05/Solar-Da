@@ -149,7 +149,8 @@ def _new_images(state: dict) -> list[dict]:
     from datetime import timedelta
     from .replay.clock import fmt_ts, parse_ts
     now = state["sim_time"]
-    since = fmt_ts(parse_ts(now) - timedelta(minutes=state["scenario"].get("tick_minutes", 30)))
+    # Photos since the previous run of this session; a first run looks back one tick.
+    since = state.get("prev_sim_time") or fmt_ts(parse_ts(now) - timedelta(minutes=state["scenario"].get("tick_minutes", 30)))
     return [i for i in state["scenario"].get("images", []) if since < i["at"] <= now]
 
 
