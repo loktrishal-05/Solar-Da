@@ -87,3 +87,4 @@ services/vision/model/*.onnx
 
 # Downloaded evaluation datasets (never committed)
 data/raw/
+services/agents/model/*.joblib

@@ -21,6 +21,9 @@ human_approval (interrupt) -> dispatch -> verify (<= 2 retries, then escalate) -
 
 - **ingest**: replay window (24 h) + fault injector + quality checks (range, rate of change, dropout, stuck and drift
   via redundant probes) + simulated effects of earlier actions; field beds get soil water from the twin.
+  Learned sensor models (`app/sensor_models.py`, release `sensor-models-v1`) add a 30 min / 2 h forecast with a
+  10-90% band and an anomaly score per stream (`model_signals`); field beds also get a 1-3 day soil-water forecast.
+  Model anomalies are `warn` flags (never vetoes); likely limit crossings become issues and early proposals.
 - **assess**: rules by default; LLM structured output when `SOLARDA_LLM=1` and a key is set (falls back on any error).
 - **specialists**: rules-only (`app/specialists.py`); irrigation uses the twin (`app/irrigation.py`); disease calls
   the vision service and the approved-source retriever.

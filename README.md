@@ -73,6 +73,7 @@ py -3.11 -m venv services/agents/.venv; services/agents/.venv/Scripts/pip instal
 py -3.11 -m venv services/twin/.venv;   services/twin/.venv/Scripts/pip install -r services/twin/requirements.lock
 py -3.11 -m venv services/vision/.venv; services/vision/.venv/Scripts/pip install -r services/vision/requirements.lock
 powershell -ExecutionPolicy Bypass -File scripts/fetch_vision_model.ps1
+powershell -ExecutionPolicy Bypass -File scripts/fetch_sensor_models.ps1   # sensor forecasters, anomaly detector, soil model
 
 # run (offline after setup), then open http://localhost:3000 -> Agent Console
 powershell -ExecutionPolicy Bypass -File scripts/start_all.ps1

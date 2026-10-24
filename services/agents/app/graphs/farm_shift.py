@@ -15,7 +15,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send, interrupt
 
-from .. import api_client, irrigation, llm, quality, specialists, weather
+from .. import api_client, irrigation, llm, quality, sensor_models, specialists, weather
 from ..replay.adapters import DATASETS, load_events
 from ..replay.clock import fmt_ts, parse_ts
 from ..replay.faults import apply_faults, pump_failed
@@ -39,6 +39,7 @@ class FarmState(TypedDict, total=False):
     quality_flags: list[dict]
     bad_metrics: dict
     weather: dict | None
+    model_signals: dict
     twin_forecast: dict | None
     situation: dict | None
     proposals: Annotated[list[dict], add]
@@ -91,7 +92,24 @@ def _field(state: FarmState) -> tuple[list[dict], dict | None]:
     ev = [{"ts": state["sim_time"], "siteId": state["site_id"], "zone": f["zone"], "metric": m,
            "value": r[k], "unit": u, "quality": "ok", "source": "twin"}
           for m, k, u in (("root_zone_water", "root_zone_water_mm", "mm"), ("canopy_cover", "canopy_cover", "fraction"))]
-    return ev, {"today": wx, "outlook": out, "rain_next_window_mm": out["rain_mm"], "twin_stress_days_so_far": r["stress_days"]}
+    return ev, {"today": wx, "outlook": out, "rain_next_window_mm": out["rain_mm"], "twin_stress_days_so_far": r["stress_days"],
+                "soil_forecast": _soil_forecast(f, today, r)}
+
+
+def _soil_forecast(f: dict, today: str, r: dict) -> dict | None:
+    """Root-zone water 1-3 days ahead if we hold (learned twin emulator, fast enough for every trigger check)."""
+    last4 = r.get("root_zone_water_last4_mm") or []
+    if len(last4) < 4:
+        return None
+    nxt = [(parse_ts(today + "T00:00:00Z") + timedelta(days=i)).strftime("%Y-%m-%d") for i in (1, 2, 3)]
+    days = weather.daily()
+    if not all(d in days for d in nxt):
+        return None
+    dap = (parse_ts(today + "T00:00:00Z") - parse_ts(f["planting"] + "T00:00:00Z")).days
+    return sensor_models.soil_forecast(wr=last4[-1], wr_1d_ago=last4[-2], wr_3d_ago=last4[0], dap=dap,
+                                       soil=f.get("soil", "SandyLoam"),
+                                       et0_next=[days[d]["et0_fao_evapotranspiration"] for d in nxt],
+                                       rain_next=[days[d]["precipitation_sum"] for d in nxt])
 
 
 def field_history(state: FarmState) -> list[dict]:
@@ -121,16 +139,34 @@ def ingest(state: FarmState) -> dict:
     applied = _apply_effects(q["snapshot"], state)
     wx = {**(sc.get("weather") or {}), **(field_weather or {})} or None
     n_bad = sum(len(v) for v in q["bad_metrics"].values())
-    return {**q, "weather": wx,
+    sig = sensor_models.signals(events, now, specialists.FORECAST_LIMITS)
+    for zone, ms in sig.items():
+        for metric, s in ms.items():
+            if s["anomaly"] and s["anomaly"]["alarm"] and metric not in q["bad_metrics"].get(zone, []):
+                q["quality_flags"].append({"zone": zone, "metric": metric, "check": "model_anomaly", "severity": "warn",
+                                           "detail": f"readings drift from the learned forecast (CUSUM {s['anomaly']['score']} > "
+                                                     f"{s['anomaly']['threshold']}); check the probe"})
+    n_warn = sum(1 for f in q["quality_flags"] if f["check"] == "model_anomaly")
+    n_breach = sum(1 for ms in sig.values() for s in ms.values() for b in s["breaches"] if b["likely"])
+    return {**q, "weather": wx, "model_signals": sig,
             "trace": _trace(state, "ingest", f"{len(events)} readings, {len(q['quality_flags'])} quality flags, "
-                                             f"{n_bad} metric(s) unusable" + (f"; plant effects: {', '.join(applied)}" if applied else ""),
-                            flags=q["quality_flags"], snapshot=q["snapshot"])}
+                                             f"{n_bad} metric(s) unusable"
+                                             + (f", {n_warn} model anomaly warning(s), {n_breach} forecast limit crossing(s)" if sig else "")
+                                             + (f"; plant effects: {', '.join(applied)}" if applied else ""),
+                            flags=q["quality_flags"], snapshot=q["snapshot"], model_signals=sig)}
 
 
 def _rules_situation(state: FarmState) -> dict:
-    issues = [{"zone": f["zone"], "topic": "sensor", "severity": "medium",
+    issues = [{"zone": f["zone"], "topic": "sensor", "severity": "medium" if f["severity"] == "bad" else "low",
                "summary": f"{f['metric']} failed {f['check']} check: {f['detail']}"}
-              for f in state["quality_flags"] if f["severity"] == "bad"]
+              for f in state["quality_flags"] if f["severity"] in ("bad", "warn")]
+    for zone, ms in (state.get("model_signals") or {}).items():
+        for metric, s in ms.items():
+            for b in s["breaches"]:
+                if b["likely"]:
+                    issues.append({"zone": zone, "topic": "forecast", "severity": "medium",
+                                   "summary": f"{metric} forecast {b['forecast']} crosses {b['side']} limit {b['limit']} "
+                                              f"within {b['horizon']} (band {b['band'][0]}-{b['band'][1]})"})
     return {"issues": issues, "note": f"{len(issues)} sensor issue(s); specialists check thresholds.", "by": "rules"}
 
 
@@ -172,7 +208,7 @@ def arbiter(state: FarmState) -> dict:
     tag = specialists._run(state)
     current = [p for p in state["proposals"] if p["id"] == specialists._id(tag, p["kind"], p["zone"])]
     best: dict[tuple, dict] = {}
-    for p in current + specialists.sensor_alerts(state):
+    for p in current + specialists.sensor_alerts(state) + specialists.sensor_alerts_from_models(state):
         k = (p["kind"], p["zone"])
         if k not in best or p["confidence"] > best[k]["confidence"]:
             best[k] = p

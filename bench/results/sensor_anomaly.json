@@ -1,0 +1,170 @@
+{
+ "faults": {
+  "ph": {
+   "drift_per_hour": 0.05,
+   "bias_step": 0.3,
+   "rules_have_backup_probe": true
+  },
+  "ec": {
+   "drift_per_hour": 0.05,
+   "bias_step": 0.3,
+   "rules_have_backup_probe": true
+  },
+  "solution_temp": {
+   "drift_per_hour": 0.3,
+   "bias_step": 1.5,
+   "rules_have_backup_probe": false
+  },
+  "air_temp": {
+   "drift_per_hour": 0.3,
+   "bias_step": 1.5,
+   "rules_have_backup_probe": true
+  },
+  "rh": {
+   "drift_per_hour": 1.5,
+   "bias_step": 8.0,
+   "rules_have_backup_probe": false
+  },
+  "co2": {
+   "drift_per_hour": 40.0,
+   "bias_step": 200.0,
+   "rules_have_backup_probe": false
+  },
+  "level": {
+   "drift_per_hour": 0.5,
+   "bias_step": 2.0,
+   "rules_have_backup_probe": false
+  }
+ },
+ "episodes_per_fault": 25,
+ "window_hours": 6,
+ "test": "EDEN ISS Oct-Dec 2020, tank1/feg primary probes",
+ "results": {
+  "ph": {
+   "alarm_level_h": 60.0,
+   "learned_false_alarms_per_day": 0.363,
+   "rules_flag_rate_on_clean_6h_checks": 0.014,
+   "drift": {
+    "learned_detected": 0.48,
+    "rules_detected": 0.84,
+    "learned_median_delay_min": 200.0,
+    "rules_median_delay_min": 255.0
+   },
+   "bias_step": {
+    "learned_detected": 0.24,
+    "rules_detected": 0.88,
+    "learned_median_delay_min": 60.0,
+    "rules_median_delay_min": 15.0
+   }
+  },
+  "ec": {
+   "alarm_level_h": 36.5,
+   "learned_false_alarms_per_day": 0.231,
+   "rules_flag_rate_on_clean_6h_checks": 0.0,
+   "drift": {
+    "learned_detected": 1.0,
+    "rules_detected": 1.0,
+    "learned_median_delay_min": 80.0,
+    "rules_median_delay_min": 315.0
+   },
+   "bias_step": {
+    "learned_detected": 1.0,
+    "rules_detected": 1.0,
+    "learned_median_delay_min": 15.0,
+    "rules_median_delay_min": 15.0
+   }
+  },
+  "solution_temp": {
+   "alarm_level_h": 57.0,
+   "learned_false_alarms_per_day": 0.044,
+   "rules_flag_rate_on_clean_6h_checks": 0.0,
+   "drift": {
+    "learned_detected": 0.0,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": null,
+    "rules_median_delay_min": null
+   },
+   "bias_step": {
+    "learned_detected": 0.4,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 25.0,
+    "rules_median_delay_min": null
+   }
+  },
+  "air_temp": {
+   "alarm_level_h": 29.5,
+   "learned_false_alarms_per_day": 0.385,
+   "rules_flag_rate_on_clean_6h_checks": 0.0,
+   "drift": {
+    "learned_detected": 0.92,
+    "rules_detected": 0.16,
+    "learned_median_delay_min": 30.0,
+    "rules_median_delay_min": 315.0
+   },
+   "bias_step": {
+    "learned_detected": 1.0,
+    "rules_detected": 0.28,
+    "learned_median_delay_min": 15.0,
+    "rules_median_delay_min": 60.0
+   }
+  },
+  "rh": {
+   "alarm_level_h": 54.5,
+   "learned_false_alarms_per_day": 0.22,
+   "rules_flag_rate_on_clean_6h_checks": 0.0,
+   "drift": {
+    "learned_detected": 0.92,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 175.0,
+    "rules_median_delay_min": null
+   },
+   "bias_step": {
+    "learned_detected": 0.96,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 25.0,
+    "rules_median_delay_min": null
+   }
+  },
+  "co2": {
+   "alarm_level_h": 57.0,
+   "learned_false_alarms_per_day": 0.22,
+   "rules_flag_rate_on_clean_6h_checks": 0.0,
+   "drift": {
+    "learned_detected": 0.36,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 285.0,
+    "rules_median_delay_min": null
+   },
+   "bias_step": {
+    "learned_detected": 0.48,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 20.0,
+    "rules_median_delay_min": null
+   }
+  },
+  "level": {
+   "alarm_level_h": 39.5,
+   "learned_false_alarms_per_day": 0.714,
+   "rules_flag_rate_on_clean_6h_checks": 0.0,
+   "drift": {
+    "learned_detected": 0.72,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 277.5,
+    "rules_median_delay_min": null
+   },
+   "bias_step": {
+    "learned_detected": 0.92,
+    "rules_detected": 0.0,
+    "learned_median_delay_min": 20.0,
+    "rules_median_delay_min": null
+   }
+  }
+ },
+ "no_gain": [
+  "ph drift: learned 0.48 vs rules 0.84",
+  "ph bias_step: learned 0.24 vs rules 0.88",
+  "ec drift: learned 1.0 vs rules 1.0",
+  "ec bias_step: learned 1.0 vs rules 1.0",
+  "solution_temp drift: learned 0.0 vs rules 0.0"
+ ]
+}

@@ -1,0 +1,172 @@
+{
+ "data": "EDEN ISS 2020 (Zenodo 11485183, CC BY 4.0), 5-min",
+ "split": "train Jan-Aug, test Oct-Dec",
+ "model": "HistGradientBoosting (median + 10%/90% quantile; persistence point where the model lost on validation) on lags 5 min-24 h, rolling stats, time of day",
+ "results": {
+  "ph": {
+   "30min": {
+    "n_test": 52404,
+    "mae_model": 0.0132,
+    "mae_persistence": 0.0132,
+    "mae_seasonal_naive": 0.019,
+    "point_forecast": "persistence (model lost on September validation)",
+    "band_coverage_10_90": 0.755,
+    "skill_vs_persistence": 0.002
+   },
+   "2h": {
+    "n_test": 52368,
+    "mae_model": 0.0277,
+    "mae_persistence": 0.0277,
+    "mae_seasonal_naive": 0.0397,
+    "point_forecast": "persistence (model lost on September validation)",
+    "band_coverage_10_90": 0.769,
+    "skill_vs_persistence": -0.001
+   }
+  },
+  "ec": {
+   "30min": {
+    "n_test": 52388,
+    "mae_model": 0.0082,
+    "mae_persistence": 0.0085,
+    "mae_seasonal_naive": 0.013,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.81,
+    "skill_vs_persistence": 0.039
+   },
+   "2h": {
+    "n_test": 52350,
+    "mae_model": 0.0201,
+    "mae_persistence": 0.0212,
+    "mae_seasonal_naive": 0.0297,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.773,
+    "skill_vs_persistence": 0.052
+   }
+  },
+  "solution_temp": {
+   "30min": {
+    "n_test": 52404,
+    "mae_model": 0.028,
+    "mae_persistence": 0.0552,
+    "mae_seasonal_naive": 0.0506,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.813,
+    "skill_vs_persistence": 0.493
+   },
+   "2h": {
+    "n_test": 52368,
+    "mae_model": 0.108,
+    "mae_persistence": 0.1627,
+    "mae_seasonal_naive": 0.123,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.685,
+    "skill_vs_persistence": 0.336
+   }
+  },
+  "level": {
+   "30min": {
+    "n_test": 52404,
+    "mae_model": 0.2288,
+    "mae_persistence": 0.2579,
+    "mae_seasonal_naive": 0.4291,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.782,
+    "skill_vs_persistence": 0.113
+   },
+   "2h": {
+    "n_test": 52368,
+    "mae_model": 0.378,
+    "mae_persistence": 0.4397,
+    "mae_seasonal_naive": 0.6818,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.776,
+    "skill_vs_persistence": 0.14
+   }
+  },
+  "air_temp": {
+   "30min": {
+    "n_test": 26202,
+    "mae_model": 0.044,
+    "mae_persistence": 0.1643,
+    "mae_seasonal_naive": 0.0529,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.772,
+    "skill_vs_persistence": 0.732
+   },
+   "2h": {
+    "n_test": 26184,
+    "mae_model": 0.1464,
+    "mae_persistence": 0.5829,
+    "mae_seasonal_naive": 0.1078,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.751,
+    "skill_vs_persistence": 0.749
+   }
+  },
+  "rh": {
+   "30min": {
+    "n_test": 26202,
+    "mae_model": 0.3757,
+    "mae_persistence": 0.5007,
+    "mae_seasonal_naive": 0.4088,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.735,
+    "skill_vs_persistence": 0.25
+   },
+   "2h": {
+    "n_test": 26184,
+    "mae_model": 0.8401,
+    "mae_persistence": 1.195,
+    "mae_seasonal_naive": 0.815,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.66,
+    "skill_vs_persistence": 0.297
+   }
+  },
+  "co2": {
+   "30min": {
+    "n_test": 26202,
+    "mae_model": 13.0878,
+    "mae_persistence": 21.6376,
+    "mae_seasonal_naive": 29.1506,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.802,
+    "skill_vs_persistence": 0.395
+   },
+   "2h": {
+    "n_test": 26184,
+    "mae_model": 45.0131,
+    "mae_persistence": 63.6322,
+    "mae_seasonal_naive": 84.1679,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.718,
+    "skill_vs_persistence": 0.293
+   }
+  },
+  "vpd": {
+   "30min": {
+    "n_test": 26202,
+    "mae_model": 0.0353,
+    "mae_persistence": 0.0398,
+    "mae_seasonal_naive": 0.0552,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.806,
+    "skill_vs_persistence": 0.113
+   },
+   "2h": {
+    "n_test": 26184,
+    "mae_model": 0.0607,
+    "mae_persistence": 0.0673,
+    "mae_seasonal_naive": 0.0796,
+    "point_forecast": "model",
+    "band_coverage_10_90": 0.713,
+    "skill_vs_persistence": 0.098
+   }
+  }
+ },
+ "no_gain": [
+  "ph 30min: skill 0.002 (MAE 0.0132 vs persistence 0.0132)",
+  "ph 2h: skill -0.001 (MAE 0.0277 vs persistence 0.0277)",
+  "ec 30min: skill 0.039 (MAE 0.0082 vs persistence 0.0085)"
+ ]
+}

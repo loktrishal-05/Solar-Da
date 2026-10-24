@@ -56,7 +56,8 @@ def check_window(events: list[dict], now: str, interval_min: int = 5, drift_hour
         latest[zone][metric] = {"value": v, "unit": last["unit"], "ts": last["ts"], "source": last["source"],
                                 "id": f"tel:{zone}:{metric}:{last['ts']}", "bad": bad,
                                 "recent": [x["value"] for x in s[-STUCK_SAMPLES:]],
-                                "first": next(x["value"] for x in s if (nowd - parse_ts(x["ts"])).total_seconds() <= drift_hours * 3600)}
+                                # no reading inside the drift window (long dropout): compare against the last one
+                                "first": next((x["value"] for x in s if (nowd - parse_ts(x["ts"])).total_seconds() <= drift_hours * 3600), v)}
 
     # Redundancy: fuse primary and backup. Use the one that is good; if both good but disagreeing, trust neither.
     for zone, metrics in latest.items():

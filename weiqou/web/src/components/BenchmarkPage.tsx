@@ -8,6 +8,7 @@ type Row = { policy: string; year: string; water_mm: string; events: string; str
 type Results = {
   irrigation: Row[]; advisor: Record<string, any> | null; vision: Record<string, any> | null; summary_md: string;
   vision_field: Record<string, any> | null; harvest: Record<string, any> | null; price: Record<string, any> | null;
+  sensor_forecast: Record<string, any> | null; sensor_anomaly: Record<string, any> | null; soil: Record<string, any> | null;
 };
 const pct = (x: number | null | undefined) => (x == null ? '–' : `${(x * 100).toFixed(1)}%`);
 
@@ -134,6 +135,36 @@ export const BenchmarkPage: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidt
           ) : <p className="text-gray-500">Run bench/eval_price.py.</p>}
         </section>
       </div>
+
+      <section className="rounded-2xl border bg-white p-4 shadow-sm text-xs">
+        <h3 className="font-black uppercase tracking-wider text-[#1B4332] mb-1">Sensor models (EDEN ISS 2020, tested Oct-Dec)</h3>
+        <p className="text-gray-500 mb-2">Forecast error vs "no change" (persistence), and fault detection vs the rule checks on injected faults. A model that lost on validation serves persistence.</p>
+        {r.sensor_forecast && r.sensor_anomaly ? (
+          <div className="overflow-x-auto">
+            <table className="w-full font-mono">
+              <thead><tr className="text-left text-gray-500"><th>Stream</th><th>30 min skill</th><th>2 h skill</th><th>Band cover</th><th>Drift caught: model / rules</th><th>Step caught: model / rules</th><th>False alarms/day</th></tr></thead>
+              <tbody>{Object.entries(r.sensor_forecast.results).map(([m, v]: [string, any]) => {
+                const a = r.sensor_anomaly!.results[m];
+                return (
+                  <tr key={m}>
+                    <td>{m}</td>
+                    <td>{(v['30min'].skill_vs_persistence * 100).toFixed(0)}%</td>
+                    <td>{(v['2h'].skill_vs_persistence * 100).toFixed(0)}%</td>
+                    <td>{pct(v['30min'].band_coverage_10_90)}</td>
+                    <td>{a ? `${pct(a.drift.learned_detected)} / ${pct(a.drift.rules_detected)}` : '–'}</td>
+                    <td>{a ? `${pct(a.bias_step.learned_detected)} / ${pct(a.bias_step.rules_detected)}` : '–'}</td>
+                    <td>{a ? a.learned_false_alarms_per_day : '–'}</td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          </div>
+        ) : <p className="text-gray-500">Run bench/train_sensor_models.py and bench/eval_anomaly.py.</p>}
+        {r.soil && (
+          <p className="mt-2 font-mono">Soil water (twin emulator, test 2023): {Object.entries(r.soil.results).map(([h, v]: [string, any]) =>
+            `${h} ${v.mae_model_mm} mm vs bucket ${v.mae_bucket_mm} mm`).join(' · ')}. <span className="font-sans text-gray-500">{r.soil.caveat}</span></p>
+        )}
+      </section>
     </div>
   );
 };

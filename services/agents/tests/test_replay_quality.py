@@ -63,3 +63,10 @@ def test_injected_faults_are_flagged():
     ev, q = _window(now, [spike]);                            assert _flagged(q, "air_temp", "rate_of_change")
     assert all(e["source"] == "simulated" for e in ev if e["metric"] == "air_temp" and e["ts"] >= "2020-03-05T09:55")
     assert pump_failed([{"type": "pump_failure", "zone": "tank1", "start": "2020-03-05T08:00:00Z"}], "tank1", now)
+
+
+def test_long_dropout_does_not_crash_and_is_flagged():
+    ev = [{"ts": f"2020-03-01T0{h}:00:00Z", "zone": "tank1", "metric": "ph", "value": 6.0, "unit": "pH", "source": "replay"}
+          for h in range(3)]  # last reading 02:00, checked at 09:00 -> nothing in the 4 h drift window
+    out = check_window(ev, "2020-03-01T09:00:00Z")
+    assert "ph" in out["bad_metrics"]["tank1"]

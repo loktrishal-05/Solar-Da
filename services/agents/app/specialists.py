@@ -12,6 +12,12 @@ AIR_TEMP_SHADE_C = 28.5
 VPD_HIGH_KPA = 1.5
 PH_GAIN_PER_ML = 0.03  # matches the simulated plant in the API
 PH_DOSE_CAP_ML = 20
+LEVEL_LOW_CM = 10.0
+SOLUTION_TEMP_HIGH_C = 26.0
+RH_HIGH_PCT = 90.0  # sustained high humidity raises fungal disease risk
+# Limits the learned forecasters are checked against (app/sensor_models.signals): (low, high), None = no limit.
+FORECAST_LIMITS = {"air_temp": (None, AIR_TEMP_VENT_C), "vpd": (None, VPD_HIGH_KPA), "ph": PH_TARGET, "ec": EC_TARGET,
+                   "solution_temp": (None, SOLUTION_TEMP_HIGH_C), "rh": (None, RH_HIGH_PCT), "level": (LEVEL_LOW_CM, None)}
 
 
 def _id(run_id: str, kind: str, zone: str) -> str:
@@ -73,6 +79,36 @@ def climate(state: dict) -> list[dict]:
         if t and t["value"] > AIR_TEMP_SHADE_C:
             out.append(_action(run, "shade", zone, {"pct": 50}, f"air {t['value']} C > {AIR_TEMP_SHADE_C}",
                                [t["id"]], "air_temp -1.0 in 10m", 0.7))
+        # Act early: the learned forecaster expects the limit to be crossed (central forecast, not just the band).
+        s = (state.get("model_signals") or {}).get(zone, {}).get("air_temp")
+        early = [b for b in (s or {}).get("breaches", []) if b["likely"] and b["side"] == "high"]
+        if t and not hot and early and "air_temp" not in bad.get(zone, []):
+            b = early[0]
+            out.append(_action(run, "ventilate", zone, {"pct": 40},
+                               f"air {t['value']} C now; forecast {b['forecast']} C within {b['horizon']} "
+                               f"(band {b['band'][0]}-{b['band'][1]}) > {AIR_TEMP_VENT_C}", [t["id"], s["id"]],
+                               "air_temp stays below limit", 0.6))
+    return out
+
+
+def sensor_alerts_from_models(state: dict) -> list[dict]:
+    """Human alerts from the learned models: a probe that drifts from its forecast, a tank about to run low,
+    humidity heading into the disease-risk band. Alerts only; nothing is dosed or moved on a forecast alone."""
+    run, out = _run(state), []
+    for zone, ms in (state.get("model_signals") or {}).items():
+        for metric, s in ms.items():
+            a = s.get("anomaly")
+            if a and a["alarm"]:
+                out.append(_action(run, "alert", zone, {"message": f"Check the {metric} probe: readings drift from the learned forecast"},
+                                   f"model anomaly score {a['score']} > {a['threshold']}", [s["id"]], "a person checks the probe", 0.6))
+            for b in s["breaches"]:
+                if b["likely"] and metric in ("level", "rh", "solution_temp"):
+                    msg = {"level": "Tank level forecast to fall below the refill mark: top up soon",
+                           "rh": "Humidity forecast above 90%: ventilate or space plants to cut disease risk",
+                           "solution_temp": "Nutrient solution forecast above 26 C: shade or cool the tank"}[metric]
+                    out.append(_action(run, "alert", f"{zone}", {"message": msg},
+                                       f"{metric} forecast {b['forecast']} within {b['horizon']} vs limit {b['limit']}",
+                                       [s["id"]], "a person acts before the limit", 0.6))
     return out
 
 

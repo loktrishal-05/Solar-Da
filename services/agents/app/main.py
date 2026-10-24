@@ -192,12 +192,26 @@ def bench_results():
     if v.exists():
         out["vision"] = json.loads(v.read_text(encoding="utf-8"))
     for key, name in (("vision_field", "vision_field.json"), ("harvest", "harvest_forecast.json"),
-                      ("price", "price_outlook.json")):
+                      ("price", "price_outlook.json"), ("sensor_forecast", "sensor_forecast.json"),
+                      ("sensor_anomaly", "sensor_anomaly.json"), ("soil", "soil_forecast.json")):
         p = BENCH / name
         out[key] = json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
     s = BENCH / "summary.md"
     out["summary_md"] = s.read_text(encoding="utf-8") if s.exists() else ""
     return out
+
+
+@app.get("/models/status")
+def models_status():
+    """Which learned models are installed, and what they cover."""
+    from . import sensor_models as S
+
+    b = S.bundle()
+    return {"sensor_models": {"installed": b is not None, "version": b and b.get("version"),
+                              "forecast_metrics": sorted(b["models"]) if b else [],
+                              "anomaly_metrics": sorted(b.get("anomaly", {})) if b else []},
+            "soil_model": {"installed": S.soil_bundle() is not None},
+            "fetch": "scripts/fetch_sensor_models.ps1"}
 
 
 @app.get("/market/outlook")

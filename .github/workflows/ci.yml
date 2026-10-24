@@ -38,6 +38,11 @@ jobs:
         run: |
           curl -sfL -o /tmp/v.zip https://github.com/${{ github.repository }}/releases/download/vision-v1/solarda_vision.zip
           unzip -o /tmp/v.zip -d services/vision/model
+      - name: Sensor models (from the GitHub release, if published)
+        continue-on-error: true
+        run: |
+          curl -sfL -o /tmp/s.zip https://github.com/${{ github.repository }}/releases/download/sensor-models-v1/solarda_sensor_models.zip
+          unzip -o /tmp/s.zip -d services/agents/model
       - name: Python tests (agents start the API, twin and vision services themselves)
         run: |
           (cd services/twin && .venv/bin/python -m pytest -q)

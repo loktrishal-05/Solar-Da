@@ -64,3 +64,14 @@ the crop calendar; we report yield instead, which the twin forecasts better than
 no Tamil Nadu series was available (2 rows), so the cached series is Bangalore onion (Agmarknet via a CC BY 4.0
 compilation). The outlook (last value x damped seasonal ratio, weight tuned on 2016-2018) beats seasonal naive at both
 horizons, beats last value only at 4 weeks, and the storage/pooling alert always states the ~28% typical error.
+
+## D10: Learned sensor models (Phase B)
+Forecasters are gradient-boosted trees (median + 10/90% quantiles) on lags and time of day, trained on EDEN ISS 2020
+Jan-Aug. Where a stream's model did not beat "no change" on September validation (pH), the point forecast is
+persistence and only the band is used. The anomaly detector is a CUSUM on forecast residuals, tuned on September; it
+complements the rule checks (rules win where a backup probe exists; the model wins on single-probe streams). Model
+anomalies are `warn` flags plus a human alert, never a veto, because test false-alarm rates (up to 0.7/day for level)
+exceed the tuned target. A likely forecast limit crossing can propose early ventilation (engine still decides) and
+human alerts for level, humidity and solution temperature; nothing is dosed on a forecast alone. Soil water uses a
+learned emulator of the AquaCrop twin (simulated training data, labelled). Weights ship as release
+`sensor-models-v1` (`scripts/fetch_sensor_models.ps1`), not in git.
