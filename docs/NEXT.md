@@ -21,7 +21,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
    - Crop recommender / market mandi prices are hardcoded. Needs a real price source (Tamil Nadu Agmarknet series) before it can change.
    - SMS alerts panels and marketplace are seeded/in-memory: persist marketplace listings (file or SQLite) and wire SMS panels to the audit log.
    - `/api/chat` keyword mock still backs the classic drawer tab; decide whether to retire it.
-   - Replace the 32-bit `simpleSha256` in `packages/engine/src/passport.ts` with real SHA-256 (keep the browser-safe build working).
+   - ~~Real SHA-256 in `passport.ts`~~ done (pure-JS, browser-safe, known-vector test in `engine.test.ts`).
 3. **Sensor models**: the pH forecaster did not beat "no change", and the learned detector loses to the rules on pH. Options: more features
    (pump events), HydroGrowNet data, or leave as is. Model anomalies stay warnings, never vetoes.
 4. **Vision**: field accuracy is 44-64% (abstains 60-68%). Next step if it matters: fine-tune with PlantWild-style photos (licence CC BY-NC-ND: evaluation

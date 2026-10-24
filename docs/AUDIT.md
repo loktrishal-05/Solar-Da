@@ -7,7 +7,7 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 |---|---|---|
 | `npm install` | real | succeeds; 5 packages have unreviewed install scripts (prisma, esbuild, core-js) |
 | `npm run build` | **broken -> fixed** | root scripts used `apps/api`, `apps/web`; real paths are `weiqou/*` ("No workspaces found"). Fixed in commit "Fix root build workspaces paths"; full build now passes (web bundle 2.2 MB, single chunk) |
-| `npm run test:engine` | real | 7/7 pass (interlocks, dosing sequence, gelatin rule, uptake ratio, crop doctor, power scheduler, passport chain) |
+| `npm run test:engine` | real | 20/20 pass (interlocks, dosing sequence, gelatin rule, uptake ratio, crop doctor, power scheduler, passport chain) |
 | `weiqou/electron` | broken | listed in README and workspaces; directory does not exist. README line corrected |
 | Python / LangGraph / agents / replay / twin / vision | missing | not in repo yet (planned Phase 1+) |
 
@@ -71,7 +71,7 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Mandi prices in crop recommender / market pages | UI-only (hardcoded) | unchanged (rule 5); a real cached Agmarknet series now backs `GET /agents/market/outlook` with a data-quality label |
 | `quality.check_window` with a dropout longer than the 4 h drift window | broken, fixed | raised StopIteration (crashed ingest); now compares against the last reading and still flags the dropout (`test_long_dropout_does_not_crash_and_is_flagged`) |
 | POST /disease/report (was UI-only) | fixed (wrapped) | data: URL images now go to the vision service (calibrated vision-v1); blurry/uncertain photos abstain; `diagnosisSource` says which path answered; root-port images keep the heuristic and are labelled. Only `data:` URLs are analysed (fetching client URLs would be SSRF). Tests in `disease_routes.test.ts` |
-| GET /harvest-lots/:id/passport (was broken) | fixed | seed extended genesis twice (forked chain); verifier also never recomputed block hashes, so edits to doses went unnoticed. Now each block extends the last and `verifyPassportChainIntegrity` checks numbering, links and content hashes. The hash is still a 32-bit checksum, not SHA-256 (ponytail note in `passport.ts`) |
+| GET /harvest-lots/:id/passport (was broken) | fixed | seed extended genesis twice (forked chain); verifier also never recomputed block hashes, so edits to doses went unnoticed. Now each block extends the last and `verifyPassportChainIntegrity` checks numbering, links and content hashes. Block hashes are now real SHA-256 (pure JS, browser-safe; known-vector test) |
 | Assistant drawer (was UI-only keyword mock) | extended | "Smart assistant" tab embeds the real Gemini farm assistant; the classic keyword assistant that creates action proposals stays as "Action proposals (classic)"; its fake mic (a timer) now uses the browser speech recognizer |
 | Alerts and event log in `App.tsx` (was hardcoded) | extended | real dispatches and safety vetoes from `/api/actions` and `/api/audit` appear first, labelled "replay"/"simulated"; the old placeholder rows stay, labelled "(sample)" |
 | `/api/chat` keyword mock | unchanged | still used by the classic drawer tab for proposals; the real assistant is `/agents/chat/stream` |

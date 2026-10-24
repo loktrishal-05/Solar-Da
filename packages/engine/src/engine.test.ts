@@ -14,6 +14,7 @@ import {
   createGenesisPassportBlock,
   appendPassportBlock,
   verifyPassportChainIntegrity,
+  sha256,
   ActuatorCommandProposal,
   ReservoirSafetyLimits,
   TelemetryReading,
@@ -163,4 +164,13 @@ test('ENGINE TRACEABILITY PASSPORT: Cryptographic Block Chain Verification', () 
   const tamperedBlock1 = { ...block1, blockHash: '0xBAD_HASH' };
   const tamperedVerification = verifyPassportChainIntegrity([genesis, tamperedBlock1, block2]);
   assert.strictEqual(tamperedVerification.isChainValid, false);
+});
+
+test('ENGINE PASSPORT: sha256 matches known vectors', () => {
+  assert.strictEqual(sha256(''), '0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+  assert.strictEqual(sha256('abc'), '0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  assert.strictEqual(
+    sha256('abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq'),
+    '0x248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1'
+  );
 });
