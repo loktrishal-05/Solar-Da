@@ -22,12 +22,12 @@ export const CropRecommender: React.FC = () => {
             <h2 className="font-display text-2xl font-extrabold text-white">Agmarknet Crop Recommender (Transparent Heuristic)</h2>
           </div>
           <p className="text-xs text-slate-400">
-            Real Mandi Price Integration (data.gov.in) — Sourced formula: score = normalize(price_trend) × 0.5 + climate_fit × 0.3 + substrate_suitability × 0.2
+            SAMPLE mandi prices (hand-entered, not live data.gov.in; real series exists for onion only) — Formula: score = normalize(price_trend) × 0.5 + climate_fit × 0.3 + substrate_suitability × 0.2
           </p>
         </div>
         <div className="flex items-center space-x-2 bg-slate-950 px-3.5 py-1.5 rounded-full border border-white/10 text-xs">
           <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-slate-200 font-semibold font-mono">Region: Tamil Nadu (Chennai Mandi)</span>
+          <span className="text-slate-200 font-semibold font-mono">Region: Tamil Nadu (Chennai Mandi, sample prices)</span>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export const CropRecommender: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3 bg-slate-900 p-3.5 rounded-xl border border-white/5 text-xs font-mono">
               <div>
-                <span className="text-slate-500 text-[10px] block font-sans">Avg Mandi Price</span>
+                <span className="text-slate-500 text-[10px] block font-sans">Avg Mandi Price (sample)</span>
                 <span className="font-bold text-white text-sm">
                   {rec.avgMandiPricePerKg ? `₹${rec.avgMandiPricePerKg}/kg` : 'Data Unavailable'}
                 </span>
