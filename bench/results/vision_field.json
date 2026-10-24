@@ -1,0 +1,37 @@
+{
+ "model": "vision-v1 (EfficientNetV2-B0)",
+ "threshold": 0.93,
+ "note": "Mapped classes only (field class -> one of the 38 PlantVillage labels). Top-1 accuracy ignores the abstain gate; abstain_rate includes photo-quality rejects. PlantWild CC BY-NC-ND 4.0, evaluation only, images not redistributed.",
+ "plantdoc_test": {
+  "no_crop": {
+   "n": 231,
+   "top1_accuracy": 0.6407,
+   "abstain_rate": 0.6017,
+   "photo_quality_rejects": 2,
+   "accuracy_when_answered": 0.9022
+  },
+  "leaf_crop": {
+   "n": 231,
+   "top1_accuracy": 0.6407,
+   "abstain_rate": 0.6277,
+   "photo_quality_rejects": 2,
+   "accuracy_when_answered": 0.8837
+  }
+ },
+ "plantwild_v1_test": {
+  "no_crop": {
+   "n": 1453,
+   "top1_accuracy": 0.4398,
+   "abstain_rate": 0.6834,
+   "photo_quality_rejects": 16,
+   "accuracy_when_answered": 0.737
+  },
+  "leaf_crop": {
+   "n": 1453,
+   "top1_accuracy": 0.4439,
+   "abstain_rate": 0.6786,
+   "photo_quality_rejects": 16,
+   "accuracy_when_answered": 0.7281
+  }
+ }
+}

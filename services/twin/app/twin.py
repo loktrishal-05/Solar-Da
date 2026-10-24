@@ -58,6 +58,36 @@ def run(planting: str, until: str, irrigation: list[dict], crop: str = "Tomato",
     }
 
 
+def climatology_weather(today: str) -> pd.DataFrame:
+    """Archive weather up to `today`; after it, each day is the mean of the same calendar day in the other
+    archive years (no peeking at the season being forecast)."""
+    w = weather_df().copy()
+    t = pd.Timestamp(today)
+    md = w.Date.dt.strftime("%m-%d")
+    other = w[w.Date.dt.year != t.year]
+    clim = other.groupby(md[other.index]).mean(numeric_only=True)
+    future = w.Date > t
+    for col in ("MinTemp", "MaxTemp", "Precipitation", "ReferenceET"):
+        w.loc[future, col] = md[future].map(clim[col]).values
+    return w
+
+
+def forecast_harvest(planting: str, today: str, crop: str = "Tomato", soil: str = "SandyLoam",
+                     weather: str = "climatology") -> dict:
+    """Harvest date and yield, assuming irrigation keeps the crop out of water stress from here on
+    (soil-moisture trigger at 40% depletion). weather="actual" uses the archive (a perfect forecast)."""
+    p = date.fromisoformat(planting)
+    w = weather_df() if weather == "actual" else climatology_weather(today)
+    m = AquaCropModel(f"{p:%Y/%m/%d}", f"{p.year}/12/31", w, Soil(soil), Crop(crop, planting_date=f"{p:%m/%d}"),
+                      InitialWaterContent(value=["FC"]), irrigation_management=IrrigationManagement(1, SMT=[40] * 4))
+    m.run_model(till_termination=True)
+    r = m.get_simulation_results().iloc[0]
+    return {"harvest_date": pd.Timestamp(r["Harvest Date (YYYY/MM/DD)"]).date().isoformat(),
+            "season_days": int(r["Harvest Date (Step)"]), "dry_yield_t_ha": round(float(r["Dry yield (tonne/ha)"]), 2),
+            "fresh_yield_t_ha": round(float(r["Fresh yield (tonne/ha)"]), 1), "weather": weather,
+            "assumption": "irrigated to avoid water stress after today", "source": "twin"}
+
+
 def compare_options(planting: str, today: str, history: list[dict], depth_mm: float, horizon_days: int = 7,
                     crop: str = "Tomato", soil: str = "SandyLoam") -> list[dict]:
     """The irrigation agent's three options, each run in the twin over the next `horizon_days`."""

@@ -56,18 +56,41 @@ def photo_quality(img: Image.Image) -> tuple[bool, str, dict]:
     return True, "", q
 
 
+def leaf_crop(img: Image.Image, pad: float = 0.08) -> Image.Image:
+    """Crop to the plant-coloured region (green through yellow/brown, so lesions stay in) to cut background.
+    Returns the image unchanged when the leaf already fills the frame or no clear plant region is found.
+    ponytail: colour-threshold bounding box, not a segmentation model; swap for a leaf segmenter if it misses."""
+    small = img.resize((IMG, IMG))
+    h, s, v = [np.asarray(c, dtype=np.float32) / 255 for c in small.convert("HSV").split()]
+    mask = (h > 0.04) & (h < 0.45) & (s > 0.18) & (v > 0.12)  # hue ~15-160 deg: yellow-brown to green
+    frac = mask.mean()
+    if frac < 0.05 or frac > 0.85:
+        return img
+    rows, cols = np.where(mask.mean(1) > 0.05)[0], np.where(mask.mean(0) > 0.05)[0]
+    if len(rows) < 10 or len(cols) < 10:
+        return img
+    W, H = img.size
+    y0, y1, x0, x1 = rows[0] / IMG, (rows[-1] + 1) / IMG, cols[0] / IMG, (cols[-1] + 1) / IMG
+    box = (max(0, x0 - pad) * W, max(0, y0 - pad) * H, min(1, x1 + pad) * W, min(1, y1 + pad) * H)
+    if (box[2] - box[0]) * (box[3] - box[1]) > 0.9 * W * H:
+        return img
+    return img.crop(tuple(int(b) for b in box))
+
+
 def softmax(z: np.ndarray) -> np.ndarray:
     z = z - z.max(-1, keepdims=True)
     e = np.exp(z)
     return e / e.sum(-1, keepdims=True)
 
 
-def classify(image_bytes: bytes, top_k: int = 3) -> dict:
+def classify(image_bytes: bytes, top_k: int = 3, crop: bool | None = None) -> dict:
     img = ImageOps.exif_transpose(Image.open(io.BytesIO(image_bytes))).convert("RGB")
     ok, why, q = photo_quality(img)
     if not ok:
         return {"abstain": True, "reason": why, "quality": q, "predictions": []}
     sess, labels, cal = _model()
+    if cal.get("leaf_crop", False) if crop is None else crop:
+        img = leaf_crop(img)
     # Same preprocessing as training (tf.image.resize of the whole image, bilinear, no crop/normalisation).
     x = np.asarray(img.resize((IMG, IMG), Image.BILINEAR), dtype=np.float32)[None]
     logits = sess.run(None, {"image": x})[0][0]

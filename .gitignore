@@ -84,3 +84,6 @@ data/runtime/
 
 # vision model weights are fetched, not committed
 services/vision/model/*.onnx
+
+# Downloaded evaluation datasets (never committed)
+data/raw/

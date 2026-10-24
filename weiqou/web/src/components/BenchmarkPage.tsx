@@ -5,7 +5,11 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 // and shows the cases where the agent does no better.
 
 type Row = { policy: string; year: string; water_mm: string; events: string; stress_days: string; dry_yield_t_ha: string };
-type Results = { irrigation: Row[]; advisor: Record<string, any> | null; vision: Record<string, any> | null; summary_md: string };
+type Results = {
+  irrigation: Row[]; advisor: Record<string, any> | null; vision: Record<string, any> | null; summary_md: string;
+  vision_field: Record<string, any> | null; harvest: Record<string, any> | null; price: Record<string, any> | null;
+};
+const pct = (x: number | null | undefined) => (x == null ? '–' : `${(x * 100).toFixed(1)}%`);
 
 const POLICIES = ['fixed_schedule', 'et_controller', 'agent', 'agent_no_forecast'];
 const COLORS: Record<string, string> = { fixed_schedule: '#9CA3AF', et_controller: '#60A5FA', agent: '#1B4332', agent_no_forecast: '#7CB342' };
@@ -90,6 +94,44 @@ export const BenchmarkPage: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidt
               <li className="text-gray-500 font-sans">LLM: {r.advisor.llm}. Plain-LLM baseline: {r.advisor.baseline_plain_llm}.</li>
             </ul>
           ) : <p className="text-gray-500">Run bench/eval_advisor.py.</p>}
+        </section>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-5">
+        <section className="rounded-2xl border bg-white p-4 shadow-sm text-xs">
+          <h3 className="font-black uppercase tracking-wider text-[#1B4332] mb-2">Disease model in the wild</h3>
+          {r.vision_field ? (
+            <table className="w-full font-mono">
+              <thead><tr className="text-left text-gray-500"><th>Set</th><th>n</th><th>Top-1</th><th>Abstain</th><th>Right when answering</th></tr></thead>
+              <tbody>{(['plantdoc_test', 'plantwild_v1_test'] as const).map((k) => {
+                const x = r.vision_field![k]?.no_crop;
+                return x && <tr key={k}><td>{k.replace('_test', '').replace('_v1', '')}</td><td>{x.n}</td><td>{pct(x.top1_accuracy)}</td><td>{pct(x.abstain_rate)}</td><td>{pct(x.accuracy_when_answered)}</td></tr>;
+              })}</tbody>
+            </table>
+          ) : <p className="text-gray-500">Run bench/eval_vision_field.py.</p>}
+          <p className="text-gray-500 mt-2">Leaf crop tried and left off: no gain on either field set.</p>
+        </section>
+        <section className="rounded-2xl border bg-white p-4 shadow-sm text-xs">
+          <h3 className="font-black uppercase tracking-wider text-[#1B4332] mb-2">Yield forecast (twin)</h3>
+          {r.harvest ? (
+            <ul className="space-y-1 font-mono">
+              {Object.entries(r.harvest.mae_by_lead).map(([lead, v]: [string, any]) => (
+                <li key={lead}>Day {lead}: twin {v.twin_yield_mae_t_ha} vs naive {v.naive_yield_mae_t_ha} t/ha error</li>
+              ))}
+              <li className="text-gray-500 font-sans">{r.harvest.phenology_note}</li>
+            </ul>
+          ) : <p className="text-gray-500">Run bench/eval_harvest.py.</p>}
+        </section>
+        <section className="rounded-2xl border bg-white p-4 shadow-sm text-xs">
+          <h3 className="font-black uppercase tracking-wider text-[#1B4332] mb-2">Price outlook (onion, Bangalore)</h3>
+          {r.price ? (
+            <ul className="space-y-1 font-mono">
+              {Object.entries(r.price.results).map(([h, v]: [string, any]) => (
+                <li key={h}>{h.replace('_', ' ')}: outlook {v.outlook}% · last value {v.last_value}% · seasonal naive {v.seasonal_naive}% (MAPE)</li>
+              ))}
+              <li className="text-gray-500 font-sans">Agmarknet archive 2014-2024, scored 2019-2024. Not today's prices.</li>
+            </ul>
+          ) : <p className="text-gray-500">Run bench/eval_price.py.</p>}
         </section>
       </div>
     </div>

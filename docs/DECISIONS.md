@@ -50,3 +50,17 @@ needs human approval regardless. PlantWild was not evaluated.
 Replayed telemetry cannot react to the agent's actions, so the API returns a simulated plant response (fixed linear
 gains, tagged `simulated`) and the ingest node overlays it with a lag. Verify checks that response. This is a known
 simplification; the twin covers field irrigation.
+
+## D8: PlantWild evaluation and leaf crop (Phase A)
+PlantWild v1 (CC BY-NC-ND 4.0) is used for evaluation only; images stay in `data/raw/` and are never committed or
+redistributed. On mapped classes the model gets 44% top-1 in the wild and abstains on 68%. A colour-threshold leaf
+crop (`classifier.leaf_crop`) did not help (+0.4 points top-1, slightly lower accuracy when answering), so it is off
+by default (`calibration.json` key `leaf_crop`). A segmentation model or fine-tuning on PlantWild-like photos is the
+next step if field accuracy matters.
+
+## D9: Harvest and price outlook (blueprint stretch)
+Harvest date: AquaCrop-OSPy's tomato uses calendar-day phenology (110 days), so the twin's date forecast cannot beat
+the crop calendar; we report yield instead, which the twin forecasts better than the naive mean from day 60. Price:
+no Tamil Nadu series was available (2 rows), so the cached series is Bangalore onion (Agmarknet via a CC BY 4.0
+compilation). The outlook (last value x damped seasonal ratio, weight tuned on 2016-2018) beats seasonal naive at both
+horizons, beats last value only at 4 weeks, and the storage/pooling alert always states the ~28% typical error.

@@ -1,0 +1,21 @@
+{
+ "series": "Agmarknet via Mendeley onion 2014-2024 (CC BY 4.0), Bangalore market, weekly median modal price",
+ "metric": "MAPE % of actual weekly median modal price",
+ "results": {
+  "1_week": {
+   "outlook": 12.7,
+   "seasonal_naive": 46.8,
+   "last_value": 12.7,
+   "n": 298
+  },
+  "4_week": {
+   "outlook": 27.8,
+   "seasonal_naive": 43.7,
+   "last_value": 28.5,
+   "n": 303
+  }
+ },
+ "no_gain": [
+  "1_week: outlook MAPE 12.7 >= last value 12.7"
+ ]
+}

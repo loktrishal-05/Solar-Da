@@ -44,6 +44,21 @@ def run(req: RunRequest):
         raise HTTPException(400, f"twin run failed: {e}")
 
 
+class HarvestRequest(BaseModel):
+    planting: str
+    today: str
+    crop: str = "Tomato"
+    soil: str = "SandyLoam"
+
+
+@app.post("/twin/harvest")
+def harvest(req: HarvestRequest):
+    try:
+        return twin.forecast_harvest(req.planting, req.today, req.crop, req.soil)
+    except (ValueError, KeyError, IndexError) as e:
+        raise HTTPException(400, f"twin run failed: {e}")
+
+
 @app.post("/twin/options")
 def options(req: OptionsRequest):
     try:

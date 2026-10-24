@@ -51,3 +51,14 @@ def test_out_of_distribution_palm_photos_mostly_abstain():
     res = [client.post("/vision/classify", files={"image": (p.name, p.read_bytes(), "image/jpeg")}).json()
            for p in sorted((ROOT / "sample images").glob("*.jpeg"))]
     assert sum(r["abstain"] for r in res) >= len(res) // 2 + 1, [r.get("top") for r in res]
+
+
+def test_leaf_crop_trims_background_and_leaves_full_frame_leaves_alone():
+    from PIL import Image
+    from app.classifier import leaf_crop
+    bg = Image.new("RGB", (400, 400), (240, 240, 240))
+    bg.paste(Image.new("RGB", (120, 160), (60, 140, 40)), (200, 150))
+    c = leaf_crop(bg)
+    assert c.size[0] < 250 and c.size[1] < 250
+    full = Image.new("RGB", (300, 300), (60, 140, 40))
+    assert leaf_crop(full).size == (300, 300)

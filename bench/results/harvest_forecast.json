@@ -1,0 +1,213 @@
+{
+ "crop": "Tomato",
+ "planting": "01-15",
+ "weather": "Open-Meteo archive Chennai 2021-2023",
+ "truth": "twin with the season's actual weather (simulation, not field harvests)",
+ "baseline": "seasonal naive: planting + mean season length of the other years",
+ "rows": [
+  {
+   "year": 2021,
+   "days_after_planting": 0,
+   "actual": "2021-05-05",
+   "twin_forecast": "2021-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2021-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.71,
+   "actual_yield_t_ha": 7.95,
+   "naive_yield_t_ha": 7.68,
+   "twin_yield_error": -0.24,
+   "naive_yield_error": -0.27
+  },
+  {
+   "year": 2021,
+   "days_after_planting": 30,
+   "actual": "2021-05-05",
+   "twin_forecast": "2021-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2021-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.7,
+   "actual_yield_t_ha": 7.95,
+   "naive_yield_t_ha": 7.68,
+   "twin_yield_error": -0.25,
+   "naive_yield_error": -0.27
+  },
+  {
+   "year": 2021,
+   "days_after_planting": 60,
+   "actual": "2021-05-05",
+   "twin_forecast": "2021-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2021-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.99,
+   "actual_yield_t_ha": 7.95,
+   "naive_yield_t_ha": 7.68,
+   "twin_yield_error": 0.04,
+   "naive_yield_error": -0.27
+  },
+  {
+   "year": 2021,
+   "days_after_planting": 90,
+   "actual": "2021-05-05",
+   "twin_forecast": "2021-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2021-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.96,
+   "actual_yield_t_ha": 7.95,
+   "naive_yield_t_ha": 7.68,
+   "twin_yield_error": 0.01,
+   "naive_yield_error": -0.27
+  },
+  {
+   "year": 2022,
+   "days_after_planting": 0,
+   "actual": "2022-05-05",
+   "twin_forecast": "2022-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2022-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.85,
+   "actual_yield_t_ha": 7.74,
+   "naive_yield_t_ha": 7.78,
+   "twin_yield_error": 0.11,
+   "naive_yield_error": 0.04
+  },
+  {
+   "year": 2022,
+   "days_after_planting": 30,
+   "actual": "2022-05-05",
+   "twin_forecast": "2022-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2022-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.96,
+   "actual_yield_t_ha": 7.74,
+   "naive_yield_t_ha": 7.78,
+   "twin_yield_error": 0.22,
+   "naive_yield_error": 0.04
+  },
+  {
+   "year": 2022,
+   "days_after_planting": 60,
+   "actual": "2022-05-05",
+   "twin_forecast": "2022-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2022-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.84,
+   "actual_yield_t_ha": 7.74,
+   "naive_yield_t_ha": 7.78,
+   "twin_yield_error": 0.1,
+   "naive_yield_error": 0.04
+  },
+  {
+   "year": 2022,
+   "days_after_planting": 90,
+   "actual": "2022-05-05",
+   "twin_forecast": "2022-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2022-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.77,
+   "actual_yield_t_ha": 7.74,
+   "naive_yield_t_ha": 7.78,
+   "twin_yield_error": 0.03,
+   "naive_yield_error": 0.04
+  },
+  {
+   "year": 2023,
+   "days_after_planting": 0,
+   "actual": "2023-05-05",
+   "twin_forecast": "2023-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2023-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.81,
+   "actual_yield_t_ha": 7.61,
+   "naive_yield_t_ha": 7.85,
+   "twin_yield_error": 0.2,
+   "naive_yield_error": 0.24
+  },
+  {
+   "year": 2023,
+   "days_after_planting": 30,
+   "actual": "2023-05-05",
+   "twin_forecast": "2023-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2023-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.84,
+   "actual_yield_t_ha": 7.61,
+   "naive_yield_t_ha": 7.85,
+   "twin_yield_error": 0.23,
+   "naive_yield_error": 0.24
+  },
+  {
+   "year": 2023,
+   "days_after_planting": 60,
+   "actual": "2023-05-05",
+   "twin_forecast": "2023-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2023-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.64,
+   "actual_yield_t_ha": 7.61,
+   "naive_yield_t_ha": 7.85,
+   "twin_yield_error": 0.03,
+   "naive_yield_error": 0.24
+  },
+  {
+   "year": 2023,
+   "days_after_planting": 90,
+   "actual": "2023-05-05",
+   "twin_forecast": "2023-05-05",
+   "twin_error_days": 0,
+   "naive_forecast": "2023-05-05",
+   "naive_error_days": 0,
+   "twin_yield_t_ha": 7.62,
+   "actual_yield_t_ha": 7.61,
+   "naive_yield_t_ha": 7.85,
+   "twin_yield_error": 0.01,
+   "naive_yield_error": 0.24
+  }
+ ],
+ "mae_by_lead": {
+  "0": {
+   "twin_mae_days": 0.0,
+   "naive_mae_days": 0.0,
+   "twin_yield_mae_t_ha": 0.183,
+   "naive_yield_mae_t_ha": 0.183,
+   "n": 3
+  },
+  "30": {
+   "twin_mae_days": 0.0,
+   "naive_mae_days": 0.0,
+   "twin_yield_mae_t_ha": 0.233,
+   "naive_yield_mae_t_ha": 0.183,
+   "n": 3
+  },
+  "60": {
+   "twin_mae_days": 0.0,
+   "naive_mae_days": 0.0,
+   "twin_yield_mae_t_ha": 0.057,
+   "naive_yield_mae_t_ha": 0.183,
+   "n": 3
+  },
+  "90": {
+   "twin_mae_days": 0.0,
+   "naive_mae_days": 0.0,
+   "twin_yield_mae_t_ha": 0.017,
+   "naive_yield_mae_t_ha": 0.183,
+   "n": 3
+  }
+ },
+ "phenology_note": "AquaCrop-OSPy's default Tomato uses calendar-day phenology (maturity 110 days), so the harvest date does not depend on weather and any method that knows the crop calendar gets it exactly. The informative forecast is yield.",
+ "no_gain": [
+  "0 days after planting: twin yield MAE 0.183 >= naive 0.183",
+  "30 days after planting: twin yield MAE 0.233 >= naive 0.183",
+  "harvest date: no gain over the crop calendar (calendar-day phenology)"
+ ]
+}

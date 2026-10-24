@@ -1,0 +1,13 @@
+Offline (Wi-Fi off) readiness, static check 2026-10-24.
+
+Runtime calls to non-local hosts found in services/*/app, weiqou/api/src, weiqou/web/src, packages/*/src:
+- weiqou/web/index.html: Google Fonts stylesheet. Offline: browser falls back to system fonts (cosmetic).
+- weiqou/web/src/components/SolarDa/CropDoctorRoots.tsx: 2 Unsplash images. Offline: images do not load (cosmetic).
+- services/agents/app/weather.py fetch(): only with `--fetch`; runtime reads the committed CSV.
+- services/agents/app/replay/build_slices.py: dataset download, build-time only.
+- terrasub-solarda.ag: display string in a QR/passport, no request.
+Everything the demo needs (replay slices, weather CSV, knowledge base, vision model, twin, price series) is local
+after `scripts/fetch_vision_model.ps1` and dependency install.
+
+Not done by Claude: physically switching Wi-Fi off and running docs/DEMO.md from a clean clone. That is a system
+setting; a team member must do this rehearsal (blueprint Phase 4 gate).

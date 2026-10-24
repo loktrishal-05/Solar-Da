@@ -191,6 +191,19 @@ def bench_results():
     v = BENCH.parents[1] / "services" / "vision" / "model" / "metrics.json"
     if v.exists():
         out["vision"] = json.loads(v.read_text(encoding="utf-8"))
+    for key, name in (("vision_field", "vision_field.json"), ("harvest", "harvest_forecast.json"),
+                      ("price", "price_outlook.json")):
+        p = BENCH / name
+        out[key] = json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
     s = BENCH / "summary.md"
     out["summary_md"] = s.read_text(encoding="utf-8") if s.exists() else ""
     return out
+
+
+@app.get("/market/outlook")
+def market_outlook(horizon_weeks: int = 4):
+    """Price outlook from the cached Agmarknet series, with its data-quality label and a storage/pooling alert."""
+    from . import market
+
+    o = market.latest_outlook(horizon_weeks)
+    return {"outlook": o, "alert": market.storage_alert(o)}
