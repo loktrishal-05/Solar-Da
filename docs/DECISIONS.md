@@ -41,6 +41,11 @@ Weights are not committed (`*.onnx` is gitignored). The Colab notebook exports `
 a GitHub release and installed with `scripts/fetch_vision_model.ps1`. The browser TF.js model stays as the offline
 fallback in Crop Doctor.
 
+Published as release `vision-v1` (2026-10-24). The field gap is large: 98.2% on PlantVillage, 61.0% on PlantDoc. The
+abstain threshold (0.93, chosen so accepted field validation predictions reach 90%) refuses 60% of field photos, so
+in the field the model mostly says "retake / ask an expert" and is 87% right when it does answer. Treatment always
+needs human approval regardless. PlantWild was not evaluated.
+
 ## D7: Effects of dispatched actions are simulated
 Replayed telemetry cannot react to the agent's actions, so the API returns a simulated plant response (fixed linear
 gains, tagged `simulated`) and the ingest node overlays it with a lag. Verify checks that response. This is a known

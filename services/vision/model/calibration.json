@@ -1,0 +1,5 @@
+{
+ "temperature": 1.15,
+ "abstain_threshold": 0.93,
+ "input": "RGB uint8 range as float32, NHWC 224x224, no normalisation"
+}

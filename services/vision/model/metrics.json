@@ -1,0 +1,29 @@
+{
+ "model": "EfficientNetV2-B0",
+ "img_size": 224,
+ "seed": 1337,
+ "temperature": 1.15,
+ "abstain_threshold": 0.93,
+ "classes": 38,
+ "train": {
+  "plantvillage": 17340,
+  "plantvillage_cap_per_class": 500,
+  "plantdoc": 1990,
+  "plantdoc_oversample": 6,
+  "epochs": "2 frozen + up to 4 fine-tune",
+  "mixed_precision": true
+ },
+ "lab_plantvillage_test_n": 5431,
+ "lab_plantvillage_test_accuracy": 0.9818,
+ "lab_plantvillage_test_ece_raw": 0.0074,
+ "lab_plantvillage_test_ece_calibrated": 0.0115,
+ "lab_plantvillage_test_abstain_rate": 0.0974,
+ "lab_plantvillage_test_accuracy_when_answered": 0.9984,
+ "field_plantdoc_test_n": 236,
+ "field_plantdoc_test_accuracy": 0.6102,
+ "field_plantdoc_test_ece_raw": 0.2106,
+ "field_plantdoc_test_ece_calibrated": 0.1946,
+ "field_plantdoc_test_abstain_rate": 0.6017,
+ "field_plantdoc_test_accuracy_when_answered": 0.8723,
+ "note": "Field = PlantDoc test split, mapped classes only. PlantWild not evaluated."
+}
