@@ -36,7 +36,7 @@ and a human approves anything risky. The same agent answers farmers in their lan
 | **Irrigation with a crop twin** | Compares hold / irrigate now / irrigate tonight in an AquaCrop twin with Chennai weather and rain forecast |
 | **Learned sensor models** | 30 min / 2 h forecasts with uncertainty bands, anomaly detector, 1-3 day soil-water forecast |
 | **Plant disease vision** | EfficientNetV2-B0 classifier, calibrated, **abstains** and asks for a retake when unsure; treatment always needs a human |
-| **Farm assistant** | Streaming Gemini chat in 6 languages with voice, read-only tools (farm status, alerts, forecasts, approved sources, live weather, web price lookup), parallel risk gate and fixed escalation text |
+| **Farm assistant** | Streaming Gemini chat in 6 languages with voice, read-only tools (farm status, alerts, forecasts, approved sources, live weather, Agmarknet mandi prices), parallel risk gate and fixed escalation text |
 | **Safety engine** | 13 original interlocks plus agent-layer rules, E-STOP, idempotent dispatch, append-only audit log |
 | **Market outlook** | 4-week onion price outlook from an Agmarknet archive, with storage and pooling alert |
 | **Traceability passport** | SHA-256 hash-chained harvest passport (tamper-evident), marketplace listings persisted to disk |
@@ -147,8 +147,8 @@ sequenceDiagram
     C->>R: classify (dose, jailbreak, medical, ...)
   and
     C->>G: draft answer with tool calls
-    G->>T: farm_status · alerts · forecast · knowledge · weather_now · web_lookup
-    T-->>G: labelled data (replayed / real / web estimate)
+    G->>T: farm_status · alerts · forecast · knowledge · weather_now · market_price
+    T-->>G: labelled data (replayed / real)
   end
   R-->>C: safe or escalate
   C->>C: output guard (never a dose or product)
@@ -236,7 +236,7 @@ The UI is a static Vite build, but the demo needs the API and the three Python s
 - No live sensors; all farm data is replayed or simulated and labelled so.
 - Disease model accuracy on field photos is 44-64% and it abstains often by design; it is an assistant, not a diagnosis.
 - Safety envelope numbers are placeholders until an agronomist verifies them.
-- Crop-recommender mandi prices are hand-entered samples (labelled); live prices come only from the assistant's web lookup and are unverified.
+- Crop-recommender mandi prices are hand-entered samples (labelled); live prices need your own free `DATA_GOV_API_KEY` (data.gov.in Agmarknet) and are not shown without it.
 - SMS is a simulated gateway; paid SMS providers are not connected.
 - Telugu, Kannada and Malayalam have text replies but no browser voice on the dev laptop.
 - Gemini free tier limits requests per day.

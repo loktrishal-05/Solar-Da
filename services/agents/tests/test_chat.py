@@ -149,10 +149,12 @@ def test_weather_tool_is_labelled_real_and_fails_soft(monkeypatch):
     assert "error" in chat._run_tool("weather_now", {}, None)
 
 
-def test_web_lookup_fails_soft_when_gemini_is_down(monkeypatch):
-    from google import genai
-
-    class Boom:
-        def __init__(self, **k): raise RuntimeError("no network")
-    monkeypatch.setattr(genai, "Client", Boom)
-    assert "error" in chat._run_tool("web_lookup", {"query": "methi price"}, None)
+def test_market_price_needs_a_key_and_labels_real_rows(monkeypatch):
+    import io, json, urllib.request
+    monkeypatch.delenv("DATA_GOV_API_KEY", raising=False)
+    assert "error" in chat._run_tool("market_price", {"commodity": "Methi"}, None)
+    monkeypatch.setenv("DATA_GOV_API_KEY", "k")
+    body = json.dumps({"records": [{"market": "Koyambedu", "commodity": "Methi", "modal_price": "3000"}]}).encode()
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: io.BytesIO(body))
+    out = chat._run_tool("market_price", {"commodity": "methi"}, None)
+    assert "REAL" in out["data_is"] and out["records"][0]["market"] == "Koyambedu"

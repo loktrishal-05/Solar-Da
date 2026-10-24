@@ -111,8 +111,8 @@ sources (a Tamil Nadu price series, an SMS gateway) the project does not have.
 
 ## D15: Weather, prices and SMS without paid services (2026-10-24)
 - Weather: the assistant has a `weather_now` tool (Open-Meteo live forecast, free, no key). It is real data and says so; the farm sensor data stays replayed.
-- Crop prices: data.gov.in needs registration, so the assistant has a `web_lookup` tool (Gemini with Google Search grounding). Its answers are labelled
-  "web estimate, unverified" with the source. It uses the same free quota as chat. The hardcoded recommender prices stay labelled SAMPLE.
+- Crop prices: the assistant's `market_price` tool reads Agmarknet through data.gov.in and needs the owner's own free `DATA_GOV_API_KEY` (not set = it says it cannot
+  give a price). Gemini Google Search grounding was tried and returns 429 on the free tier, so it was removed. The hardcoded recommender prices stay labelled SAMPLE.
 - SMS: paid gateways are out. `weiqou/api/src/sms.ts` is a demo gateway: every safety veto and dispatched alert goes to `data/runtime/sms_outbox.jsonl`
   (labelled SIMULATED, deduped per 10 min). Setting `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (free bot from @BotFather) also pushes the text to a real phone.
 - The farm replay now starts by itself with the agents service (`SOLARDA_AUTOSTART=0` disables), so the assistant has labelled replayed data to report.

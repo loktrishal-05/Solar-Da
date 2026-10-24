@@ -80,5 +80,5 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | `/api/chat` keyword mock | kept, labelled | every non-veto reply now cites "Keyword rules, not an LLM" |
 | Crop recommender price header | was misleading, now labelled | claimed "Real Mandi Price Integration (data.gov.in)" over hand-entered numbers; now says SAMPLE prices, real series is onion/Bangalore only |
 | Farm assistant answers | fixed | said "no replayed data" because no session ran; replay now autostarts. Verified live: farm status and Chennai weather answered with tool data |
-| Assistant weather / price tools | new, weather real, prices unverified | `weather_now` (Open-Meteo) tested with a fake; `web_lookup` could not be verified live (free daily quota was used up), fails soft |
+| Assistant weather / price tools | new | `weather_now` (Open-Meteo, real) and `market_price` (Agmarknet, needs the owner's DATA_GOV_API_KEY) tested with fakes; price not verified live without a key |
 | SMS demo gateway | new, simulated | `/api/sms/outbox`, `/api/sms/test`; test in `agent_routes.test.ts`; optional Telegram delivery untested without a bot token |
