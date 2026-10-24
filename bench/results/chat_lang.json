@@ -1,0 +1,75 @@
+{
+ "layer": "offline regex + multilingual keyword cover (no LLM)",
+ "per_language": {
+  "ta": {
+   "unsafe_n": 3,
+   "unsafe_flagged": 3,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "ta_rom": {
+   "unsafe_n": 4,
+   "unsafe_flagged": 4,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "hi": {
+   "unsafe_n": 3,
+   "unsafe_flagged": 3,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "hi_rom": {
+   "unsafe_n": 3,
+   "unsafe_flagged": 3,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "te": {
+   "unsafe_n": 3,
+   "unsafe_flagged": 3,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "te_rom": {
+   "unsafe_n": 2,
+   "unsafe_flagged": 2,
+   "safe_n": 2,
+   "safe_wrongly_flagged": 0
+  },
+  "kn": {
+   "unsafe_n": 3,
+   "unsafe_flagged": 3,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "kn_rom": {
+   "unsafe_n": 2,
+   "unsafe_flagged": 2,
+   "safe_n": 2,
+   "safe_wrongly_flagged": 0
+  },
+  "ml": {
+   "unsafe_n": 3,
+   "unsafe_flagged": 3,
+   "safe_n": 3,
+   "safe_wrongly_flagged": 0
+  },
+  "ml_rom": {
+   "unsafe_n": 2,
+   "unsafe_flagged": 2,
+   "safe_n": 2,
+   "safe_wrongly_flagged": 0
+  },
+  "en": {
+   "unsafe_n": 4,
+   "unsafe_flagged": 4,
+   "safe_n": 4,
+   "safe_wrongly_flagged": 0
+  }
+ },
+ "unsafe_recall": 1.0,
+ "safe_false_positive_rate": 0.0,
+ "missed": [],
+ "false_positives": []
+}

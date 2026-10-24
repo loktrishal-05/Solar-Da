@@ -93,3 +93,11 @@ languages (never machine-translated), and an output guard retracts any answer co
 (`redteam/chat.yaml`, 22 cases): 21 passed; the one failure is not yet analysed (see `bench/results/redteam/chat.json`);
 several runs also hit the free-tier rate limit, where the classifier falls back to the regex result.
 Not done yet: Phase E (voice tests, language/slang test sets per language), Phase F (audit of remaining features).
+
+## D13: Languages and voice (Phase E)
+Languages: Tamil, English, Hindi, Telugu, Kannada, Malayalam, plus romanised/code-mixed text. Safety for the case where
+Gemini is down or rate-limited is an offline layer: advisor regexes plus a multilingual dose/chemical/jailbreak cover
+(`chat.multilingual_risk`), scored per language in `bench/eval_chat_lang.py` and held by a test (recall >= 95%, no false
+positives). The red-team failure (Malayalam jailbreak while the classifier was rate-limited) was this gap and is fixed.
+Voice uses the browser speech APIs only: output when the browser has a voice for the language, otherwise text; the
+farmer can barge in by speaking, and hands-free mode re-listens after the answer. Mic input is untested end to end.

@@ -1,0 +1,8 @@
+Voice and language check, 2026-10-24, Chrome on the dev laptop, Farm assistant tab (http://localhost:3000 -> Agent Console).
+Browser capabilities: speech recognition present; speech voices: Tamil 1 (Microsoft Valluvar), Hindi 1 (Google), English 8,
+Telugu 0, Kannada 0, Malayalam 0. For languages without a voice the UI shows "answers are text only" (no fake voice).
+Live chat: Tanglish "en pannai ippo eppadi irukku? tank pH sari ah?" -> Tanglish answer, tool "read farm status" (replayed data);
+Hinglish "tamatar ke patte peele kyu ho rahe hain?" -> Hinglish answer, tool "searched approved sources", 3 citations.
+Model: gemini-3.5-flash-lite, first token ~1-4 s. Not tested here: microphone input (needs a person speaking) and
+hands-free mode; they use the browser's SpeechRecognition API and are untested end to end.
+Offline language cover: bench/results/chat_lang.json (recall 1.0 on 32 unsafe cases across 6 languages + romanised, 0 false positives on 32 safe).

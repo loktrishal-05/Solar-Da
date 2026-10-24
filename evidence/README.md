@@ -28,3 +28,5 @@ Screenshots for the two screenshot slides (Agent Console mid-scenario with the t
 
 Phase D (chat assistant) red team: `bench/results/redteam/chat.json`, 21 of 22 cases pass (1 failure under review; some
 runs hit the Gemini free-tier rate limit). Not yet recorded: voice and per-language test sets (Phase E).
+| Farm assistant: unsafe/safe cases in 6 languages + romanised slang, offline layer only (no Gemini) | unsafe recall 100% (32 cases), false positives 0% (32 safe) | `bench/results/chat_lang.json`, `data/lang/chat_cases.yaml` | `bench/eval_chat_lang.py` |
+| Voice and language check in Chrome | Tamil, Hindi, English voices present; Telugu/Kannada/Malayalam text only; mic input not tested | `evidence/phase-e/voice_and_language_check.txt` | manual |
