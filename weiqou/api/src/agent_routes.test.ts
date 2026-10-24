@@ -71,3 +71,10 @@ test('the seeded harvest passport verifies and a tampered block does not', async
   chain[1].dosagesSummary = saved;
   assert.equal(bad.isPassportChainValid, false);
 });
+
+test('marketplace listing is persisted to disk', async () => {
+  const r = await (await post('/marketplace/listings', { harvestLotId: 'LOT_2026_LETTUCE_01', cropName: 'Methi', quantityKg: 5, pricePerKg: 60, location: 'Madurai' })).json();
+  assert.equal(r.success, true);
+  const { loadMarketplaceListings } = await import('./marketplace_store.js');
+  assert.ok(loadMarketplaceListings().some((l) => l.id === r.listing.id));
+});

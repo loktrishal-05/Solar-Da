@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { store } from './store.js';
+import { appendMarketplaceListing, loadMarketplaceListings } from './marketplace_store.js';
 import { processGeminiAssistantTurn } from './gemini.js';
 import {
   calculateSubstrateRecipe,
@@ -437,6 +438,7 @@ router.post('/chat', async (req: Request, res: Response) => {
 });
 
 // 9. Marketplace & Passports
+store.marketplaceListings.push(...loadMarketplaceListings());
 router.get('/marketplace/listings', (req: Request, res: Response) => {
   res.json({ listings: store.marketplaceListings });
 });
@@ -457,6 +459,7 @@ router.post('/marketplace/listings', (req: Request, res: Response) => {
   };
 
   store.marketplaceListings.push(newListing);
+  appendMarketplaceListing(newListing);
   res.json({ success: true, listing: newListing });
 });
 

@@ -23,7 +23,7 @@ export interface ChatResponseTurn {
  */
 export async function processGeminiAssistantTurn(request: ChatRequestTurn): Promise<ChatResponseTurn> {
   const textLower = request.userMessage.toLowerCase();
-  const citations: string[] = [];
+  const citations: string[] = ['Keyword rules, not an LLM (the Farm assistant tab uses Gemini)'];
 
   // RED-TEAM ADVERSARIAL PROMPT INJECTION INSPECTION (Section 4.10 & 4.19 Item 7)
   const injectionPatterns = [

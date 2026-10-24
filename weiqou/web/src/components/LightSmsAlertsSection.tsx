@@ -24,13 +24,13 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
               <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">SMS Notifications & Alerts Center</h2>
             </div>
             <p className="text-xs text-gray-500 font-normal">
-              Twilio SMS gateway integration for offline grower notifications.
+              Alert log fed by the safety API audit trail (replayed data). No SMS is sent: no gateway is connected.
             </p>
           </div>
 
           <div className="flex items-center space-x-2 text-xs font-mono">
-            <span className="px-3 py-1 bg-emerald-50 text-[#059669] border border-emerald-200 font-bold rounded-full">
-              Twilio SMS Gateway: ONLINE
+            <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 font-bold rounded-full">
+              SMS gateway: NOT CONNECTED
             </span>
           </div>
         </div>
@@ -130,7 +130,7 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
             <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
               <div className="flex items-center space-x-2 text-gray-900 font-bold text-xs font-sans">
                 <Smartphone className="w-4 h-4 text-[#1B4332]" />
-                <span>Sample SMS Dispatch Preview</span>
+                <span>Sample SMS text (preview only, not sent)</span>
               </div>
 
               <div className="p-3.5 bg-[#FAFAF8] rounded-xl border border-gray-200 font-mono text-[11px] text-gray-800 space-y-1">
@@ -138,7 +138,7 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
                 <p className="leading-relaxed">
                   "ALERT: Grow Unit G-04 moisture 18% (threshold 35%). Auto-pulse triggered at 14:32."
                 </p>
-                <span className="text-[9px] text-[#059669] font-bold block pt-1">Status: Delivered to +91 98401 *****</span>
+                <span className="text-[9px] text-[#059669] font-bold block pt-1">Status: not sent (no gateway connected)</span>
               </div>
             </div>
           </div>

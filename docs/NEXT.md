@@ -19,8 +19,8 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
 2. **Phase F remainder** (audit row first, then wrap, then test + docs):
    - Crop recommender / market mandi prices are hardcoded. Needs a real price source (Tamil Nadu Agmarknet series) before it can change.
-   - SMS alerts panels and marketplace are seeded/in-memory: persist marketplace listings (file or SQLite) and wire SMS panels to the audit log.
-   - `/api/chat` keyword mock still backs the classic drawer tab; decide whether to retire it.
+   - ~~Marketplace persistence, SMS panel honesty~~ done (JSONL; SMS gateway still not connected: needs a Twilio/MSG91 account from the user).
+   - `/api/chat` keyword mock kept but labelled as non-LLM in its citations.
    - ~~Real SHA-256 in `passport.ts`~~ done (pure-JS, browser-safe, known-vector test in `engine.test.ts`).
 3. **Sensor models**: the pH forecaster did not beat "no change", and the learned detector loses to the rules on pH. Options: more features
    (pump events), HydroGrowNet data, or leave as is. Model anomalies stay warnings, never vetoes.

@@ -19,7 +19,7 @@ export const SmsAlertsCenter: React.FC<SmsAlertsCenterProps> = ({ isOpen, onClos
       severity: 'CRITICAL',
       growUnit: 'Grow Unit G-04',
       message: 'ALERT: Grow Unit G-04 moisture 18% (threshold 35%). Auto-pulse triggered at 14:32.',
-      status: 'DELIVERED (SMS)',
+      status: 'LOGGED (sample, no SMS sent)',
     },
     {
       id: 'alert_02',
@@ -27,7 +27,7 @@ export const SmsAlertsCenter: React.FC<SmsAlertsCenterProps> = ({ isOpen, onClos
       severity: 'WARNING',
       growUnit: 'Reservoir Loop Alpha',
       message: 'WARNING: EC 1.55 mS/cm below target 1.80 mS/cm. Proposal generated.',
-      status: 'DELIVERED (SMS)',
+      status: 'LOGGED (sample, no SMS sent)',
     },
     {
       id: 'alert_03',
@@ -56,7 +56,7 @@ export const SmsAlertsCenter: React.FC<SmsAlertsCenterProps> = ({ isOpen, onClos
           <div className="flex items-center space-x-2">
             <span className="px-3 py-1 bg-[#F4A261]/20 text-[#D97706] border border-[#F4A261]/40 text-xs font-bold rounded-full flex items-center gap-1.5">
               <Smartphone className="w-4 h-4 text-[#D97706]" />
-              <span>SMS Gateway Online (India Mandi Network)</span>
+              <span>SMS gateway not connected: alerts are logged only</span>
             </span>
           </div>
         </div>

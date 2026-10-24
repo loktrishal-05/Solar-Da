@@ -25,7 +25,7 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | GET /harvest-lots/:id/passport | **broken** | API returns `isPassportChainValid:false` for the seeded lot while the engine passport test passes: seed data/hash chain inconsistent. Any `:id` returns the same lot |
 | POST /disease/report | **UI-only** | ignores image content: `data:image/png;base64,AAAA` returns HEALTHY at fixed confidence 0.88 |
 | POST /chat ("Gemini") | **UI-only** | `gemini.ts` is keyword matching (`dose`, `water`...) plus an injection-phrase blocklist; no LLM call. Injection veto works for the listed phrases only. Request field is `content`, not `userMessage` |
-| GET/POST /marketplace/listings | real (in-memory) | 200, lost on restart |
+| GET/POST /marketplace/listings | real (persisted) | new listings append to `data/runtime/marketplace.jsonl` and reload on restart; test in `agent_routes.test.ts` |
 
 ## Safety engine (`packages/engine`)
 | Item | Status | Evidence |
@@ -76,3 +76,5 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Alerts and event log in `App.tsx` (was hardcoded) | extended | real dispatches and safety vetoes from `/api/actions` and `/api/audit` appear first, labelled "replay"/"simulated"; the old placeholder rows stay, labelled "(sample)" |
 | `/api/chat` keyword mock | unchanged | still used by the classic drawer tab for proposals; the real assistant is `/agents/chat/stream` |
 | Crop recommender / market mandi prices | unchanged, still hardcoded | the real series covers onion at Bangalore only (`/agents/market/outlook`), not the recommender's crops |
+| SMS alerts panels | was UI-only, now honest | claimed "Twilio ONLINE" and "Delivered"; no gateway exists. Relabelled "NOT CONNECTED", sample text marked not sent; the log is fed by the safety API audit trail |
+| `/api/chat` keyword mock | kept, labelled | every non-veto reply now cites "Keyword rules, not an LLM" |
