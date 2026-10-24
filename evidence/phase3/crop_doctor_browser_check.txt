@@ -1,0 +1,13 @@
+Crop Doctor browser check, 2026-10-24, Chrome on the dev laptop, http://localhost:3000 -> Crop Doctor, reference samples.
+
+1. Freeze fix (commit 329245d): TF.js model loads and warms up; clicking a sample returns in a few seconds, page stays responsive.
+2. Old in-browser model (MobileNet-PlantVillage-38-v1.0) on "Tomato Early Blight" sample: "Pepper Bell - Bacterial Spot" 92.9% (wrong, and above its 75% gate).
+3. Same 6 samples through services/vision (vision-v1, POST /vision/classify):
+   apple-scab        Apple___Apple_scab            0.999
+   corn-rust         Corn_(maize)___Common_rust_   0.999
+   grape-black-rot   Grape___Black_rot             0.9728
+   potato-late-blight Potato___Late_blight         0.9978
+   tomato-early-blight Tomato___Early_blight       0.9515
+   tomato-healthy    Tomato___healthy              0.9937
+4. Crop Doctor now calls /vision/classify first: "Tomato - Early Blight" 95.8%, "Classified by EfficientNetV2-B0 vision-v1", gate 93%.
+5. With the vision service stopped: Crop Doctor falls back to the in-browser model ("Tomato - Healthy" 99.3%, MobileNet, gate 75%).

@@ -42,6 +42,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
 
   const confidence = prediction?.confidence ?? 0;
   const abstained = isAbstain(prediction, abstainThreshold);
+  const gate = prediction?.threshold ?? abstainThreshold; // server model carries its own calibrated threshold
 
   useEffect(() => {
     return () => stopCamera();
@@ -272,13 +273,13 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
             <div className="flex items-center space-x-2">
               <Camera className="w-6 h-6 text-[#1B4332]" />
               <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">
-                AI Crop Doctor Station (MobileNet — PlantVillage 38 classes)
+                AI Crop Doctor Station (PlantVillage 38 classes)
               </h2>
             </div>
             <p className="text-xs text-gray-500 font-normal">
               Real-time leaf disease classification with mandatory{' '}
-              {Math.round(abstainThreshold * 100)}% safety abstention gate. 100% client-side, no data leaves the
-              browser.
+              {Math.round(abstainThreshold * 100)}% safety abstention gate. Uses the Solarda vision service
+              (calibrated, 93% gate) when reachable; otherwise runs fully in the browser.
             </p>
           </div>
 
@@ -295,7 +296,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
               {ready ? '● TF.js Model Ready' : loading ? 'Loading model...' : 'Model unavailable'}
             </span>
             <span className="px-3.5 py-1 bg-[#E8F5E9] text-[#1B4332] border border-[#A5D6A7] text-xs font-bold rounded-full font-mono">
-              MobileNet-PlantVillage-38-v1.0
+              vision-v1 · fallback MobileNet-PlantVillage-38-v1.0
             </span>
           </div>
         </div>
@@ -541,7 +542,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                 <div>
                   <h3 className="font-bold text-sm text-gray-900">Diagnostic Confidence Score</h3>
                   <span className="text-[10px] text-gray-500 font-mono block">
-                    Safety Gate Ceiling: {Math.round(abstainThreshold * 100)}% · {Object.keys(classNames).length || 38} classes
+                    Safety Gate Ceiling: {Math.round(gate * 100)}% · {Object.keys(classNames).length || 38} classes
                   </span>
                 </div>
               </div>
@@ -555,8 +556,8 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                   }`}
                 >
                   {!abstained
-                    ? `VALIDATED (>${Math.round(abstainThreshold * 100)}%)`
-                    : `ABSTENTION (<${Math.round(abstainThreshold * 100)}%)`}
+                    ? `VALIDATED (>${Math.round(gate * 100)}%)`
+                    : prediction.reason ? 'ABSTENTION (RETAKE)' : `ABSTENTION (<${Math.round(gate * 100)}%)`}
                 </span>
               )}
             </div>
@@ -578,9 +579,9 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                   <div>
                     <span className="block">ABSTENTION MANDATE: Low Confidence Prediction</span>
                     <span className="text-xs text-[#8D6E63] font-normal block mt-1 leading-relaxed">
-                      Model confidence ({(confidence * 100).toFixed(2)}%) is below the mandatory{' '}
-                      {Math.round(abstainThreshold * 100)}% safety threshold. Platform abstains from generating
-                      chemical protocols and escalates to human agronomist review.
+                      {prediction.reason ??
+                        `Model confidence (${(confidence * 100).toFixed(2)}%) is below the mandatory ${Math.round(gate * 100)}% safety threshold.`}{' '}
+                      Platform abstains from generating chemical protocols and escalates to human agronomist review.
                     </span>
                   </div>
                 </div>
@@ -611,7 +612,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                       <span>{formatClassName(prediction.className)}</span>
                     </h4>
                     <span className="text-[10px] text-gray-500 font-mono block">
-                      Classified by MobileNet-PlantVillage (Top-1 of {Object.keys(classNames).length || 38})
+                      Classified by {prediction.modelVersion} (Top-1 of {Object.keys(classNames).length || 38})
                     </span>
                   </div>
                 </div>

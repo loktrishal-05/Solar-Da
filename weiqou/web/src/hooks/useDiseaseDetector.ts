@@ -8,7 +8,44 @@ export type DiseasePrediction = {
   topK: Array<{ classIndex: number; className: string; confidence: number }>;
   modelVersion: string;
   inferenceTimeMs: number;
+  // Set by the server model (services/vision): its own calibrated threshold and abstain decision.
+  threshold?: number;
+  abstain?: boolean;
+  reason?: string;
 };
+
+const SERVER_URL = '/vision/classify';
+const SERVER_MODEL = 'EfficientNetV2-B0 vision-v1 (Solarda vision service)';
+
+// Calibrated server model first (PlantVillage + PlantDoc, abstains on blur and low confidence).
+// Returns null when the service is unreachable so the in-browser model takes over offline.
+export async function classifyOnServer(el: HTMLImageElement | HTMLCanvasElement): Promise<DiseasePrediction | null> {
+  const start = performance.now();
+  try {
+    let canvas = el as HTMLCanvasElement;
+    if (!(el instanceof HTMLCanvasElement)) {
+      canvas = document.createElement('canvas');
+      canvas.width = el.naturalWidth || el.width;
+      canvas.height = el.naturalHeight || el.height;
+      canvas.getContext('2d')!.drawImage(el, 0, 0);
+    }
+    const blob = await new Promise<Blob | null>((ok) => canvas.toBlob(ok, 'image/jpeg', 0.92));
+    if (!blob) return null;
+    const form = new FormData();
+    form.append('image', blob, 'leaf.jpg');
+    const r = await fetch(SERVER_URL, { method: 'POST', body: form, signal: AbortSignal.timeout(15000) });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const topK = (d.predictions ?? []).map((p: any) => ({ classIndex: -1, className: p.label, confidence: p.confidence }));
+    const best = topK[0] ?? { classIndex: -1, className: '', confidence: 0 };
+    return {
+      ...best, topK, modelVersion: SERVER_MODEL, inferenceTimeMs: performance.now() - start,
+      threshold: d.threshold, abstain: !!d.abstain, reason: d.reason,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export type DiseaseDetectorState = {
   model: tf.LayersModel | null;
@@ -142,6 +179,8 @@ export function useDiseaseDetector() {
       imageElement: HTMLImageElement | HTMLCanvasElement,
       topK: number = TOP_K
     ): Promise<DiseasePrediction | null> => {
+      const server = await classifyOnServer(imageElement);
+      if (server) return server;
       if (!modelRef.current) {
         throw new Error('Model not loaded yet');
       }
@@ -187,5 +226,5 @@ export function useDiseaseDetector() {
 }
 
 export function isAbstain(prediction: DiseasePrediction | null, threshold = ABSTAIN_THRESHOLD) {
-  return !prediction || prediction.confidence < threshold;
+  return !prediction || !!prediction.abstain || prediction.confidence < (prediction.threshold ?? threshold);
 }

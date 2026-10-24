@@ -17,6 +17,8 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/agents/, ''),
       },
+      // Leaf-disease vision service (FastAPI + ONNX); Crop Doctor falls back to TF.js when it is down.
+      '/vision': { target: 'http://localhost:8200', changeOrigin: true },
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
