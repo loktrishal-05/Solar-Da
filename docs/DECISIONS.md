@@ -92,7 +92,7 @@ draft answer and nothing is shown until it clears; dose/injection questions get 
 languages (never machine-translated), and an output guard retracts any answer containing a dose. Red team
 (`redteam/chat.yaml`, 22 cases): 21 passed; the one failure is not yet analysed (see `bench/results/redteam/chat.json`);
 several runs also hit the free-tier rate limit, where the classifier falls back to the regex result.
-Not done yet: Phase E (voice tests, language/slang test sets per language), Phase F (audit of remaining features).
+Phase E (languages, voice) and F (feature upgrades) followed: see D13 and D14.
 
 ## D13: Languages and voice (Phase E)
 Languages: Tamil, English, Hindi, Telugu, Kannada, Malayalam, plus romanised/code-mixed text. Safety for the case where
