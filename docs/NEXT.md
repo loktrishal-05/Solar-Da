@@ -15,7 +15,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 7. Tests: `npm run test:engine`, `npm test -w @terrasub-solarda/api`, and in each service `.venv/Scripts/python -m pytest -q`.
 
 ## Next work, in order
-1. **Microphone and hands-free voice test** (needs a person speaking): Farm assistant tab -> mic / headphone buttons, in Tamil, Hindi, English.
+1. **Microphone and hands-free voice test** (API + ta/hi/en voices confirmed in `evidence/phase-e/browser_voice_support.txt`; still needs a person speaking): Farm assistant tab -> mic / headphone buttons, in Tamil, Hindi, English.
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
 2. **Phase F remainder** (audit row first, then wrap, then test + docs):
    - Crop recommender prices are hardcoded but now labelled SAMPLE. Replacing them needs a data.gov.in API key from the user (Tamil Nadu Agmarknet series for methi/palak/coriander).

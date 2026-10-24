@@ -1,0 +1,5 @@
+Checked 2026-10-24 in Chrome (dev laptop, Windows 11) at http://localhost:3000 via the Claude extension.
+SpeechRecognition API present: true
+speechSynthesis voice languages: en-US, en-IN, ta-IN, hi-IN (+ de, es, fr, id, it, ja, ko, nl, pl, pt, ru, zh)
+No te-IN, kn-IN, ml-IN voices: text reply only for Telugu/Kannada/Malayalam on this machine.
+NOT tested: actual speaking into the mic (needs a person). See docs/NEXT.md item 1.
