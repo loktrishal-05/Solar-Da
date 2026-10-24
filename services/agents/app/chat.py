@@ -146,7 +146,44 @@ def tool_price_outlook() -> dict:
     return {"outlook": o, "storage_alert": market.storage_alert(o)}
 
 
+def tool_weather_now() -> dict:
+    """Real current weather and 3-day forecast for the farm site from Open-Meteo (free, no key). Not replayed."""
+    import json, urllib.request
+    from .weather import SITE
+    url = ("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&timezone=Asia%%2FKolkata&forecast_days=3"
+           "&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m"
+           "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max"
+           % (SITE["lat"], SITE["lon"]))
+    try:
+        d = json.load(urllib.request.urlopen(url, timeout=8))
+    except Exception as e:
+        return {"error": f"weather service unreachable ({type(e).__name__}); say you cannot fetch it right now"}
+    return {"place": SITE["name"], "data_is": "REAL, live from Open-Meteo (not the replayed farm data)",
+            "now": d["current"], "next_3_days": d["daily"]}
+
+
+def tool_web_lookup(query: str) -> dict:
+    """Google Search through Gemini grounding, for current facts the farm data and approved sources lack (market prices)."""
+    from google import genai
+    from google.genai import types
+    from . import llm
+    err = None
+    for model in (llm.CHAT_MODEL, llm.CHAT_FALLBACK):
+        try:
+            client = genai.Client(api_key=llm.google_key())  # keep a reference: a temporary client is closed mid-call
+            r = client.models.generate_content(
+                model=model, contents=f"{query} Answer in 3 short lines with the date and source of any number.",
+                config=types.GenerateContentConfig(tools=[types.Tool(google_search=types.GoogleSearch())]))
+            return {"answer": (r.text or "")[:1200], "data_is": "from a Google web search via Gemini; unverified, say so and give the source"}
+        except Exception as e:
+            err = e
+    return {"error": f"web lookup failed ({type(err).__name__}, probably the daily free quota); say you cannot look it up right now"}
+
+
 TOOL_DOCS = {
+    "weather_now": ("REAL current weather and 3-day forecast (rain, temperature) at the farm site.", {}),
+    "web_lookup": ("Google search for current facts such as today's mandi price of a crop. Use only when the other "
+                   "tools cannot answer; report the figure as a web estimate with its source.", {"query": {"type": "string"}}),
     "farm_status": ("Current replayed readings, unusable sensors and open issues on the farm.", {}),
     "alerts_and_approvals": ("Actions waiting for the farmer's approval, latest alerts and safety verdicts.", {}),
     "sensor_forecast": ("Learned 30 min / 2 h sensor forecasts, anomaly alarms, likely limit crossings, field soil-water "
@@ -163,7 +200,7 @@ TOOL_DOCS = {
 def _tools_schema() -> list[dict]:
     return [{"type": "function", "function": {"name": n, "description": d,
                                               "parameters": {"type": "object", "properties": p,
-                                                             "required": [k for k in p if n in ("search_knowledge",)]}}}
+                                                             "required": [k for k in p if n in ("search_knowledge", "web_lookup")]}}}
             for n, (d, p) in TOOL_DOCS.items()]
 
 
@@ -176,6 +213,10 @@ def _run_tool(name: str, args: dict, trigger: Callable[[str], bool] | None) -> d
         return tool_sensor_forecast(str(args.get("metric", ""))[:20])
     if name == "search_knowledge":
         return tool_search_knowledge(str(args.get("query", ""))[:300])
+    if name == "weather_now":
+        return tool_weather_now()
+    if name == "web_lookup":
+        return tool_web_lookup(str(args.get("query", ""))[:200])
     if name == "price_outlook":
         return tool_price_outlook()
     if name == "request_farm_check":
@@ -193,7 +234,9 @@ Facts:
   REPLAYED from public datasets or SIMULATED, never live: say "replayed" or "simulated" when you report readings.
 - Agronomy facts come only from search_knowledge; cite the source title in [brackets]. If the sources do not cover
   it, say you are not sure and suggest the local agriculture extension officer (KVK).
-- Prices come from price_outlook, an archive that ends in 2024: never present it as today's price.
+- Weather comes from weather_now (real, live). For the price of any crop today use web_lookup and call it a web
+  estimate with its source; never invent a price.
+- Prices from price_outlook come from an archive that ends in 2024: never present it as today's price.
 Safety:
 - Never give a dose, rate, mixing ratio, spray interval or withholding period for any pesticide, fungicide, herbicide
   or fertiliser, and never name a product to spray. Say a human expert will advise.

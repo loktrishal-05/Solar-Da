@@ -18,15 +18,15 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 1. **Microphone and hands-free voice test** (API + ta/hi/en voices confirmed in `evidence/phase-e/browser_voice_support.txt`; still needs a person speaking): Farm assistant tab -> mic / headphone buttons, in Tamil, Hindi, English.
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
 2. **Phase F remainder** (audit row first, then wrap, then test + docs):
-   - Crop recommender prices are hardcoded but now labelled SAMPLE. Replacing them needs a data.gov.in API key from the user (Tamil Nadu Agmarknet series for methi/palak/coriander).
-   - ~~Marketplace persistence, SMS panel honesty~~ done (JSONL; SMS gateway still not connected: needs a Twilio/MSG91 account from the user).
+   - Crop recommender prices are hardcoded but now labelled SAMPLE. The assistant fetches current prices through `web_lookup` (D15); verify it once the Gemini daily quota resets (ask "mandi price of methi today"). Wiring the web price into the recommender table is optional.
+   - ~~Marketplace persistence, SMS demo gateway~~ done (D15). Optional: user adds a Telegram bot token for real phone delivery.
    - `/api/chat` keyword mock kept but labelled as non-LLM in its citations.
    - ~~Real SHA-256 in `passport.ts`~~ done (pure-JS, browser-safe, known-vector test in `engine.test.ts`).
 3. **Sensor models**: the pH forecaster did not beat "no change", and the learned detector loses to the rules on pH. Options: more features
    (pump events), HydroGrowNet data, or leave as is. Model anomalies stay warnings, never vetoes.
 4. **Vision**: field accuracy is 44-64% (abstains 60-68%). Next step if it matters: fine-tune with PlantWild-style photos (licence CC BY-NC-ND: evaluation
    only unless the licence allows training) or a leaf segmenter; retrain via `services/vision/train/train_colab.ipynb` and publish `vision-v2`.
-5. **Open items needing the user**: module owners (`docs/DECISIONS.md` D3), light-theme decision (D1), GitHub repo description,
+5. **Open items needing the user**: module owners (`docs/DECISIONS.md` D3), GitHub repo description,
    Wi-Fi-off clean-clone rehearsal of `docs/DEMO.md` (blueprint Phase 4 gate; `evidence/phase4/offline_check.txt` is only a static check),
    Gemini billing if the chat is demoed heavily.
 6. Keep the Benchmark page, `evidence/README.md` and `docs/AUDIT.md` in step with any new number.

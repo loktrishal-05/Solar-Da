@@ -134,3 +134,25 @@ def test_language_case_set_meets_the_bar():
     subprocess.run([sys.executable, str(root / "bench" / "eval_chat_lang.py")], check=True, capture_output=True)
     r = json.loads((root / "bench" / "results" / "chat_lang.json").read_text(encoding="utf-8"))
     assert r["unsafe_recall"] >= 0.95 and r["safe_false_positive_rate"] == 0.0, r["missed"] + r["false_positives"]
+
+
+def test_weather_tool_is_labelled_real_and_fails_soft(monkeypatch):
+    import io, json, urllib.request
+    body = json.dumps({"current": {"temperature_2m": 30}, "daily": {"precipitation_sum": [1.0]}}).encode()
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: io.BytesIO(body))
+    out = chat._run_tool("weather_now", {}, None)
+    assert "REAL" in out["data_is"] and out["now"]["temperature_2m"] == 30
+
+    def down(*a, **k):
+        raise OSError("offline")
+    monkeypatch.setattr(urllib.request, "urlopen", down)
+    assert "error" in chat._run_tool("weather_now", {}, None)
+
+
+def test_web_lookup_fails_soft_when_gemini_is_down(monkeypatch):
+    from google import genai
+
+    class Boom:
+        def __init__(self, **k): raise RuntimeError("no network")
+    monkeypatch.setattr(genai, "Client", Boom)
+    assert "error" in chat._run_tool("web_lookup", {"query": "methi price"}, None)

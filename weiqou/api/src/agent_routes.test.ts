@@ -78,3 +78,15 @@ test('marketplace listing is persisted to disk', async () => {
   const { loadMarketplaceListings } = await import('./marketplace_store.js');
   assert.ok(loadMarketplaceListings().some((l) => l.id === r.listing.id));
 });
+
+test('alerts go to the demo SMS outbox, labelled simulated, and a repeat is deduped', async () => {
+  const body = { run_id: 'r-sms', sim_time: ctx.sim_time, action: { id: 'al1', kind: 'alert', zone: 'tank1', params: { message: 'EC low' }, rationale: 'x', evidence: [], expected_effect: 'n/a', confidence: 0.9 } };
+  await post('/safety/check', { proposals: [body.action], context: ctx });
+  await post('/actions', body, { 'Idempotency-Key': 'k-sms1' });
+  const out = await (await fetch(base + '/sms/outbox')).json();
+  const m = out.messages.find((x: any) => x.text.includes('EC low'));
+  assert.ok(m && m.severity === 'CRITICAL' && m.status.startsWith('SIMULATED'));
+  const again = await (await post('/sms/test', {})).json();
+  const again2 = await (await post('/sms/test', {})).json();
+  assert.ok(again.message && again2.message === null);
+});

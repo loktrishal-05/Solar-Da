@@ -2,7 +2,7 @@
 
 ## D1: Theme (2026-10-23)
 Conflict: `docs/HANDOFF.md` says dark theme is the consensus; the running app (`App.tsx` -> `Light*` components) and the live site are light.
-Decision (provisional, Phase 0): **light is the shipped theme**, because it is what renders and what the live site shows. Dark* components remain in the tree unwired. Owner can reverse this; change `App.tsx` imports.
+Decision (CONFIRMED by the owner 2026-10-24): the current light UI/UX is fixed and is the only one wanted; do not restyle it, new work must reuse its existing components and classes. **light is the shipped theme**, because it is what renders and what the live site shows. Dark* components remain in the tree unwired. Owner can reverse this; change `App.tsx` imports.
 
 ## D2: Python interpreters and AquaCrop version (2026-10-23)
 Test install on Windows 11:
@@ -108,3 +108,12 @@ real data or models sit in front of them. Features changed: disease report (visi
 and content-hash verification), assistant drawer (real assistant tab, real mic), dashboard alerts/event log (API data).
 Not changed: crop recommender prices, SMS panels, marketplace (all seeded/in-memory); their real-data upgrades need
 sources (a Tamil Nadu price series, an SMS gateway) the project does not have.
+
+## D15: Weather, prices and SMS without paid services (2026-10-24)
+- Weather: the assistant has a `weather_now` tool (Open-Meteo live forecast, free, no key). It is real data and says so; the farm sensor data stays replayed.
+- Crop prices: data.gov.in needs registration, so the assistant has a `web_lookup` tool (Gemini with Google Search grounding). Its answers are labelled
+  "web estimate, unverified" with the source. It uses the same free quota as chat. The hardcoded recommender prices stay labelled SAMPLE.
+- SMS: paid gateways are out. `weiqou/api/src/sms.ts` is a demo gateway: every safety veto and dispatched alert goes to `data/runtime/sms_outbox.jsonl`
+  (labelled SIMULATED, deduped per 10 min). Setting `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (free bot from @BotFather) also pushes the text to a real phone.
+- The farm replay now starts by itself with the agents service (`SOLARDA_AUTOSTART=0` disables), so the assistant has labelled replayed data to report.
+- Knowledge base gained Wikipedia articles on fenugreek, coriander, spinach, lettuce, hydroponics (`scripts/fetch_wiki_knowledge.py`, CC BY-SA 4.0).

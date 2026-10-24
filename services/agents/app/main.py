@@ -1,5 +1,6 @@
 """Agent runtime API (FastAPI). Replay control, farm-shift runs, approvals, E-STOP, SSE stream."""
 import asyncio
+import os
 import json
 from pathlib import Path
 
@@ -28,6 +29,18 @@ class ReplayStart(BaseModel):
     speed: int = 60
     autonomy: str | None = None
     loop: bool = False
+
+
+@app.on_event("startup")
+def _autostart():
+    """Start a looping replay so the assistant and dashboard have (labelled, replayed) data without a manual click."""
+    global session
+    if os.environ.get("SOLARDA_AUTOSTART", "1") == "1" and not session:
+        try:
+            session = runner.Session(os.environ.get("SOLARDA_AUTOSTART_SCENARIO", "chennai_field_irrigation"), 60, None, True)
+            session.thread.start()
+        except Exception:
+            session = None  # no scenario files (fresh clone without data): stay idle
 
 
 @app.get("/scenarios")

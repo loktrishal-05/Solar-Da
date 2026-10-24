@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { checkAgentProposal, AgentVerdict, DispatchedRecord } from '@terrasub-solarda/engine';
 import { ProposedActionSchema, ApprovalSchema } from '@terrasub-solarda/contracts';
 import { store } from './store.js';
+import { readOutbox, sendAlertSms } from './sms.js';
 
 // Agent-layer endpoints (docs/BLUEPRINT.md, Phase 1). The Python agent runtime calls these;
 // it never re-implements the invariants.
@@ -106,6 +107,7 @@ agentRouter.post('/safety/check', (req: Request, res: Response) => {
     const v = check(p, context);
     verdicts.set(p.id, { ...v, ctx: context });
     appendAudit({ type: 'verdict', sim_time: context.sim_time, proposal: p, verdict: v, context });
+    if (v.verdict === 'veto') void sendAlertSms('WARNING', `Safety engine blocked ${p.kind} at ${p.zone}: ${v.invariant ?? 'safety rule'} (replayed data)`);
     return v;
   });
   res.json({ verdicts: out, estop: store.eStopActive });
@@ -148,7 +150,15 @@ agentRouter.post('/actions', (req: Request, res: Response) => {
   };
   appendFileSync(ACTIONS_FILE, JSON.stringify(record) + '\n');
   appendAudit({ type: 'dispatched', run_id, sim_time, proposal_id: action.id, effect: record.effect });
+  if (applied.kind === 'alert') void sendAlertSms('CRITICAL', `${applied.zone}: ${String((applied.params as any).message ?? 'alert')} (replayed data)`);
   res.status(201).json(record);
+});
+
+agentRouter.get('/sms/outbox', (_req: Request, res: Response) => res.json({ messages: readOutbox().slice(-30).reverse() }));
+
+agentRouter.post('/sms/test', async (_req: Request, res: Response) => {
+  const rec = await sendAlertSms('INFO', `Test alert from Solarda at ${new Date().toLocaleTimeString()}`);
+  res.json({ message: rec });
 });
 
 agentRouter.get('/actions', (_req: Request, res: Response) => res.json({ actions: readJsonl(ACTIONS_FILE) }));

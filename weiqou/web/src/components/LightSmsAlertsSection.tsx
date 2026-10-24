@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, ShieldCheck, CheckCircle2, AlertTriangle, Info, Settings, Smartphone } from 'lucide-react';
 
 interface LightSmsAlertsSectionProps {
@@ -7,6 +7,10 @@ interface LightSmsAlertsSectionProps {
 }
 
 export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ alerts, onDismissAlert }) => {
+  const [outbox, setOutbox] = useState<Array<{ id: string; at: string; severity: string; text: string; channel: string; status: string }>>([]);
+  const loadOutbox = () => fetch('/api/sms/outbox').then((r) => r.json()).then((d) => setOutbox(d.messages ?? [])).catch(() => {});
+  useEffect(() => { loadOutbox(); const t = setInterval(loadOutbox, 8000); return () => clearInterval(t); }, []);
+  const sendTest = () => fetch('/api/sms/test', { method: 'POST' }).then(loadOutbox).catch(() => {});
   const [filterType, setFilterType] = useState<'ALL' | 'CRITICAL' | 'WARNING' | 'INFO'>('ALL');
   const [warningSmsOn, setWarningSmsOn] = useState<boolean>(true);
   const [infoSmsOn, setInfoSmsOn] = useState<boolean>(false);
@@ -24,13 +28,13 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
               <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">SMS Notifications & Alerts Center</h2>
             </div>
             <p className="text-xs text-gray-500 font-normal">
-              Alert log fed by the safety API audit trail (replayed data). No SMS is sent: no gateway is connected.
+              Demo gateway: alerts from the safety engine are written to an outbox (replayed data). Real SMS needs a paid provider; optional free Telegram push is supported.
             </p>
           </div>
 
           <div className="flex items-center space-x-2 text-xs font-mono">
             <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 font-bold rounded-full">
-              SMS gateway: NOT CONNECTED
+              DEMO GATEWAY (simulated SMS)
             </span>
           </div>
         </div>
@@ -130,16 +134,20 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
             <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
               <div className="flex items-center space-x-2 text-gray-900 font-bold text-xs font-sans">
                 <Smartphone className="w-4 h-4 text-[#1B4332]" />
-                <span>Sample SMS text (preview only, not sent)</span>
+                <span>Alert messages (demo gateway)</span>
               </div>
 
-              <div className="p-3.5 bg-[#FAFAF8] rounded-xl border border-gray-200 font-mono text-[11px] text-gray-800 space-y-1">
-                <span className="font-bold text-[#1B4332] block">From: TerraSub SCADA Gateway</span>
-                <p className="leading-relaxed">
-                  "ALERT: Grow Unit G-04 moisture 18% (threshold 35%). Auto-pulse triggered at 14:32."
-                </p>
-                <span className="text-[9px] text-[#059669] font-bold block pt-1">Status: not sent (no gateway connected)</span>
+              <div className="space-y-2 max-h-56 overflow-y-auto">
+                {outbox.length === 0 && <p className="text-[11px] text-gray-500">No alerts sent yet. Press the button to send a test.</p>}
+                {outbox.slice(0, 6).map((m) => (
+                  <div key={m.id} className="p-3 bg-[#FAFAF8] rounded-xl border border-gray-200 font-mono text-[11px] text-gray-800 space-y-1">
+                    <span className="font-bold text-[#1B4332] block">{m.severity} · {m.at.slice(11, 19)} UTC</span>
+                    <p className="leading-relaxed">{m.text}</p>
+                    <span className={`text-[9px] font-bold block ${m.channel === 'telegram' ? 'text-[#059669]' : 'text-amber-700'}`}>{m.status}</span>
+                  </div>
+                ))}
               </div>
+              <button onClick={sendTest} className="w-full py-2 text-xs font-bold rounded-xl bg-[#1B4332] text-white hover:opacity-90">Send test alert</button>
             </div>
           </div>
         </div>
