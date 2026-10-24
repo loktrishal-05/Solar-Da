@@ -19,7 +19,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
 2. **Phase F remainder** (audit row first, then wrap, then test + docs):
    - Crop recommender prices are hardcoded but now labelled SAMPLE. The assistant's `market_price` tool reads Agmarknet once the user adds a free `DATA_GOV_API_KEY` to `.env` (data.gov.in signup); then ask "mandi price of methi today".
-   - ~~Marketplace persistence, SMS demo gateway~~ done (D15). Optional: user adds a Telegram bot token for real phone delivery.
+   - ~~Marketplace persistence, SMS demo gateway~~ done (D15). Telegram delivery verified live (evidence/phase-e/telegram_alert_delivery.txt).
    - `/api/chat` keyword mock kept but labelled as non-LLM in its citations.
    - ~~Real SHA-256 in `passport.ts`~~ done (pure-JS, browser-safe, known-vector test in `engine.test.ts`).
 3. **Sensor models**: the pH forecaster did not beat "no change", and the learned detector loses to the rules on pH. Options: more features

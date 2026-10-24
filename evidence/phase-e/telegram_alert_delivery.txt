@@ -1,0 +1,3 @@
+Checked 2026-10-24 22:31 IST. Bot @SolardaFarmBot ("Solarda Farm Alerts"), chat paired through Telegram Web (/start).
+POST /api/sms/test -> channel telegram, status "DELIVERED via Telegram bot"; the message "[INFO] Test alert from Solarda at 10:31:22 pm"
+appeared in the chat (screenshot taken in the session). Token and chat id live only in the gitignored .env.
