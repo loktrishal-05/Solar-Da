@@ -24,6 +24,14 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 - Then (HF route): create a Hugging Face Space (Docker SDK), push this repo to it, put the Space URL in README (`ADD_DEPLOYMENT_LINK_HERE`) and in the GitHub repo description.
 - Leave `GEMINI_API_KEY` unset on the public Space unless the 20 requests/day quota is acceptable to burn.
 
+## Next phase: vision v2 (plan, not started)
+Goal: raise field (PlantDoc test) accuracy above the current 61% and cut the 60% abstain rate, without hurting the 98% lab score.
+- Hardware: RTX 2050 (4 GB). Native-Windows TensorFlow has no GPU support, so train with PyTorch + CUDA (new script `services/vision/train/train_torch.py`, AMP, batch 32 at 224) or reuse `train_colab.ipynb` on a Colab T4.
+- Experiments, one change at a time, same PlantDoc split, report in `evidence/phase-i/`: (1) EfficientNetV2-S or ConvNeXt-Tiny backbone; (2) strong field augmentation (random-resized-crop, colour jitter, blur, RandAugment) with all 5-8 PlantDoc train copies; (3) larger PlantVillage cap (500 -> 1500 per class); (4) temperature + abstain threshold re-fit on PlantDoc validation.
+- Gate: field accuracy up by 5 points or more, lab accuracy within 1 point, ECE not worse, `services/vision` tests pass, ONNX still ~0.07 s per image and memory not above ~100 MB (D17). Publish as release `vision-v2`, update `scripts/fetch_vision_model.ps1`, `deploy/fetch_models.py`, Benchmark page, `evidence/README.md`, `docs/AUDIT.md`.
+- Licence: PlantWild is CC BY-NC-ND, evaluation only; do not train on it.
+- It occupies the GPU for hours, so run it when the laptop is not being used for the demo.
+
 ## Next work, in order
 1. **Microphone and hands-free voice test** (API + ta/hi/en voices confirmed in `evidence/phase-e/browser_voice_support.txt`; still needs a person speaking): Farm assistant tab -> mic / headphone buttons, in Tamil, Hindi, English.
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
