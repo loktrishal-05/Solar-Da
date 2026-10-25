@@ -157,7 +157,7 @@ agentRouter.post('/actions', (req: Request, res: Response) => {
 agentRouter.get('/sms/outbox', (_req: Request, res: Response) => res.json({ messages: readOutbox().slice(-30).reverse() }));
 
 agentRouter.post('/sms/test', async (_req: Request, res: Response) => {
-  const rec = await sendAlertSms('INFO', `Test alert from Solarda at ${new Date().toLocaleTimeString()}`);
+  const rec = await sendAlertSms('INFO', `Test alert from Solarda at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
   res.json({ message: rec });
 });
 
