@@ -14,6 +14,13 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 6. `powershell -File scripts/start_all.ps1`, open http://localhost:3000 -> Agent Console. Stop: `scripts/stop_all.ps1`.
 7. Tests: `npm run test:engine`, `npm test -w @terrasub-solarda/api`, and in each service `.venv/Scripts/python -m pytest -q`.
 
+## Deployment status (2026-10-25, branch `phase-h-deploy`)
+- Done and tested locally: `Dockerfile` + `deploy/` run the whole stack in one container on :7860 (`docker build -t solarda .`, `docker run -p 7860:7860 solarda`, `sh deploy/smoke.sh`).
+- **Blocked on a permission, not on code:** the GitHub releases `vision-v1` and `sensor-models-v2-onnx` named in the fetch scripts do not exist yet, so a clean clone cannot fetch models. Zips are built by zipping `services/vision/model` and `services/agents/model` (without `*.joblib`), then:
+  `gh release create vision-v1 solarda_vision.zip` and `gh release create sensor-models-v2-onnx solarda_sensor_models_onnx.zip`.
+- Then: create a Hugging Face Space (Docker SDK), push this repo to it, put the Space URL in README (`ADD_DEPLOYMENT_LINK_HERE`) and in the GitHub repo description.
+- Leave `GEMINI_API_KEY` unset on the public Space unless the 20 requests/day quota is acceptable to burn.
+
 ## Next work, in order
 1. **Microphone and hands-free voice test** (API + ta/hi/en voices confirmed in `evidence/phase-e/browser_voice_support.txt`; still needs a person speaking): Farm assistant tab -> mic / headphone buttons, in Tamil, Hindi, English.
    Fix what breaks; record in `evidence/phase-e/`. Telugu/Kannada/Malayalam have no browser voice on the dev laptop: check another browser/OS.
