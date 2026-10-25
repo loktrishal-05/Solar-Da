@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Copy, Headphones, Mic, MicOff, Send, ShieldAlert, Square, Volume2, VolumeX, Wrench } from 'lucide-react';
+import { BACKEND_OFFLINE_MESSAGE } from '../backendStatus';
 
 // Farm assistant: streaming multi-turn chat (Gemini via services/agents /chat/stream) with read-only farm tools,
 // six languages plus romanised/code-mixed input, and browser voice (speech in, sentence-by-sentence speech out,
@@ -120,7 +121,7 @@ export const FarmChat: React.FC<{ lowBandwidth: boolean; fill?: boolean }> = ({ 
         }
       }
     } catch (e: any) {
-      update((m) => ({ ...m, content: m.content || (e?.name === 'AbortError' ? '(stopped)' : 'Assistant not reachable. Is services/agents running?'), pending: false }));
+      update((m) => ({ ...m, content: m.content || (e?.name === 'AbortError' ? '(stopped)' : BACKEND_OFFLINE_MESSAGE), pending: false }));
     } finally {
       setBusy(false); abortRef.current = null;
       update((m) => ({ ...m, pending: false }));

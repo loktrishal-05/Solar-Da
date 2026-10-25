@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| **Live UI preview** | https://solarda.vercel.app (front end only: the agents, twin, vision and chat need the backend, so the Agent Console shows "runtime not reachable" there) |
+| **Live UI preview** | https://solarda.vercel.app (front end only: the agents, twin, vision and chat need the backend, so the Agent Console shows "Backend not connected" there) |
 | **Run the full demo** | one command: `powershell -File scripts/demo.ps1` (Docker), see [Deployment](#deployment) |
 | **Demo script** | [`docs/DEMO.md`](docs/DEMO.md) |
 | **Evidence (every number, with its source file)** | [`evidence/README.md`](evidence/README.md) |

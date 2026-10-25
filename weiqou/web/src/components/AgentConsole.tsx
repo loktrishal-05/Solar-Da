@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AdvisorPanel } from './AdvisorPanel';
 import { FarmChat } from './FarmChat';
 import { BenchmarkPage } from './BenchmarkPage';
+import { BACKEND_OFFLINE_MESSAGE } from '../backendStatus';
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle, Zap } from 'lucide-react';
 
 // Agent Console: replay controls, live (replayed) feed, per-node reasoning trace, approvals inbox.
@@ -52,7 +53,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    fetch(AGENTS + '/scenarios').then((r) => r.json()).then(setScenarios).catch(() => setError('Agent runtime not reachable on :8000. Start it with: services/agents/.venv/Scripts/python -m uvicorn app.main:app --port 8000'));
+    fetch(AGENTS + '/scenarios').then((r) => r.json()).then(setScenarios).catch(() => setError(BACKEND_OFFLINE_MESSAGE));
     fetch(AGENTS + '/replay/state').then((r) => r.json()).then(setSession).catch(() => {});
     fetch(AGENTS + '/runs').then((r) => r.json()).then((runs: Record<string, any>) => {
       const pending: Record<string, ApprovalRequest> = {};
