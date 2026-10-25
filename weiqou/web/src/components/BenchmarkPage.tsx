@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { BACKEND_OFFLINE_MESSAGE } from '../backendStatus';
 
 // Benchmark page: every number comes from bench/results (simulation), names its baseline and weather years,
 // and shows the cases where the agent does no better.
@@ -18,7 +19,7 @@ const COLORS: Record<string, string> = { fixed_schedule: '#9CA3AF', et_controlle
 export const BenchmarkPage: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidth }) => {
   const [r, setR] = useState<Results | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  useEffect(() => { fetch('/agents/bench/results').then((x) => x.json()).then(setR).catch(() => setErr('Agent runtime not reachable.')); }, []);
+  useEffect(() => { fetch('/agents/bench/results').then((x) => x.json()).then(setR).catch(() => setErr(BACKEND_OFFLINE_MESSAGE)); }, []);
 
   const byYear = (key: keyof Row) => {
     const years = [...new Set((r?.irrigation ?? []).map((x) => x.year))];

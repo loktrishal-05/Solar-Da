@@ -18,8 +18,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 **Decision: the hackathon demo runs from the local Docker image (`scripts/demo.ps1`). Public URL https://solarda.vercel.app is a front-end-only preview (Vercel project `solarda`, git-linked to `main`).** Hugging Face Docker is paid on this account and Google Cloud has no billing account. The notes below are for adding a host later.
 
 - Done and tested locally: `Dockerfile` + `deploy/` run the whole stack in one container on :7860 (`docker build -t solarda .`, `docker run -p 7860:7860 solarda`, `sh deploy/smoke.sh`).
-- **Blocked on a permission, not on code:** the GitHub releases `vision-v1` and `sensor-models-v2-onnx` named in the fetch scripts do not exist yet, so a clean clone cannot fetch models. Zips are built by zipping `services/vision/model` and `services/agents/model` (without `*.joblib`), then:
-  `gh release create vision-v1 solarda_vision.zip` and `gh release create sensor-models-v2-onnx solarda_sensor_models_onnx.zip`.
+- Model releases `vision-v1` (solarda_vision.zip) and `sensor-models-v2-onnx` (solarda_sensor_models_onnx.zip) now exist on GitHub (checked 2026-10-25), so `deploy/fetch_models.py` can fetch them during `docker build`.
 - Alternative to Hugging Face (Docker is painful there; the stack needs ~525 MB RAM so 512 MB free tiers fail): Google Cloud Run, `gcloud run deploy solarda --source . --region asia-south1 --memory 2Gi --cpu 1 --port 7860 --no-cpu-throttling --cpu-boost --allow-unauthenticated`. `.gcloudignore` uploads the local models.
 - Then (HF route): create a Hugging Face Space (Docker SDK), push this repo to it, put the Space URL in README (`ADD_DEPLOYMENT_LINK_HERE`) and in the GitHub repo description.
 - Leave `GEMINI_API_KEY` unset on the public Space unless the 20 requests/day quota is acceptable to burn.
@@ -53,3 +52,8 @@ Goal: raise field (PlantDoc test) accuracy above the current 61% and cut the 60%
 - Windows: avoid `\b` inside normal Python strings written by heredoc (becomes a backspace character); use raw strings or the Write/Edit tools.
 - `data/raw/PlantDoc-Dataset` has 5 test files Windows can't create (characters in names); evaluation uses 231 of 236.
 - Colab tab reloads when the PC is low on memory; open a fresh tab and re-run if a training run is lost.
+
+## Why the Vercel preview shows "Backend not connected" (2026-10-25)
+Vercel serves only the built UI. Every call goes to a relative path (`/api`, `/agents`, `/vision`), and nothing answers those on Vercel, so the Agent Console, chat and benchmark cannot load there. The UI now says this plainly (`weiqou/web/src/backendStatus.ts`) instead of asking whether `services/agents` is running.
+
+To make the public link work, host the one container from the root `Dockerfile` on any Docker host and use that URL (nginx inside serves the UI and proxies the backend, so no UI change or CORS is needed). Set the host's port variable `PORT=7860`, and optionally `GEMINI_API_KEY`. The stack needs about 450 to 525 MB of RAM, so a 512 MB free tier is likely too small. Not tested on a host yet; run `sh deploy/smoke.sh https://YOUR-URL` after deploying.
