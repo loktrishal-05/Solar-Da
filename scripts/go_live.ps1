@@ -21,4 +21,4 @@ for ($i = 0; $i -lt 60 -and -not $up; $i++) {
 }
 if (-not $up) { throw 'App did not answer on http://localhost:3000' }
 Write-Host "Public URL: https://$Domain"
-ngrok http --url=$Domain 3000
+ngrok http --url=$Domain --request-header-add "ngrok-skip-browser-warning:1" 3000

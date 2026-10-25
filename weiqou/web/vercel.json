@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/agents/:path*", "destination": "/api/p?p=agents/:path*" },
+    { "source": "/vision/:path*", "destination": "/api/p?p=vision/:path*" },
+    { "source": "/api/((?!p$).*)", "destination": "/api/p?p=api/$1" }
+  ]
+}
