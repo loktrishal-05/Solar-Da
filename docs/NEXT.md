@@ -15,7 +15,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 7. Tests: `npm run test:engine`, `npm test -w @terrasub-solarda/api`, and in each service `.venv/Scripts/python -m pytest -q`.
 
 ## Deployment status (2026-10-25)
-**Decision: the hackathon demo runs from the local Docker image (`scripts/demo.ps1`); no public URL.** Hugging Face Docker is paid on this account and Google Cloud has no billing account. The notes below are for adding a host later.
+**Decision: the hackathon demo runs from the local Docker image (`scripts/demo.ps1`). Public URL https://solarda.vercel.app is a front-end-only preview (Vercel project `solarda`, git-linked to `main`).** Hugging Face Docker is paid on this account and Google Cloud has no billing account. The notes below are for adding a host later.
 
 - Done and tested locally: `Dockerfile` + `deploy/` run the whole stack in one container on :7860 (`docker build -t solarda .`, `docker run -p 7860:7860 solarda`, `sh deploy/smoke.sh`).
 - **Blocked on a permission, not on code:** the GitHub releases `vision-v1` and `sensor-models-v2-onnx` named in the fetch scripts do not exist yet, so a clean clone cannot fetch models. Zips are built by zipping `services/vision/model` and `services/agents/model` (without `*.joblib`), then:
