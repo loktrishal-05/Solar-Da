@@ -226,7 +226,7 @@ npx promptfoo@0.124.1 eval -c redteam/advisor.yaml    # stack running
 ```
 
 ## Deployment
-One `Dockerfile` runs the whole stack in a single container: nginx on port 7860 fronts the TypeScript API (3001), agents (8000), twin (8100) and vision (8200) under supervisord, serving the built UI. Routes match the Vite dev proxy, so the UI is unchanged.
+One `Dockerfile` runs the whole stack in a single container: nginx on port 7860 fronts the TypeScript API (3001), agents (8000), twin (8100) and vision (8200) started by a small launcher script (`deploy/start.sh`), serving the built UI. Routes match the Vite dev proxy, so the UI is unchanged.
 
 ```bash
 docker build -t solarda .            # model weights are fetched from the GitHub releases unless already in services/*/model
@@ -235,7 +235,7 @@ sh deploy/smoke.sh                   # checks the UI, API, agents, vision and a 
 ```
 
 - **Hackathon demo:** run the container on the presenting laptop: `powershell -ExecutionPolicy Bypass -File scripts/demo.ps1` (opens http://localhost:3000; add `-Stop` to stop). The models are baked into the image, so it works with Wi-Fi off; only the chat, live weather and mandi prices need internet.
-- **No public URL on purpose.** The stack needs about 525 MB of RAM and Docker hosting is paid or card-gated on the free tiers we tried (Hugging Face, Google Cloud Run); `deploy/hf/` and `.gcloudignore` are ready if a host is added later.
+- **No public URL on purpose.** The stack needs about 450 MB of RAM under load (543 MB before the ONNX session and launcher trims) and Docker hosting is paid or card-gated on the free tiers we tried (Hugging Face, Google Cloud Run); `deploy/hf/` and `.gcloudignore` are ready if a host is added later.
 - Any container host works (Hugging Face Spaces Docker SDK uses port 7860 as is). `GEMINI_API_KEY` is optional; without it the chat falls back to the non-LLM path.
 
 ## Limitations

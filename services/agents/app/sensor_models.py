@@ -76,6 +76,8 @@ class OnnxModel:
             o = ort.SessionOptions()
             o.intra_op_num_threads = 1  # 51 small models: one thread each, not a spinning pool per session
             o.inter_op_num_threads = 1
+            o.enable_cpu_mem_arena = False  # arena + mem-pattern planning cost ~4 MB per tiny model: 207 MB -> 6 MB for all 51
+            o.enable_mem_pattern = False
             self._s = ort.InferenceSession(str(ONNX_DIR / self.file), o, providers=["CPUExecutionProvider"])
         return self._s
 

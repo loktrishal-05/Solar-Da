@@ -124,3 +124,6 @@ Owner decision: the app must not depend on a local Docker, and models run on ONN
 onnxruntime (`app/sensor_models.py`, `OnnxModel`). Each exported model is checked against the original on random rows including NaN, and
 `tests/test_onnx_parity.py` compares forecasts and anomaly alarms end to end (forecasts within 0.01; CUSUM score may drift a little in float32, alarms identical).
 The old joblib path stays only as a fallback and for training. The Gemini chat model is a hosted API, not run locally. Release asset: `sensor-models-v2-onnx`.
+
+## D17: Memory trims for small hosts (2026-10-25)
+Disabling the ONNX CPU memory arena and mem-pattern planning for the 51 tiny sensor models cut the agents service by ~200 MB (207 MB -> 6 MB for all sessions, same outputs: 70 agent tests pass). The vision model uses an unoptimised-graph session (113 -> ~90 MB). supervisord was replaced by `deploy/start.sh` (-30 MB). Container total under a running scenario: 543 -> ~450 MiB. CPU ONNX is 0.07 s per leaf image, so no GPU is needed.
