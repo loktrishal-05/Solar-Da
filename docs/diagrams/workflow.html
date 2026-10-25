@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Solarda workflow</title>
+<style>
+:root{--g9:#0b2e22;--g8:#12452f;--lime:#b7f34a;--cream:#f6f3e8;--ink:#0d1b14;--mut:#5b6b62;--amber:#f2a93b;--red:#e0645f}
+*{box-sizing:border-box;margin:0}
+body{width:1600px;height:900px;background:radial-gradient(1200px 600px at 20% -10%,#1b5a3d 0,#0b2e22 60%);font-family:"Segoe UI",Inter,Arial,sans-serif;color:var(--cream);position:relative;overflow:hidden}
+h1{position:absolute;left:56px;top:34px;font-size:34px}
+h1 span{color:var(--lime)}
+.sub{position:absolute;left:58px;top:82px;font-size:16px;color:#bcd3c5}
+.n{position:absolute;border-radius:14px;padding:12px 14px;background:var(--cream);color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.n b{display:block;font-size:17px;margin-bottom:3px}
+.n small{font-size:12.5px;color:var(--mut);line-height:1.35;display:block}
+.n .no{position:absolute;top:-13px;left:12px;background:var(--lime);color:#10240f;font:800 13px/1 "Segoe UI";padding:5px 9px;border-radius:99px}
+.n.llm{background:#fff4d9;border:2px solid var(--amber)}
+.n.gate{background:var(--lime);color:#10240f;border:0}
+.n.gate small{color:#274a1f}
+.n.human{background:#ffe3e1;border:2px solid var(--red)}
+.n.out{background:var(--g8);color:var(--cream);border:1px solid rgba(183,243,74,.4)}
+.n.out small{color:#c5dccf}
+.lane{position:absolute;left:56px;right:56px;border:1px dashed rgba(183,243,74,.28);border-radius:18px}
+.lab{position:absolute;left:80px;font-size:12px;letter-spacing:2px;color:var(--lime);font-weight:700}
+.note{position:absolute;font-size:13px;color:#d6e8dc}
+.note em{color:var(--lime);font-style:normal;font-weight:700}
+svg{position:absolute;inset:0;pointer-events:none}
+</style></head><body>
+<h1>One farm shift <span>from trigger to audit</span></h1>
+<div class="sub">Event-driven, never a blind timer. Each step writes a trace entry you can replay from any checkpoint.</div>
+
+<div class="lane" style="top:128px;height:186px"></div><div class="lab" style="top:140px;left:76px">1 · SENSE AND UNDERSTAND</div>
+<div class="n" style="left:80px;top:170px;width:260px;height:120px"><span class="no">1</span><b>Trigger</b><small>Threshold crossed, quality fault, model forecast, anomaly, new leaf photo, rain ahead, manual Check now, or a scheduled fallback</small></div>
+<div class="n" style="left:380px;top:170px;width:260px;height:120px"><span class="no">2</span><b>Ingest</b><small>Replay layer emits readings tagged with their source; faults injected for tests; a stuck or drifting probe is flagged, not trusted</small></div>
+<div class="n" style="left:680px;top:170px;width:260px;height:120px"><span class="no">3</span><b>Assess</b><small>Sensor models: 30 min and 2 h forecasts with bands, anomaly score, soil-water outlook; twin ET0 and root-zone deficit</small></div>
+<div class="n llm" style="left:980px;top:170px;width:540px;height:120px"><span class="no">4</span><b>Specialists in parallel · the LLM proposes</b><small>Irrigation · Fertigation · Climate · Disease. Each returns proposals with rationale, evidence ids, expected effect and confidence. Nothing here can act.</small></div>
+
+<div class="lane" style="top:346px;height:206px"></div><div class="lab" style="top:358px;left:76px">2 · DECIDE</div>
+<div class="n" style="left:80px;top:392px;width:300px;height:132px"><span class="no">5</span><b>Arbiter</b><small>Merges conflicting proposals, picks one per zone, cites the twin run ids behind the choice (hold / irrigate now / irrigate tonight)</small></div>
+<div class="n gate" style="left:430px;top:392px;width:420px;height:132px"><span class="no">6</span><b>Safety gate · TypeScript engine</b><small>13 original interlocks plus agent rules: dose per hour, tank limits, sensor trust, tier. Returns ALLOW, NEEDS_HUMAN or VETO with a reason. The model cannot override it.</small></div>
+<div class="n human" style="left:900px;top:392px;width:300px;height:132px"><span class="no">7</span><b>Human approval</b><small>L1 propose: everything waits in the inbox. Pesticide dose or spray rate always escalates to an expert. E-STOP freezes dispatch.</small></div>
+<div class="n" style="left:1250px;top:392px;width:270px;height:132px"><span class="no">8</span><b>Dispatch</b><small>Idempotency-Key per action, so a retry can never double-dose</small></div>
+
+<div class="lane" style="top:584px;height:150px"></div><div class="lab" style="top:596px;left:76px">3 · PROVE IT</div>
+<div class="n out" style="left:80px;top:626px;width:360px;height:86px"><span class="no">9</span><b>Verify</b><small>Re-reads sensors after dispatch; a missed effect raises a new trigger</small></div>
+<div class="n out" style="left:490px;top:626px;width:360px;height:86px"><span class="no">10</span><b>Audit</b><small>Append-only, SHA-256 hash-chained; every checkpoint replayable via /runs/{id}/history</small></div>
+<div class="n out" style="left:900px;top:626px;width:620px;height:86px"><span class="no">11</span><b>Notify</b><small>Alerts go to the SMS outbox (labelled SIMULATED) and optionally to a real phone via a free Telegram bot, deduplicated per 10 minutes</small></div>
+
+<div class="note" style="left:80px;top:768px">Example veto: <em>ph_excursion</em> at 60x. The agent keeps proposing pH-down; the gate returns <em>MAX_DOSE_PER_HOUR</em> and the dose never leaves the building.</div>
+<div class="note" style="left:80px;top:800px">Example refusal: blurry leaf photo → <em>retake</em>; clear photo → calibrated diagnosis, treatment proposal waits for a human, re-scan date set.</div>
+<div class="note" style="left:80px;top:832px">Data honesty: every reading and chart shows its source tag. <em>Replayed data is never presented as live.</em></div>
+
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" stroke="#b7f34a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M340 230h40M640 230h40M940 230h40"/>
+ <path d="M372 224l8 6-8 6M672 224l8 6-8 6M972 224l8 6-8 6"/>
+ <path d="M1250 290v52H230v50"/><path d="M224 384l6 8 6-8"/>
+ <path d="M380 458h50M850 458h50M1200 458h50"/>
+ <path d="M422 452l8 6-8 6M892 452l8 6-8 6M1242 452l8 6-8 6"/>
+ <path d="M1385 524v48H260v52"/><path d="M254 616l6 8 6-8"/>
+ <path d="M440 669h50M850 669h50"/>
+ <path d="M482 663l8 6-8 6M892 663l8 6-8 6"/>
+</svg>
+</body></html>

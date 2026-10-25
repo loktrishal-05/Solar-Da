@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Solarda architecture</title>
+<style>
+:root{--g9:#0b2e22;--g8:#12452f;--g6:#1f7a4f;--lime:#b7f34a;--cream:#f6f3e8;--ink:#0d1b14;--mut:#5b6b62;--amber:#f2a93b;--blue:#3b82c4;--red:#d9534f}
+*{box-sizing:border-box;margin:0}
+body{width:1600px;height:900px;background:radial-gradient(1200px 600px at 80% -10%,#1b5a3d 0,#0b2e22 60%);font-family:"Segoe UI",Inter,Arial,sans-serif;color:var(--cream);position:relative;overflow:hidden}
+h1{position:absolute;left:56px;top:34px;font-size:34px;letter-spacing:.3px}
+h1 span{color:var(--lime)}
+.sub{position:absolute;left:58px;top:82px;font-size:16px;color:#bcd3c5}
+.layer{position:absolute;left:56px;right:56px;border:1px solid rgba(183,243,74,.25);border-radius:18px;background:rgba(255,255,255,.04);padding:14px 18px}
+.tag{position:absolute;top:-11px;left:22px;background:var(--g9);padding:0 10px;font-size:12px;letter-spacing:2px;color:var(--lime);font-weight:700}
+.row{display:flex;gap:16px;height:100%;align-items:stretch}
+.box{flex:1;border-radius:12px;padding:12px 14px;background:var(--cream);color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.box b{display:block;font-size:17px;margin-bottom:4px}
+.box small{display:block;font-size:12.5px;color:var(--mut);line-height:1.35}
+.box.dark{background:var(--g8);color:var(--cream);border:1px solid rgba(183,243,74,.35)}
+.box.dark small{color:#c5dccf}
+.box.key{background:var(--lime);color:#10240f}
+.box.key small{color:#274a1f}
+.pill{display:inline-block;font:700 11px/1 "Cascadia Mono",Consolas,monospace;background:#e4efe7;color:var(--g8);padding:3px 7px;border-radius:99px;margin-bottom:6px}
+.dark .pill{background:rgba(183,243,74,.18);color:var(--lime)}
+svg{position:absolute;inset:0;pointer-events:none}
+.legend{position:absolute;right:58px;top:42px;font-size:13px;color:#bcd3c5;text-align:right;line-height:1.6}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+</style></head><body>
+<h1>Solarda <span>system architecture</span></h1>
+<div class="sub">Five processes, one browser origin. The language model proposes, the TypeScript safety engine decides.</div>
+<div class="legend"><i style="background:var(--lime)"></i>decision authority &nbsp; <i style="background:var(--cream)"></i>service &nbsp; <i style="background:var(--g8);border:1px solid var(--lime)"></i>data / external</div>
+
+<div class="layer" style="top:128px;height:150px"><div class="tag">PRESENTATION</div><div class="row">
+ <div class="box"><span class="pill">React + Vite</span><b>Agent Console</b><small>Live feed, reasoning trace, approvals inbox, E-STOP, every value tagged replay / simulated / twin</small></div>
+ <div class="box"><span class="pill">6 languages + voice</span><b>Farm assistant</b><small>Tamil, Hindi, English, Telugu, Kannada, Malayalam; streaming answers, risk gate</small></div>
+ <div class="box"><span class="pill">TF.js fallback</span><b>Crop Doctor</b><small>Leaf photo in, calibrated diagnosis out, abstains and asks for a retake when unsure</small></div>
+ <div class="box"><span class="pill">dashboards</span><b>Benchmark · Market · Passport</b><small>Water and yield vs fixed and ET schedules, 4-week onion outlook, QR harvest passport</small></div>
+</div></div>
+
+<div class="layer" style="top:304px;height:66px"><div class="tag">ENTRY</div><div class="row">
+ <div class="box dark" style="display:flex;align-items:center;gap:18px"><b style="margin:0">nginx :7860 (Docker) or Vite proxy :3000 (dev)</b><small style="margin:0">/api → TypeScript API · /agents → agent runtime (SSE, unbuffered) · /vision → vision service · everything else → static UI</small></div>
+</div></div>
+
+<div class="layer" style="top:396px;height:214px"><div class="tag">SERVICES</div><div class="row">
+ <div class="box key"><span class="pill" style="background:#10240f;color:var(--lime)">TypeScript · :3001</span><b>Safety engine + API</b><small>13 interlocks plus agent rules, max-dose-per-hour, tier gating, idempotent dispatch, append-only SHA-256 audit log, demo SMS gateway, hash-chained passport. <b style="display:inline;font-size:12.5px">Only this layer can allow an action.</b></small></div>
+ <div class="box"><span class="pill">FastAPI + LangGraph · :8000</span><b>Agent runtime</b><small>Replay layer, trigger engine (threshold, forecast, anomaly, photo, weather, manual), farm-shift graph, Gemini chat with read-only tools, sensor models on ONNX Runtime (30 min / 2 h forecasts, anomaly, soil water)</small></div>
+ <div class="box"><span class="pill">AquaCrop · :8100</span><b>Crop twin</b><small>Compares hold / irrigate now / irrigate tonight, returns stress days and biomass with run ids the agent must cite</small></div>
+ <div class="box"><span class="pill">ONNX · :8200</span><b>Vision service</b><small>EfficientNetV2-B0, 38 classes, temperature-calibrated, abstain threshold, quality gate (blur / brightness)</small></div>
+</div></div>
+
+<div class="layer" style="top:640px;height:214px"><div class="tag">DATA AND EXTERNAL SOURCES</div><div class="row">
+ <div class="box dark"><span class="pill">replayed, tagged</span><b>Sensor datasets</b><small>EDEN ISS 2020 climate, HydroGrowNet tank, AMS / NDS series. No live farm sensors: every reading carries its source tag.</small></div>
+ <div class="box dark"><span class="pill">free · live</span><b>Open-Meteo</b><small>Chennai archive for the twin, live forecast for the assistant (the only real-time feed)</small></div>
+ <div class="box dark"><span class="pill">optional key</span><b>Gemini · Agmarknet</b><small>LLM proposes only. Mandi prices via data.gov.in key; hand-entered samples are labelled SAMPLE.</small></div>
+ <div class="box dark"><span class="pill">public datasets</span><b>PlantVillage · PlantDoc</b><small>38-class lab + field training and evaluation: 98.2% lab, 61% field with abstention</small></div>
+ <div class="box dark"><span class="pill">free</span><b>Telegram bot</b><small>Optional real phone alerts; otherwise the SMS outbox is labelled SIMULATED</small></div>
+</div></div>
+
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" stroke="#b7f34a" stroke-width="2" stroke-linecap="round">
+ <path d="M800 278v26M800 370v26M800 610v30" stroke-dasharray="2 7"/>
+ <path d="M794 290l6 8 6-8M794 382l6 8 6-8M794 626l6 8 6-8"/>
+</svg>
+</body></html>

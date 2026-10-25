@@ -24,7 +24,7 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 - Then (HF route): create a Hugging Face Space (Docker SDK), push this repo to it, put the Space URL in README (`ADD_DEPLOYMENT_LINK_HERE`) and in the GitHub repo description.
 - Leave `GEMINI_API_KEY` unset on the public Space unless the 20 requests/day quota is acceptable to burn.
 
-## Next phase: vision v2 (plan, not started)
+## Next phase: vision v2 (SKIPPED 2026-10-25 by the user: demo-only app, v1 is enough; Colab run cancelled; script kept on branch `phase-i-vision-v2`)
 Goal: raise field (PlantDoc test) accuracy above the current 61% and cut the 60% abstain rate, without hurting the 98% lab score.
 - Hardware: RTX 2050 (4 GB). Native-Windows TensorFlow has no GPU support, so train with PyTorch + CUDA (new script `services/vision/train/train_torch.py`, AMP, batch 32 at 224) or reuse `train_colab.ipynb` on a Colab T4.
 - Experiments, one change at a time, same PlantDoc split, report in `evidence/phase-i/`: (1) EfficientNetV2-S or ConvNeXt-Tiny backbone; (2) strong field augmentation (random-resized-crop, colour jitter, blur, RandAugment) with all 5-8 PlantDoc train copies; (3) larger PlantVillage cap (500 -> 1500 per class); (4) temperature + abstain threshold re-fit on PlantDoc validation.

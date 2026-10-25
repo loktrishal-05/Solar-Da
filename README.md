@@ -57,6 +57,10 @@ and a human approves anything risky. The same agent answers farmers in their lan
 
 ## System architecture
 
+![Solarda system architecture](docs/img/architecture.png)
+
+*Editable source: `docs/diagrams/architecture.html`. The Mermaid version below is the text form.*
+
 ```mermaid
 flowchart LR
   subgraph Browser["Browser (React + Vite, :3000)"]
@@ -114,6 +118,8 @@ flowchart LR
 Details: [`docs/AGENT_LAYER.md`](docs/AGENT_LAYER.md).
 
 ## Workflow of one farm shift
+
+![One farm shift from trigger to audit](docs/img/workflow.png)
 
 ```mermaid
 flowchart TD
