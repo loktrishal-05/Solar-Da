@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| **Live UI preview** | https://solarda.vercel.app (front end only: the agents, twin, vision and chat need the backend, so the Agent Console shows "runtime not reachable" there) |
+| **Live demo** | https://solarda.vercel.app (UI on Vercel; `/agents`, `/vision`, `/api` are proxied to the laptop server below, so it works only while that laptop is on, awake, online and Docker is running) |
 | **Run the full demo** | one command: `powershell -File scripts/demo.ps1` (Docker), see [Deployment](#deployment) |
 | **Demo script** | [`docs/DEMO.md`](docs/DEMO.md) |
 | **Evidence (every number, with its source file)** | [`evidence/README.md`](evidence/README.md) |
@@ -272,3 +272,8 @@ sh deploy/smoke.sh                   # checks the UI, API, agents, vision and a 
 
 ## Credits
 Built on the TerraSub & Solar-Da platform. Datasets and models are credited in `data/*/ATTRIBUTION.md` and `evidence/`.
+
+## Laptop as the server (public URL)
+Double-click **Start Solarda** on the Desktop (`scripts/go_live.ps1`): it starts the Docker container and an ngrok tunnel on the static domain in the gitignored `.ngrok-domain`. **Stop Solarda** runs `scripts/stop_live.ps1`. Recreate the shortcuts with `scripts/make_shortcuts.ps1`.
+One-time: `ngrok config add-authtoken <token>` (ngrok agent 3.20+; run `ngrok update`). API keys go in the gitignored `.env`.
+The public URL exposes the whole app: do not put real secrets in the container's data. `weiqou/web/api/p.js` is the Vercel edge proxy (adds `ngrok-skip-browser-warning`); change the target with `BACKEND_URL`.
