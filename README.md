@@ -226,11 +226,16 @@ npx promptfoo@0.124.1 eval -c redteam/advisor.yaml    # stack running
 ```
 
 ## Deployment
-The UI is a static Vite build, but the demo needs the API and the three Python services behind it, so a complete deployment runs all five processes (for example on one VM with `scripts/start_all.ps1`, or as containers).
+One `Dockerfile` runs the whole stack in a single container: nginx on port 7860 fronts the TypeScript API (3001), agents (8000), twin (8100) and vision (8200) under supervisord, serving the built UI. Routes match the Vite dev proxy, so the UI is unchanged.
+
+```bash
+docker build -t solarda .            # model weights are fetched from the GitHub releases unless already in services/*/model
+docker run -p 7860:7860 -e GEMINI_API_KEY=... solarda
+sh deploy/smoke.sh                   # checks the UI, API, agents, vision and a real classification
+```
 
 - **Live demo:** `ADD_DEPLOYMENT_LINK_HERE`
-- A frontend-only host (such as Vercel) serves the interface but not the agents, twin or vision services, so the Agent Console and assistant need the backend URL configured in the proxy settings of `weiqou/web/vite.config.ts`.
-- Secrets (`GEMINI_API_KEY`, Telegram token) are environment variables and are never committed.
+- Any container host works (Hugging Face Spaces Docker SDK uses port 7860 as is). `GEMINI_API_KEY` is optional; without it the chat falls back to the non-LLM path.
 
 ## Limitations
 - No live sensors; all farm data is replayed or simulated and labelled so.

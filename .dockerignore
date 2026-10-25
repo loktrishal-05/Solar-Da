@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/.venv
+**/dist
+data/raw
+data/replay/full
+data/runtime
+sample images
+evidence
+firmware
