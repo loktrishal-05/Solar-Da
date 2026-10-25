@@ -89,3 +89,4 @@ services/vision/model/*.onnx
 data/raw/
 services/agents/model/*.joblib
 services/agents/model/onnx/
+.ngrok-domain
