@@ -1,5 +1,7 @@
 # Solarda: Agentic Smart Agriculture
 
+[![ci](https://github.com/loktrishal-05/Solar-Da/actions/workflows/ci.yml/badge.svg)](https://github.com/loktrishal-05/Solar-Da/actions/workflows/ci.yml) ![Docker](https://img.shields.io/badge/run-docker%20one%20command-2496ED) ![Replay data](https://img.shields.io/badge/data-replayed%2C%20always%20labelled-amber) ![Safety](https://img.shields.io/badge/LLM%20proposes-engine%20decides-green)
+
 > Safety-gated AI farm agents, a multilingual farm assistant, a plant-disease vision model and learned sensor forecasting, built on the TerraSub & Solar-Da precision-agriculture platform.
 > Built for the **Agentic AI Hackathon 2026**.
 
@@ -12,6 +14,16 @@
 | **What is real vs UI-only** | [`docs/AUDIT.md`](docs/AUDIT.md) |
 
 > **Data honesty.** There are no live farm sensors. Every reading shown comes from the replay layer (public datasets), the crop twin or a simulation, and is tagged with its source. Weather in the chat assistant is the one real, live feed (Open-Meteo). Nothing replayed is ever presented as live.
+
+## Quick start (about 2 minutes, Docker Desktop required)
+```powershell
+git clone https://github.com/loktrishal-05/Solar-Da.git; cd Solar-Da
+powershell -ExecutionPolicy Bypass -File scripts/demo.ps1     # builds once, then opens http://localhost:3000
+```
+Open **Agent Console**, pick `heatwave` at 60x, press **Start**, and watch each run: ingest, assess, specialists, arbiter, safety verdict, approval, dispatch, audit.
+
+![Agent Console with a disease-detection trace](evidence/screenshots/agent_console_disease_trace.jpg)
+![Irrigation benchmark against fixed and ET schedules](evidence/screenshots/benchmark_irrigation.jpg)
 
 ---
 
