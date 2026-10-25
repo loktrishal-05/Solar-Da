@@ -18,7 +18,8 @@ replay data never presented as live, LLM proposes and the TypeScript engine deci
 - Done and tested locally: `Dockerfile` + `deploy/` run the whole stack in one container on :7860 (`docker build -t solarda .`, `docker run -p 7860:7860 solarda`, `sh deploy/smoke.sh`).
 - **Blocked on a permission, not on code:** the GitHub releases `vision-v1` and `sensor-models-v2-onnx` named in the fetch scripts do not exist yet, so a clean clone cannot fetch models. Zips are built by zipping `services/vision/model` and `services/agents/model` (without `*.joblib`), then:
   `gh release create vision-v1 solarda_vision.zip` and `gh release create sensor-models-v2-onnx solarda_sensor_models_onnx.zip`.
-- Then: create a Hugging Face Space (Docker SDK), push this repo to it, put the Space URL in README (`ADD_DEPLOYMENT_LINK_HERE`) and in the GitHub repo description.
+- Alternative to Hugging Face (Docker is painful there; the stack needs ~525 MB RAM so 512 MB free tiers fail): Google Cloud Run, `gcloud run deploy solarda --source . --region asia-south1 --memory 2Gi --cpu 1 --port 7860 --no-cpu-throttling --cpu-boost --allow-unauthenticated`. `.gcloudignore` uploads the local models.
+- Then (HF route): create a Hugging Face Space (Docker SDK), push this repo to it, put the Space URL in README (`ADD_DEPLOYMENT_LINK_HERE`) and in the GitHub repo description.
 - Leave `GEMINI_API_KEY` unset on the public Space unless the 20 requests/day quota is acceptable to burn.
 
 ## Next work, in order

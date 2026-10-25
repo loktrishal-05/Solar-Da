@@ -1,0 +1,13 @@
+# Used by `gcloud run deploy --source .` (replaces .gitignore, so the gitignored ONNX models ARE uploaded).
+.git
+**/node_modules
+**/.venv
+**/dist
+**/__pycache__
+data/raw
+data/replay/full
+data/runtime
+sample images
+evidence
+firmware
+*.joblib
