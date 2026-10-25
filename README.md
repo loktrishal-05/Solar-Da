@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Live demo** | `ADD_DEPLOYMENT_LINK_HERE` (see [Deployment](#deployment)) |
+| **Run the demo** | one command: `powershell -File scripts/demo.ps1` (Docker), see [Deployment](#deployment) |
 | **Demo script** | [`docs/DEMO.md`](docs/DEMO.md) |
 | **Evidence (every number, with its source file)** | [`evidence/README.md`](evidence/README.md) |
 | **What is real vs UI-only** | [`docs/AUDIT.md`](docs/AUDIT.md) |
@@ -234,7 +234,8 @@ docker run -p 7860:7860 -e GEMINI_API_KEY=... solarda
 sh deploy/smoke.sh                   # checks the UI, API, agents, vision and a real classification
 ```
 
-- **Live demo:** `ADD_DEPLOYMENT_LINK_HERE`
+- **Hackathon demo:** run the container on the presenting laptop: `powershell -ExecutionPolicy Bypass -File scripts/demo.ps1` (opens http://localhost:3000; add `-Stop` to stop). The models are baked into the image, so it works with Wi-Fi off; only the chat, live weather and mandi prices need internet.
+- **No public URL on purpose.** The stack needs about 525 MB of RAM and Docker hosting is paid or card-gated on the free tiers we tried (Hugging Face, Google Cloud Run); `deploy/hf/` and `.gcloudignore` are ready if a host is added later.
 - Any container host works (Hugging Face Spaces Docker SDK uses port 7860 as is). `GEMINI_API_KEY` is optional; without it the chat falls back to the non-LLM path.
 
 ## Limitations

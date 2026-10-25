@@ -1,8 +1,8 @@
 # Demo script (Round II)
 
-Laptop with Wi-Fi off. Start: `powershell -ExecutionPolicy Bypass -File scripts/start_all.ps1`, open
-http://localhost:3000, click **Agent Console**. Reset between rehearsals: `scripts/stop_all.ps1`, delete
-`data/runtime/`, start again.
+Laptop with Wi-Fi off. Start (Docker Desktop running): `powershell -ExecutionPolicy Bypass -File scripts/demo.ps1`; it opens
+http://localhost:3000, click **Agent Console**. Every run starts from fresh state; stop with `scripts/demo.ps1 -Stop`.
+Without Docker: `scripts/start_all.ps1` (see README), reset with `scripts/stop_all.ps1` and delete `data/runtime/`.
 
 ## 5-minute path
 1. **Replay badge.** Point at the amber "Replay mode" bar: no live sensors; EDEN ISS 2020 (an Antarctic research
