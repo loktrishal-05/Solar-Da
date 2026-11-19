@@ -20,7 +20,7 @@ docker rm -f solarda-demo 2>&1 | Out-Null
 $ErrorActionPreference = 'Stop'
 if (-not (docker image ls -q solarda)) { Write-Host 'Building image (first time, ~10 min)...'; docker build -t solarda . }
 $envArgs = @(); if (Test-Path .env) { $envArgs = @('--env-file', '.env') }
-docker run -d --name solarda-demo -p 3000:7860 @envArgs solarda | Out-Null
+docker run -d --restart unless-stopped --name solarda-demo -p 3000:7860 @envArgs solarda | Out-Null
 
 Write-Host 'Waiting for the app...'
 $up = $false
