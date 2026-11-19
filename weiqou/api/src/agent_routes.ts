@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
@@ -7,6 +8,7 @@ import { checkAgentProposal, AgentVerdict, DispatchedRecord } from '@terrasub-so
 import { ProposedActionSchema, ApprovalSchema } from '@terrasub-solarda/contracts';
 import { store } from './store.js';
 import { readOutbox, sendAlertSms } from './sms.js';
+import { requireAgentRuntime, zodMessage } from './auth.js';
 
 // Agent-layer endpoints (docs/BLUEPRINT.md, Phase 1). The Python agent runtime calls these;
 // it never re-implements the invariants.
@@ -19,9 +21,31 @@ const ACTIONS_FILE = resolve(RUNTIME_DIR, 'actions.jsonl');
 const readJsonl = (f: string): any[] =>
   existsSync(f) ? readFileSync(f, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)) : [];
 
-// Append-only: there is no update or delete route for either log.
+// Append-only and hash-chained: each entry stores the previous entry's hash and its own
+// (sha256 of prev + the entry without its hash), so editing or deleting a past entry is detected by /audit/verify.
+// Entries written before chaining existed have no hash; the chain starts at the first hashed entry.
+const entryHash = (prev: string, body: Record<string, unknown>) => createHash('sha256').update(prev + JSON.stringify(body)).digest('hex');
+let lastHash: string | null = null;
+
 export function appendAudit(entry: Record<string, unknown>) {
-  appendFileSync(AUDIT_FILE, JSON.stringify({ at: new Date().toISOString(), ...entry }) + '\n');
+  if (lastHash === null) lastHash = [...readJsonl(AUDIT_FILE)].reverse().find((e) => e.hash)?.hash ?? 'GENESIS';
+  const body = { at: new Date().toISOString(), ...entry, prev: lastHash };
+  const hash = entryHash(lastHash as string, body);
+  appendFileSync(AUDIT_FILE, JSON.stringify({ ...body, hash }) + '\n');
+  lastHash = hash;
+}
+
+export function verifyAudit(): { ok: true; entries: number } | { ok: false; entries: number; broken_at: number } {
+  const all = readJsonl(AUDIT_FILE);
+  const start = all.findIndex((e) => e.hash);
+  if (start < 0) return { ok: true, entries: 0 };
+  let prev = 'GENESIS';
+  for (let i = start; i < all.length; i++) {
+    const { hash, ...body } = all[i];
+    if (!hash || body.prev !== prev || entryHash(prev, body) !== hash) return { ok: false, entries: all.length - start, broken_at: i };
+    prev = hash;
+  }
+  return { ok: true, entries: all.length - start };
 }
 
 // Verdicts issued by /safety/check; /actions refuses anything without one.
@@ -101,7 +125,7 @@ export const agentRouter = Router();
 
 agentRouter.post('/safety/check', (req: Request, res: Response) => {
   const parse = SafetyRequestSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
   const { proposals, context } = parse.data;
   const out = proposals.map((p) => {
     const v = check(p, context);
@@ -120,14 +144,15 @@ const ActionRequestSchema = z.object({
   approval: ApprovalSchema.optional(),
 });
 
-agentRouter.post('/actions', (req: Request, res: Response) => {
+// Only the agent runtime dispatches: a browser could otherwise post an action with a forged approval.
+agentRouter.post('/actions', requireAgentRuntime, (req: Request, res: Response) => {
   const key = req.header('Idempotency-Key');
   if (!key) return res.status(400).json({ error: 'Idempotency-Key header is required' });
   const prior = readJsonl(ACTIONS_FILE).find((a) => a.idempotency_key === key);
   if (prior) return res.json({ ...prior, replayed: true }); // a resumed run never repeats a dispatch
 
   const parse = ActionRequestSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
   const { run_id, sim_time, action, approval } = parse.data;
 
   const v = verdicts.get(action.id) ?? verdictFromAudit(action.id);
@@ -163,10 +188,12 @@ agentRouter.post('/sms/test', async (_req: Request, res: Response) => {
 
 agentRouter.get('/actions', (_req: Request, res: Response) => res.json({ actions: readJsonl(ACTIONS_FILE) }));
 
-agentRouter.post('/audit', (req: Request, res: Response) => {
+agentRouter.post('/audit', requireAgentRuntime, (req: Request, res: Response) => {
   appendAudit({ type: 'agent', ...req.body });
   res.status(201).json({ ok: true });
 });
+
+agentRouter.get('/audit/verify', (_req: Request, res: Response) => res.json(verifyAudit()));
 
 agentRouter.get('/audit', (req: Request, res: Response) => {
   const runId = req.query.run_id;

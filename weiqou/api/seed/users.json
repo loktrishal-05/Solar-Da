@@ -1,0 +1,5 @@
+[
+  { "name": "Murugan K", "email": "farmer@solarda.demo", "role": "farmer", "password": "solarda-demo" },
+  { "name": "Dr. Priya S", "email": "agronomist@solarda.demo", "role": "agronomist", "password": "solarda-demo" },
+  { "name": "Solarda Admin", "email": "admin@solarda.demo", "role": "admin", "password": "solarda-demo" }
+]

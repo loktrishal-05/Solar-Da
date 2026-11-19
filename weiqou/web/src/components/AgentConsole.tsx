@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AdvisorPanel } from './AdvisorPanel';
-import { FarmChat } from './FarmChat';
-import { BenchmarkPage } from './BenchmarkPage';
 import { BACKEND_OFFLINE_MESSAGE } from '../backendStatus';
+import { decideRun, type ApprovalRequest } from '../approvals';
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle, Zap } from 'lucide-react';
 
 // Agent Console: replay controls, live (replayed) feed, per-node reasoning trace, approvals inbox.
@@ -12,7 +10,6 @@ const AGENTS = '/agents';
 
 type Telemetry = { ts: string; zone: string; metric: string; value: number; unit: string; source: string };
 type TraceEntry = { run_id: string; node: string; ts: string; summary: string; data?: Record<string, any> };
-type ApprovalRequest = { type: string; run_id: string; sim_time: string; actions: { verdict: any; action: any }[] };
 type SessionInfo = {
   session_id: string | null; scenario?: string; description?: string; dataset?: string; speed?: number;
   paused?: boolean; sim_time?: string; start?: string; end?: string; autonomy?: string; finished?: boolean;
@@ -35,7 +32,8 @@ const TRIGGER_STYLE: Record<string, string> = {
 const sourceStyle = (s: string) =>
   s === 'replay' ? 'bg-sky-50 text-sky-800 border-sky-200' : 'bg-violet-50 text-violet-800 border-violet-200';
 
-export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () => void }> = ({ eStopActive, onToggleEStop }) => {
+// Assistant, offline advisor and benchmark used to be tabs here; they are their own pages in the app shell now.
+export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () => void; canApprove?: boolean }> = ({ eStopActive, onToggleEStop, canApprove = false }) => {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [scenario, setScenario] = useState('heatwave');
   const [speed, setSpeed] = useState(60);
@@ -47,8 +45,6 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   const [openRun, setOpenRun] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<'console' | 'assistant' | 'advisor' | 'benchmark'>('console');
-  const [lowBandwidth, setLowBandwidth] = useState(false);
   const [triggers, setTriggers] = useState<{ sim_time: string; triggers: Trigger[]; suppressed?: boolean }[]>([]);
   const esRef = useRef<EventSource | null>(null);
 
@@ -105,16 +101,26 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
     if (!r.ok) setError((await r.json()).detail ?? 'could not start');
     else setSession(await r.json());
   };
-  const pause = async () => setSession(await (await post(`/replay/pause?paused=${!session.paused}`)).json());
+  // Replay controls: only accept a new session state from a successful reply; otherwise show the reason.
+  const control = async (path: string, body?: unknown) => {
+    try {
+      const r = await post(path, body);
+      const b = await r.json().catch(() => ({}));
+      if (r.ok) { setSession(b); setError(null); } else setError(typeof b.detail === 'string' ? b.detail : 'The replay control failed');
+    } catch {
+      setError(BACKEND_OFFLINE_MESSAGE);
+    }
+  };
+  const pause = () => control(`/replay/pause?paused=${!session.paused}`);
   const changeSpeed = async (s: number) => {
     setSpeed(s);
-    if (session.session_id) setSession(await (await post(`/replay/speed?speed=${s}`)).json());
+    if (session.session_id) await control(`/replay/speed?speed=${s}`);
   };
   const seek = async (frac: number) => {
     if (!session.start || !session.end) return;
     const a = Date.parse(session.start), b = Date.parse(session.end);
     const ts = new Date(a + (b - a) * frac).toISOString().replace(/\.\d+Z$/, 'Z');
-    setSession(await (await post('/replay/seek', { ts })).json());
+    await control('/replay/seek', { ts });
   };
 
   const checkNow = async () => {
@@ -123,10 +129,9 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   };
 
   const decide = useCallback(async (req: ApprovalRequest, decision: 'approve' | 'reject') => {
-    const approvals = req.actions.map((a) => ({ proposal_id: a.action.id, decision, decided_by: 'farmer (console)', ts: req.sim_time }));
-    const r = await post(`/runs/${encodeURIComponent(req.run_id)}/resume`, { approvals });
-    if (r.ok) setApprovals((prev) => { const n = { ...prev }; delete n[req.run_id]; return n; });
-    else setError((await r.json()).detail ?? 'resume failed');
+    const err = await decideRun(req, decision);
+    if (!err) setApprovals((prev) => { const n = { ...prev }; delete n[req.run_id]; return n; });
+    else setError(err);
   }, []);
 
   const runs = useMemo(() => {
@@ -146,7 +151,7 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   }, [feed]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-5 text-[#1A1A1A]">
+    <div className="space-y-5 text-[#1A1A1A]">
       {/* Replay badge: permanent, never hidden */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-900">
         <Radio className="w-4 h-4" />
@@ -159,19 +164,6 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
 
       {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800 font-mono">{error}</div>}
 
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        {([['console', 'Agent console'], ['assistant', 'Farm assistant (chat + voice)'], ['advisor', 'Offline advisor (தமிழ்)'], ['benchmark', 'Benchmark']] as const).map(([k, label]) => (
-          <button key={k} onClick={() => setTab(k)} className={`px-3 py-1.5 rounded-full border font-bold ${tab === k ? 'bg-[#1B4332] text-white border-[#1B4332]' : 'bg-white'}`}>{label}</button>
-        ))}
-        <label className="ml-auto flex items-center gap-1.5 text-gray-600">
-          <input type="checkbox" checked={lowBandwidth} onChange={(e) => setLowBandwidth(e.target.checked)} /> Low-bandwidth mode (no charts or voice)
-        </label>
-      </div>
-
-      {tab === 'assistant' && <FarmChat lowBandwidth={lowBandwidth} />}
-      {tab === 'advisor' && <AdvisorPanel lowBandwidth={lowBandwidth} />}
-      {tab === 'benchmark' && <BenchmarkPage lowBandwidth={lowBandwidth} />}
-      {tab === 'console' && (<>
 
       {/* Replay controls */}
       <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm space-y-3">
@@ -344,15 +336,14 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
                   <div className="text-[11px] font-mono text-gray-500">expects: {action.expected_effect} · safety: {verdict.verdict} ({verdict.reason})</div>
                 </div>
               ))}
-              <div className="flex gap-2">
+              {canApprove ? <div className="flex gap-2">
                 <button onClick={() => decide(req, 'approve')} className="px-3 py-1.5 rounded-full bg-[#1B4332] text-white font-bold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Approve</button>
                 <button onClick={() => decide(req, 'reject')} className="px-3 py-1.5 rounded-full border border-red-200 text-red-700 font-bold flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> Reject</button>
-              </div>
+              </div> : <p className="text-[#3B4FB0] font-semibold">Waiting for an agronomist. Sign in with an agronomist account to approve or reject.</p>}
             </div>
           ))}
         </div>
       </section>
-      </>)}
     </div>
   );
 };

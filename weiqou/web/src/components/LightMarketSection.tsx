@@ -30,31 +30,15 @@ export const LightMarketSection: React.FC = () => {
   ];
 
   return (
-    <section id="market" className="bg-[#FAFAF8] py-20 px-4 lg:px-8 border-b border-[#E5E7EB] font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="w-6 h-6 text-[#1B4332]" />
-              <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">Market Demand Intelligence Desk</h2>
-            </div>
-            <p className="text-xs text-gray-500 font-normal">
-              Agmarknet Mandi price feeds paired with climate & substrate suitability scoring heuristics.
-            </p>
-          </div>
-
-          <span className="px-3.5 py-1 bg-amber-50 text-[#D97706] border border-amber-200 text-xs font-bold rounded-full font-mono flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5" /> Agmarknet Feed Active
-          </span>
-        </div>
+    <section id="market" className="font-sans">
+      <div className="space-y-8">
 
         {/* Split View: Left Agmarknet Table & Right Crop Recommender */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT: AGMARKNET PRICE TABLE */}
           <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-              <h3 className="font-extrabold text-sm text-[#1A1A1A]">Agmarknet Mandi Price Index (Live)</h3>
+              <h3 className="font-extrabold text-sm text-[#1A1A1A]">Mandi prices (sample values, not a live feed)</h3>
               <span className="text-[10px] text-gray-500 font-mono">* Missing data stays missing (no bare guesses)</span>
             </div>
 

@@ -15,7 +15,14 @@
 
 > **Data honesty.** There are no live farm sensors. Every reading shown comes from the replay layer (public datasets), the crop twin or a simulation, and is tagged with its source. Weather in the chat assistant is the one real, live feed (Open-Meteo). Nothing replayed is ever presented as live.
 
-## Quick start (about 2 minutes, Docker Desktop required)
+## Quick start on Linux/macOS (Node 20+, Python 3.11 via `uv`, make)
+```bash
+make setup    # once: node deps + build, three Python venvs, model weights, local secrets
+make dev      # api :3001, agents :8000, twin :8100, vision :8200, web :3000 -> open http://localhost:3000
+make health   # OK/DOWN per service;  make stop  to stop;  make test  runs every suite
+```
+
+## Quick start with Docker (about 2 minutes, Docker Desktop required)
 ```powershell
 git clone https://github.com/loktrishal-05/Solar-Da.git; cd Solar-Da
 powershell -ExecutionPolicy Bypass -File scripts/demo.ps1     # builds once, then opens http://localhost:3000
@@ -54,6 +61,9 @@ and a human approves anything risky. The same agent answers farmers in their lan
 | **Market outlook** | 4-week onion price outlook from an Agmarknet archive, with storage and pooling alert |
 | **Traceability passport** | SHA-256 hash-chained harvest passport (tamper-evident), marketplace listings persisted to disk |
 | **Alerts** | Demo SMS gateway (outbox, simulated) with optional free Telegram delivery |
+| **Web product** | Landing page, one-click demo sign-in as farmer / agronomist / admin, Users page (admins grant roles), an "About this page" panel on every page and a public guide (`/guide`) |
+| **Approvals and audit** | Only an agronomist or admin can approve; the approver is recorded; the audit log is hash-chained (`GET /api/audit/verify`) |
+| **Try to break it** | Live prompt-injection and unsafe-action attacks against the assistant and the safety engine, all blocked |
 
 ## System architecture
 

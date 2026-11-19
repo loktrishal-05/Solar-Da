@@ -4,7 +4,16 @@ State as of 2026-10-24: blueprint Phases 0-4 and expansion phases A-F are on `ma
 (D1-D14), `docs/AUDIT.md`, `evidence/README.md`. Rules in `CLAUDE.md` still apply (one branch per phase, tests + docs,
 replay data never presented as live, LLM proposes and the TypeScript engine decides, never commit weights/secrets/datasets).
 
-## Get the environment running (a fresh VS Code session)
+## Linux/macOS: `make setup` once, then `make dev` / `make health` / `make stop` / `make test` (see `Makefile`).
+Finale work (Nov 2026) is on branch `finale` (main is protected; merge by PR). Plan: `docs/superpowers/plans/2026-11-19-finale-product.md`.
+State 2026-11-19: landing page, sign-in with farmer/agronomist/admin roles (demo accounts in `weiqou/api/seed/users.json`),
+sidebar app (overview, agent console, approvals, crop doctor, assistant, try-to-break-it, water and market, alerts, community, settings),
+approvals only by agronomist/admin through `POST /api/runs/:id/resume`. Demo script: `docs/finale/DEMO_SCRIPT.md`.
+Round 2 (same day): one-click demo roles (`POST /api/auth/demo`, off with `SOLARDA_DEMO_LOGIN=0`), farmer-only signup + admin Users page,
+page intros + `/guide`, API audit (agent-only routes need `X-Solarda-Internal`, headers, JSON 404/400/500, see AUDIT.md), hash-chained audit log
+(`/api/audit/verify`), immersive landing (video hero, pinned story), three.js scene on sign-in, logo + favicon set. Plan: `docs/superpowers/plans/2026-11-19-finale-polish.md`.
+
+## Get the environment running on Windows (a fresh VS Code session)
 1. `npm install; npm run build`
 2. Python 3.11 venvs: `services/{agents,twin,vision}` -> `py -3.11 -m venv .venv` and `pip install -r requirements.lock`
 3. Models (GitHub releases, not in git): `scripts/fetch_vision_model.ps1`, `scripts/fetch_sensor_models.ps1` (ONNX, release `sensor-models-v2-onnx`)

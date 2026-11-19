@@ -71,38 +71,8 @@ export const LightCommunitySection: React.FC = () => {
   ];
 
   return (
-    <section id="community" className="relative bg-white py-20 px-4 lg:px-8 border-b border-[#E5E7EB] font-sans overflow-hidden">
-      {/* Video Background #6 — Subtle Mandi Market Video with 92% White Overlay */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <video
-          src="/media/STYLE_BIBLE_ABOVE___Using_the.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover filter saturate-[0.8] opacity-15"
-        />
-        <div className="absolute inset-0 bg-white/92" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8">
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <Users className="w-6 h-6 text-[#1B4332]" />
-              <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">Farmer Community & Co-operative Forum</h2>
-            </div>
-            <p className="text-xs text-gray-500 font-normal">
-              Connect with verified agronomists, form bulk input co-ops, and share crop observation logs.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2 text-xs font-mono text-[#059669]">
-            <span className="w-2 h-2 rounded-full bg-[#059669] animate-ping" />
-            <span className="font-bold">● 3 Agronomists Online</span>
-          </div>
-        </div>
+    <section id="community" className="font-sans">
+      <div className="relative z-10 space-y-8">
 
         {/* Filter Pills */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2 text-xs font-mono">
