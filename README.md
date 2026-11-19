@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/loktrishal-05/Solar-Da/actions/workflows/ci.yml/badge.svg)](https://github.com/loktrishal-05/Solar-Da/actions/workflows/ci.yml)
 ![licence MIT](https://img.shields.io/badge/licence-MIT-2F7D4F)
-![tests 169](https://img.shields.io/badge/tests-169%20passing-2F7D4F)
+![tests 169](https://img.shields.io/badge/tests-170%20passing-2F7D4F)
 ![Lighthouse accessibility 100](https://img.shields.io/badge/Lighthouse%20a11y-100%20on%2014%20pages-2F7D4F)
 ![data replayed](https://img.shields.io/badge/farm%20data-replayed%2C%20always%20labelled-B45309)
 
@@ -63,7 +63,7 @@ shared zod contracts between the API, the agents and the web app; dead code remo
 agent runtime can dispatch or write the audit log; hash-chained audit log; security headers, no CORS, JSON errors; proxy
 allow-list. Details and known limits: [`SECURITY.md`](SECURITY.md).
 
-**Testing.** 169 automated tests run on every push: engine 20, API 46 (auth, approvals, guards, headers, audit chain, red-team
+**Testing.** 170 automated tests run on every push: engine 20, API 47 (auth, approvals, guards, headers, audit chain, red-team
 cases), contracts 10, proxy 2, agents 80, crop twin 4, vision 7. CI also replays 30 red-team attacks with promptfoo.
 `make test` runs the same suites locally.
 

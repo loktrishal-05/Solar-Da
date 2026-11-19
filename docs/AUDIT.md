@@ -126,3 +126,4 @@ Every route in `weiqou/api/src/{routes,agent_routes,auth,approvals}.ts` and `ser
 | 10 videos/images in `web/public/media` | used only by removed components; most showed the old TerraSub app | no references left |
 | `prisma/` and deps `@prisma/client`, `prisma`, `cors`, `ws`, `@google/generative-ai`, `ts-node`, `framer-motion` | never imported | `make test` |
 | `docs/HANDOFF.md`, `docs/terrasub-solarda-master-prompt.md`, `docs/deck/build_deck.js` | LLM handoff/prompt notes and a slide generator (organisers ban AI-made slides) | team lead's decision |
+| Manual checks (no web test runner) | lazy-loaded pages by deep link and sidebar; one-click sign-in on a production build (was bouncing to /login); a deleted page chunk after a redeploy reloads once, then shows "Solarda was updated" with the shell intact; Lighthouse accessibility 100 on 14 pages | production `vite preview` + Chrome DevTools, 2026-11-19 |

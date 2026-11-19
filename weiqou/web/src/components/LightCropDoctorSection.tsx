@@ -417,7 +417,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
               {isScanning && (
                 <div className="mt-3 text-center text-xs font-bold text-[#1B4332] animate-pulse flex items-center justify-center space-x-2">
                   <RefreshCw className="w-4 h-4 animate-spin text-[#3F6B1F]" />
-                  <span>Running TF.js tensor inference...</span>
+                  <span>Asking the Solarda vision service...</span>
                 </div>
               )}
 

@@ -174,3 +174,8 @@ test('repeated wrong passwords lock that email for a while (429 with Retry-After
   // Other accounts are unaffected.
   assert.equal((await post('/login', { email: seededAgronomist.email, password: seededAgronomist.password })).status, 200);
 });
+
+test('oversized emails are rejected before they are remembered (no memory growth, never 429)', async () => {
+  const huge = 'x'.repeat(300) + '@example.com';
+  for (let i = 0; i < 11; i++) assert.equal((await post('/login', { email: huge, password: 'whatever-1' })).status, 401);
+});

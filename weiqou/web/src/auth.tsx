@@ -38,8 +38,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setUser(d?.user ?? null))
-      .catch(() => setUser(null))
+      // Keep a user who signed in while this first check was in flight (slow links such as ngrok).
+      .then((d) => setUser((u) => u ?? d?.user ?? null))
+      .catch(() => setUser((u) => u))
       .finally(() => setLoading(false));
   }, []);
 

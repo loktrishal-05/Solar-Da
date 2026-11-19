@@ -6,8 +6,22 @@ import { EmptyState } from './ui';
 import { Landing } from './pages/Landing';
 
 // Every page except the landing page is its own chunk, loaded when first visited.
+// After a redeploy the old chunk files are gone: reload once to pick up the new build, then explain instead of a blank page.
+const RELOAD_KEY = 'solarda.chunk-reload';
+const ChunkError: React.FC = () => (
+  <EmptyState title="Solarda was updated" body="This page belongs to an older version of the site."
+              action={<button onClick={() => window.location.reload()} className="font-semibold text-leaf-700 underline">Reload the page</button>} />
+);
 const named = <K extends string>(load: () => Promise<Record<K, React.FC>>, name: K) =>
-  lazy(() => load().then((m) => ({ default: m[name] })));
+  lazy(() => load().then((m) => {
+    try { sessionStorage.removeItem(RELOAD_KEY); } catch { /* storage blocked */ }
+    return { default: m[name] };
+  }).catch(() => {
+    let first = false;
+    try { first = !sessionStorage.getItem(RELOAD_KEY); if (first) sessionStorage.setItem(RELOAD_KEY, '1'); } catch { /* storage blocked: no reload loop */ }
+    if (first) { window.location.reload(); return new Promise<never>(() => {}); }
+    return { default: ChunkError };
+  }));
 const wrapped = () => import('./pages/Wrapped');
 const Login = named(() => import('./pages/Auth'), 'Login');
 const Signup = named(() => import('./pages/Auth'), 'Signup');

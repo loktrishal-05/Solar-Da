@@ -16,7 +16,7 @@ test('allowed backend paths are forwarded with their query string', async () => 
 
 test('anything else is refused without contacting the backend', async () => {
   calls.length = 0;
-  for (const p of ['', 'admin', 'api/../admin', 'agents/%2e%2e/secret', '//evil.example/x', 'https://evil.example/', 'api']) {
+  for (const p of ['', 'admin', 'api/../admin', 'agents/%2e%2e/secret', 'api/..%2f..%2fadmin', 'api/%5c..%5cadmin', '//evil.example/x', 'https://evil.example/', 'api']) {
     assert.equal((await hit(p)).status, 400, p);
   }
   assert.equal(calls.length, 0);

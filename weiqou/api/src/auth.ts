@@ -89,7 +89,7 @@ const SignupSchema = z.object({
   email: z.string({ required_error: 'Enter your email' }).trim().email('Enter a valid email address').max(120, 'Email is too long'),
   password: z.string({ required_error: 'Enter a password' }).min(8, 'Password must be at least 8 characters').max(200, 'Password is too long'),
 });
-const LoginSchema = z.object({ email: z.string().trim(), password: z.string() });
+const LoginSchema = z.object({ email: z.string().trim().max(254), password: z.string().max(200) });
 
 export const authRouter = Router();
 
@@ -125,7 +125,8 @@ authRouter.post('/auth/login', (req: Request, res: Response) => {
   if (!p.success || !user || !verifyPassword(p.data.password, user.password)) {
     if (email) {
       if (failures.size > 5000) for (const k of failures.keys()) if (!recentFailures(k).length) failures.delete(k);
-      failures.set(email, [...recent, Date.now()]);
+      // Still full after the sweep (a flood of distinct emails): stop remembering rather than grow without bound.
+      if (failures.size <= 5000) failures.set(email, [...recent, Date.now()]);
     }
     return res.status(401).json({ error: 'Wrong email or password' });
   }

@@ -18,7 +18,7 @@ Please do not open a public issue for a vulnerability.
 | Agent-only routes | Dispatching actions, writing the audit log and clearing the E-stop through the agent runtime need the shared `X-Solarda-Internal` key, so a browser cannot forge an approval. Anyone may engage the E-stop; only an agronomist or admin may clear it. | `auth.ts` (`requireAgentRuntime`), `routes.ts` | `api_guards.test.ts`, `test_api_client_key.py` |
 | Audit log | Append-only and hash-chained; `GET /api/audit/verify` reports the first edited entry. | `agent_routes.ts` | `audit_chain.test.ts` |
 | HTTP | No CORS grants (same-origin app), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, `Cache-Control: no-store`, no `X-Powered-By`; JSON errors without stack traces; malformed JSON is a 400. | `weiqou/api/src/app.ts`, agent and vision services | `app_hardening.test.ts`, `test_route_errors.py`, `test_vision.py` |
-| Public proxy | The Vercel edge proxy forwards only `/api/`, `/agents/` and `/vision/` paths to the backend; the target is resolved before it is checked, so `..` cannot escape. | `weiqou/web/api/p.js` | `p.test.mjs` |
+| Public proxy | The Vercel edge proxy forwards only `/api/`, `/agents/` and `/vision/` paths to the backend; the target is resolved before it is checked, so `..` cannot escape, and encoded slashes or backslashes are refused. | `weiqou/web/api/p.js` | `p.test.mjs` |
 | Secrets | Session secret and internal key are generated per machine into gitignored `data/runtime/` with mode 0600 (`make secrets`); API keys live in the gitignored `.env`. No secrets in git. | `Makefile`, `.gitignore` | - |
 
 ## Known limits
