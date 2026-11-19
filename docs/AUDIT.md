@@ -88,4 +88,5 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Item | Status | Evidence |
 |---|---|---|
 | Sign-in (`/api/auth/signup`, `login`, `logout`, `me`) | new, real | local JSON store `data/runtime/users.json`, scrypt hashes, HMAC cookie; demo accounts from `weiqou/api/seed/users.json` (demo-only passwords); `auth.test.ts` 9 tests |
+| Approvals (`POST /api/runs/:id/resume`) | new, real | agronomist/admin only; API stamps `decided_by`, writes audit `type: approval`, forwards with `X-Solarda-Internal`; agent runtime refuses resume without the key when `SOLARDA_INTERNAL_KEY` is set (`make dev` sets it). Tests: `approvals.test.ts`, `test_resume_key.py` |
 | Unused UI components (~50 files, `Dark*`, legacy `TerraSub/`, `SolarDa/`) | dead code | not imported anywhere; kept for now (not on the demo path) |

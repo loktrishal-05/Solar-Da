@@ -1,10 +1,11 @@
 """Agent runtime API (FastAPI). Replay control, farm-shift runs, approvals, E-STOP, SSE stream."""
 import asyncio
+import hmac
 import os
 import json
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
@@ -170,7 +171,11 @@ class Resume(BaseModel):
 
 
 @app.post("/runs/{run_id}/resume")
-def run_resume(run_id: str, req: Resume):
+def run_resume(run_id: str, req: Resume, x_solarda_internal: str | None = Header(default=None)):
+    # With a key configured, approvals must arrive through the API, which checks the approver's role and stamps who decided.
+    key = os.environ.get("SOLARDA_INTERNAL_KEY")
+    if key and not hmac.compare_digest(x_solarda_internal or "", key):
+        raise HTTPException(403, "approvals go through the API")
     try:
         values = runner.resume_run(run_id, [a.model_dump(mode="json", exclude_none=True) for a in req.approvals])
     except ValueError as e:
