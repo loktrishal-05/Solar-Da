@@ -96,9 +96,8 @@ make dev      # web :3000, API :3001, agents :8000, crop twin :8100, vision :820
 make health   # OK/DOWN per service
 make test     # every suite;  make lint;  make stop;  make reset (clear demo runs, keep accounts)
 ```
-Docker: `make docker` (one container on :7860). Windows: `scripts/start_all.ps1`. Laptop as the server with a public URL:
-`scripts/go_live.ps1` (Docker + ngrok on the static domain in the gitignored `.ngrok-domain`; the Vercel proxy `weiqou/web/api/p.js`
-forwards to it, target set by `BACKEND_URL`).
+Docker: `make docker` (one container on :7860). Windows: `scripts/start_all.ps1`. Presenting from a laptop: double-click **Start Solarda** (`scripts/go_live.ps1`: starts Docker Desktop if needed, runs the container, opens http://localhost:3000; **Stop Solarda** is `scripts/stop_live.ps1`).
+Add `-Public` for ngrok on the static domain in the gitignored `.ngrok-domain`; the Vercel proxy `weiqou/web/api/p.js` forwards to it, target set by `BACKEND_URL`.
 
 Optional keys go in a gitignored `.env` (see `.env.example`): `GEMINI_API_KEY` for the LLM (without it the offline advisor
 answers), `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` for phone alerts, `DATA_GOV_API_KEY` for live mandi prices.
