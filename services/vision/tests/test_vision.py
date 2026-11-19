@@ -70,3 +70,39 @@ def test_leaf_crop_trims_background_and_leaves_full_frame_leaves_alone():
 def test_no_cross_origin_access():
     r = client.get("/health", headers={"Origin": "https://evil.example"})
     assert "access-control-allow-origin" not in r.headers
+
+
+def _scene(kind: str) -> bytes:
+    """Synthetic non-plant photos (textured so they pass the blur/brightness gates)."""
+    import numpy as np
+    from PIL import ImageDraw
+
+    rng = np.random.default_rng(1)
+    if kind == "noise":
+        return _jpeg(Image.fromarray(rng.integers(0, 255, (480, 640, 3), dtype="uint8")))
+    im = Image.new("RGB", (640, 480), (135, 190, 235))
+    d = ImageDraw.Draw(im)
+    d.rectangle([0, 330, 640, 480], fill=(70, 70, 75))
+    d.rectangle([90, 240, 550, 360], fill=(190, 20, 25))
+    d.polygon([(190, 240), (260, 170), (420, 170), (470, 240)], fill=(180, 15, 20))
+    for x in (170, 470):
+        d.ellipse([x - 45, 320, x + 45, 410], fill=(20, 20, 20))
+    a = np.asarray(im).astype(int) + rng.integers(-25, 25, (480, 640, 3))
+    return _jpeg(Image.fromarray(np.clip(a, 0, 255).astype("uint8")))
+
+
+@needs_model
+@pytest.mark.parametrize("kind", ["car", "noise"])
+def test_non_plant_photo_is_refused_without_naming_a_disease(kind):
+    r = client.post("/vision/classify", files={"image": ("x.jpg", _scene(kind), "image/jpeg")})
+    body = r.json()
+    assert r.status_code == 200 and body["abstain"] and body["not_a_leaf"], body
+    assert body["predictions"] == [] and "not look like a plant" in body["reason"]
+
+
+@needs_model
+def test_demo_leaves_pass_the_plant_gate_and_get_a_diagnosis():
+    for f in sorted((ROOT / "data/demo_images").glob("*.jpg")):
+        body = client.post("/vision/classify", files={"image": (f.name, f.read_bytes(), "image/jpeg")}).json()
+        assert not body.get("not_a_leaf") and body["predictions"], (f.name, body)
+        assert body["plant_score"] >= 0.8

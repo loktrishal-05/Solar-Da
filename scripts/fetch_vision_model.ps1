@@ -17,4 +17,10 @@ if (-not $Zip) {
 Expand-Archive -Path $Zip -DestinationPath $dest -Force
 Get-ChildItem $dest | Format-Table Name, Length
 if (-not (Test-Path (Join-Path $dest 'leaf_disease.onnx'))) { throw 'leaf_disease.onnx missing from the archive' }
+# Plant / not-a-plant gate (CLIP image encoder, 89 MB, Hugging Face Xenova/clip-vit-base-patch32). Without it the service refuses to answer.
+$gate = Join-Path $dest 'leaf_gate.onnx'
+if (-not (Test-Path $gate)) {
+    Write-Host 'Downloading plant gate model (89 MB)'
+    Invoke-WebRequest -Uri 'https://huggingface.co/Xenova/clip-vit-base-patch32/resolve/main/onnx/vision_model_quantized.onnx' -OutFile $gate
+}
 Write-Host 'Vision model installed.'

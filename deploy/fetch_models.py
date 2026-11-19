@@ -16,3 +16,13 @@ for url, dest, marker in [
         zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(url).read())).extractall(dest)
     except Exception as e:  # noqa: BLE001
         print(f"WARNING: could not fetch {url}: {e}")
+
+# Plant / not-a-plant gate for the vision service (CLIP image encoder, Hugging Face, 89 MB).
+gate = pathlib.Path("services/vision/model/leaf_gate.onnx")
+if not gate.exists():
+    try:
+        gate.parent.mkdir(parents=True, exist_ok=True)
+        gate.write_bytes(urllib.request.urlopen(
+            "https://huggingface.co/Xenova/clip-vit-base-patch32/resolve/main/onnx/vision_model_quantized.onnx").read())
+    except Exception as e:  # noqa: BLE001
+        print(f"WARNING: could not fetch the plant gate model: {e}")

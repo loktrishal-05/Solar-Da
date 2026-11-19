@@ -1,8 +1,8 @@
 """Leaf-disease classifier: ONNX model trained in Colab (services/vision/train), temperature-calibrated,
 with an abstain gate. It abstains, and asks for another photo, instead of guessing.
 
-Model files live in services/vision/model/: leaf_disease.onnx (not in git; fetch with scripts/fetch_vision_model.ps1),
-labels.json, calibration.json, metrics.json (committed).
+Model files live in services/vision/model/: leaf_disease.onnx and leaf_gate.onnx (not in git; fetch with scripts/fetch_vision_model.ps1),
+leaf_gate.json (plant / not-a-plant text embeddings), labels.json, calibration.json, metrics.json (committed).
 """
 import io
 import json
@@ -11,6 +11,8 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageFilter, ImageOps, ImageStat
+
+from . import leafgate
 
 MODEL_DIR = Path(__file__).resolve().parents[1] / "model"
 IMG = 224
@@ -39,7 +41,8 @@ def _model():
 
 
 def available() -> bool:
-    return (MODEL_DIR / "leaf_disease.onnx").exists()
+    # Fail closed: without the plant gate a car photo would get a disease name, so both models must be installed.
+    return (MODEL_DIR / "leaf_disease.onnx").exists() and leafgate.available()
 
 
 def metrics() -> dict:
@@ -90,6 +93,11 @@ def softmax(z: np.ndarray) -> np.ndarray:
 
 def classify(image_bytes: bytes, top_k: int = 3, crop: bool | None = None) -> dict:
     img = ImageOps.exif_transpose(Image.open(io.BytesIO(image_bytes))).convert("RGB")
+    score, gate = leafgate.plant_score(img)
+    if score < gate:
+        return {"abstain": True, "not_a_leaf": True, "plant_score": round(score, 3), "predictions": [],
+                "reason": "This does not look like a plant leaf, so no disease check was run. "
+                          "Take a close, sharp photo of one leaf."}
     ok, why, q = photo_quality(img)
     if not ok:
         return {"abstain": True, "reason": why, "quality": q, "predictions": []}
@@ -109,5 +117,5 @@ def classify(image_bytes: bytes, top_k: int = 3, crop: bool | None = None) -> di
         return {"abstain": True, "quality": q, "predictions": preds,
                 "reason": f"Not confident enough ({top['confidence']:.0%} < {cal['abstain_threshold']:.0%}). "
                           "Retake a close, sharp photo of one affected leaf."}
-    return {"abstain": False, "quality": q, "predictions": preds, "top": top,
+    return {"abstain": False, "plant_score": round(score, 3), "quality": q, "predictions": preds, "top": top,
             "threshold": cal["abstain_threshold"], "calibrated": True}
