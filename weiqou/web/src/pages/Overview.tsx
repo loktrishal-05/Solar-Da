@@ -48,7 +48,7 @@ export const Overview: React.FC = () => {
       <PageHeader
         title={`${greet()}, ${user?.name ?? ''}`}
         subtitle={approver
-          ? (pendingApprovals ? `${pendingApprovals} proposal${pendingApprovals > 1 ? 's' : ''} wait for your decision.` : 'Nothing waits for your decision right now.')
+          ? (pendingApprovals ? `${pendingApprovals} proposal${pendingApprovals > 1 ? 's wait' : ' waits'} for your decision.` : 'Nothing waits for your decision right now.')
           : 'Here is what the agent proposed, what the safety engine allowed or blocked, and what is waiting for an agronomist.'}
         actions={<Link to="/app/console" className="rounded-full bg-leaf-700 px-4 py-2 text-sm font-semibold text-white hover:bg-leaf-800">Open agent console</Link>}
       />

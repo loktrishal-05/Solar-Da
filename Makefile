@@ -2,6 +2,7 @@
 #   make setup   once: node deps + build, three Python 3.11 venvs (uv), model weights, local secrets
 #   make dev     start api :3001, agents :8000, twin :8100, vision :8200, web :3000 (logs in data/runtime/logs)
 #   make stop | make health | make test | make docker
+#   make reset   clear runs, approvals, audit and outbox before a demo (keeps accounts and secrets)
 SHELL := /bin/bash
 RT    := data/runtime
 SVCS  := agents twin vision
@@ -9,7 +10,7 @@ PY     = services/$(1)/.venv/bin/python
 # Every service sees .env (optional) plus the two generated secrets.
 ENV   := set -a; [ -f .env ] && . ./.env; SESSION_SECRET=$$(cat $(RT)/.session_secret); SOLARDA_INTERNAL_KEY=$$(cat $(RT)/.internal_key); set +a
 
-.PHONY: setup dev stop health test docker logs
+.PHONY: setup dev stop health test docker logs reset
 
 setup:
 	npm ci
@@ -43,6 +44,10 @@ stop:
 health:
 	@for u in localhost:3001/api/health localhost:8000/health localhost:8100/health localhost:8200/health localhost:3000; do \
 	  curl -sf -m 5 -o /dev/null http://$$u && echo "OK   $$u" || echo "DOWN $$u (see $(RT)/logs)"; done
+
+reset: stop
+	rm -f $(RT)/actions.jsonl $(RT)/audit.jsonl $(RT)/runs.json $(RT)/sms_outbox.jsonl $(RT)/checkpoints.sqlite*
+	@echo "demo state cleared (accounts kept) -> make dev"
 
 logs:
 	@tail -n 20 $(RT)/logs/*.log

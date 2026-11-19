@@ -2,7 +2,7 @@
 
 ## D1: Theme (2026-10-23)
 Conflict: `docs/HANDOFF.md` says dark theme is the consensus; the running app (`App.tsx` -> `Light*` components) and the live site are light.
-Decision (CONFIRMED by the owner 2026-10-24): the current light UI/UX is fixed and is the only one wanted; do not restyle it, new work must reuse its existing components and classes. **light is the shipped theme**, because it is what renders and what the live site shows. Dark* components remain in the tree unwired. Owner can reverse this; change `App.tsx` imports.
+**Superseded by D18 (2026-11-19).** Decision (CONFIRMED by the owner 2026-10-24): the current light UI/UX is fixed and is the only one wanted; do not restyle it, new work must reuse its existing components and classes. **light is the shipped theme**, because it is what renders and what the live site shows. Dark* components remain in the tree unwired. Owner can reverse this; change `App.tsx` imports.
 
 ## D2: Python interpreters and AquaCrop version (2026-10-23)
 Test install on Windows 11:
@@ -127,3 +127,11 @@ The old joblib path stays only as a fallback and for training. The Gemini chat m
 
 ## D17: Memory trims for small hosts (2026-10-25)
 Disabling the ONNX CPU memory arena and mem-pattern planning for the 51 tiny sensor models cut the agents service by ~200 MB (207 MB -> 6 MB for all sessions, same outputs: 70 agent tests pass). The vision model uses an unoptimised-graph session (113 -> ~90 MB). supervisord was replaced by `deploy/start.sh` (-30 MB). Container total under a running scenario: 543 -> ~450 MiB. CPU ONNX is 0.07 s per leaf image, so no GPU is needed.
+
+## D18: Product shell for the finale (2026-11-19)
+The team lead asked for an enterprise-style product for the finale (landing page, sign-in, one page per feature) and for a UI/UX overhaul; this reverses D1's "do not restyle".
+Decision: keep the light theme and the existing feature components, wrap them in a routed app shell with Solarda tokens
+(`weiqou/web/tailwind.config.js`: leaf greens, verdict colours allow/modify/veto/human; Bricolage Grotesque + IBM Plex Sans).
+Local sign-in in the Express API (JSON store, scrypt, HMAC cookie) with farmer/agronomist/admin roles; approvals go through
+`POST /api/runs/:id/resume` (agronomist/admin only, approver recorded). Work on branch `finale`, merged to `main` by PR
+(main is protected). Plan: `docs/superpowers/plans/2026-11-19-finale-product.md`.
