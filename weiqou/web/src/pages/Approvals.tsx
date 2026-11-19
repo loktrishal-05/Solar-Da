@@ -64,7 +64,7 @@ export const Approvals: React.FC = () => {
           {pending.map((req) => (
             <Card key={req.run_id} as="article" className="border-human/30">
               <div className="flex items-start justify-between gap-3">
-                <div className="text-sm text-ink/60">Run {req.run_id} · farm time {req.sim_time.slice(5, 16).replace('T', ' ')}</div>
+                <div className="text-sm text-ink/70">Run {req.run_id} · farm time {req.sim_time.slice(5, 16).replace('T', ' ')}</div>
                 <VerdictStamp verdict="needs_human" className="text-base shrink-0" />
               </div>
               <ul className="mt-3 space-y-4">
@@ -72,9 +72,9 @@ export const Approvals: React.FC = () => {
                   <li key={action.id}>
                     <div className="font-display text-xl font-bold text-leaf-950">{KIND[action.kind] ?? action.kind} · {action.zone}</div>
                     <div className="text-[15px] text-ink/80">{params(verdict.modified_params ?? action.params)}</div>
-                    <p className="mt-1 text-[15px]"><span className="text-ink/55">Why the agent wants it: </span>{action.rationale}</p>
-                    <p className="text-[15px]"><span className="text-ink/55">Safety engine: </span>{verdict.reason}</p>
-                    <p className="text-sm text-ink/55">Expected result: {action.expected_effect}</p>
+                    <p className="mt-1 text-[15px]"><span className="text-ink/70">Why the agent wants it: </span>{action.rationale}</p>
+                    <p className="text-[15px]"><span className="text-ink/70">Safety engine: </span>{verdict.reason}</p>
+                    <p className="text-sm text-ink/70">Expected result: {action.expected_effect}</p>
                     {typeof action.params.note === 'string' && <p className="mt-1 text-sm italic text-ink/70">{action.params.note}</p>}
                   </li>
                 ))}
@@ -94,7 +94,7 @@ export const Approvals: React.FC = () => {
 
       <Card className="mt-8">
         <h2 className="font-display text-xl font-bold">Decisions</h2>
-        {!history.length ? <p className="mt-2 text-sm text-ink/60">No decisions yet.</p> : (
+        {!history.length ? <p className="mt-2 text-sm text-ink/70">No decisions yet.</p> : (
           <ul className="mt-3 divide-y divide-leaf-100">
             {history.slice(0, 15).map((h) => (
               <li key={h.run_id + h.ts} className="flex flex-wrap items-center gap-3 py-3 text-[15px]">
@@ -104,8 +104,8 @@ export const Approvals: React.FC = () => {
                   </span>
                 ))}
                 <span className="font-semibold">{h.by}</span>
-                <span className="text-ink/60">run {h.run_id}</span>
-                <span className="ml-auto text-sm text-ink/55">{new Date(h.ts).toLocaleString()}</span>
+                <span className="text-ink/70">run {h.run_id}</span>
+                <span className="ml-auto text-sm text-ink/70">{new Date(h.ts).toLocaleString()}</span>
               </li>
             ))}
           </ul>

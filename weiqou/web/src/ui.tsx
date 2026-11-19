@@ -38,9 +38,9 @@ export const Stat: React.FC<{ label: string; value: React.ReactNode; hint?: Reac
   const color = { default: 'text-leaf-950', veto: 'text-veto', human: 'text-human', allow: 'text-allow' }[tone];
   return (
     <div>
-      <div className="text-sm text-ink/60">{label}</div>
+      <div className="text-sm text-ink/70">{label}</div>
       <div className={`font-display text-3xl font-bold leading-tight ${color}`}>{value}</div>
-      {hint && <div className="text-xs text-ink/55 mt-0.5">{hint}</div>}
+      {hint && <div className="text-xs text-ink/70 mt-0.5">{hint}</div>}
     </div>
   );
 };

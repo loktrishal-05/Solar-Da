@@ -11,7 +11,6 @@
   "dependencies": {
     "@terrasub-solarda/contracts": "*",
     "@terrasub-solarda/engine": "*",
-    "framer-motion": "^13.1.1",
     "lucide-react": "^0.378.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -28,5 +27,7 @@
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
-  }
+  },
+  "description": "Solarda web app",
+  "license": "MIT"
 }

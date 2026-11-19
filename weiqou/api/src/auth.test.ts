@@ -163,3 +163,14 @@ test('the seeded demo accounts keep their roles, so the one-click buttons always
   assert.equal(r.status, 409);
   assert.equal((await post('/demo', { role: 'farmer' })).status, 200);
 });
+
+test('repeated wrong passwords lock that email for a while (429 with Retry-After)', async () => {
+  await post('/signup', { name: 'Target', email: 'target@example.com', password: 'correct-horse-1' });
+  for (let i = 0; i < 10; i++) assert.equal((await post('/login', { email: 'target@example.com', password: `wrong-${i}` })).status, 401);
+  const locked = await post('/login', { email: 'TARGET@example.com', password: 'correct-horse-1' });
+  assert.equal(locked.status, 429);
+  assert.ok(Number(locked.headers.get('retry-after')) > 0);
+  assert.match((await locked.json()).error, /Too many/);
+  // Other accounts are unaffected.
+  assert.equal((await post('/login', { email: seededAgronomist.email, password: seededAgronomist.password })).status, 200);
+});

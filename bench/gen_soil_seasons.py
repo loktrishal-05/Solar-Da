@@ -14,6 +14,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services" / "twin"))
 from aquacrop import AquaCropModel, Crop, InitialWaterContent, IrrigationManagement, Soil  # noqa: E402
+
 from app import twin  # noqa: E402
 
 SEED, SEASONS_PER_YEAR = 1337, 24

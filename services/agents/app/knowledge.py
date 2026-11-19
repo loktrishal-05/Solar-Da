@@ -56,7 +56,7 @@ def search(query: str, k: int = 3, k1: float = 1.5, b: float = 0.75) -> list[dic
         if s > 0:
             # Phrase bonus: "late blight" should beat a passage that only says "blight".
             joined = " ".join(c["tokens"])
-            s += 3.0 * sum(f"{a} {b}" in joined for a, b in zip(q, q[1:]))
+            s += 3.0 * sum(f"{a} {b}" in joined for a, b in zip(q, q[1:], strict=False))
             scored.append((s, c))
     scored.sort(key=lambda x: -x[0])
     return [{**{k_: v for k_, v in c.items() if k_ != "tokens"}, "score": round(s, 2)} for s, c in scored[:k]]

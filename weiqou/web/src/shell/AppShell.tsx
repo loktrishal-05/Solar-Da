@@ -91,6 +91,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   return (
     <ShellCtx.Provider value={{ eStopActive, toggleEStop, backendUp, pendingApprovals }}>
       <div className="min-h-screen bg-paper lg:pl-64">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-leaf-900 focus:shadow">Skip to main content</a>
         <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-leaf-950 px-4 py-5 flex flex-col gap-6 transition-transform lg:translate-x-0 ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="flex items-center justify-between px-2">
             <Link to="/"><Logo light /></Link>
@@ -138,7 +139,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
           </div>
         )}
 
-        <main className="px-4 lg:px-8 py-6 max-w-[1400px]">{children}</main>
+        <main id="main" tabIndex={-1} className="px-4 lg:px-8 py-6 max-w-[1400px] focus:outline-none">{children}</main>
 
         {chatOpen && (
           <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={() => setChatOpen(false)}>

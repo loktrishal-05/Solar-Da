@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { navigate, usePath } from './router';
 
 export type Role = 'farmer' | 'agronomist' | 'admin';
@@ -42,9 +43,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => setUser(await send('login', { email, password })), []);
-  const demo = useCallback(async (role: Role) => setUser(await send('demo', { role })), []);
-  const signup = useCallback(async (input: SignupInput) => setUser(await send('signup', input)), []);
+  // Commit the user before the caller navigates: the router renders synchronously on navigation, and without this the
+  // protected page would briefly see "no user" and bounce back to /login (seen in production builds).
+  const commit = (u: User) => flushSync(() => setUser(u));
+  const login = useCallback(async (email: string, password: string) => commit(await send('login', { email, password })), []);
+  const demo = useCallback(async (role: Role) => commit(await send('demo', { role })), []);
+  const signup = useCallback(async (input: SignupInput) => commit(await send('signup', input)), []);
   const logout = useCallback(async () => {
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setUser(null);

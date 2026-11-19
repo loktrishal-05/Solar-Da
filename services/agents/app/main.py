@@ -1,12 +1,11 @@
 """Agent runtime API (FastAPI). Replay control, farm-shift runs, approvals, E-STOP, SSE stream."""
 import asyncio
 import hmac
-import os
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
@@ -16,7 +15,7 @@ from .models import Approval
 from .replay.scenario import list_scenarios, load_scenario
 
 app = FastAPI(title="Solarda agent runtime")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# No CORS middleware: the web app reaches this service through the same origin (Vite proxy, nginx, Vercel proxy).
 session: runner.Session | None = None
 
 
@@ -58,7 +57,7 @@ def replay_start(req: ReplayStart):
     try:
         session = runner.Session(req.scenario, req.speed, req.autonomy, req.loop)
     except (FileNotFoundError, ValueError) as e:
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, str(e)) from e
     session.thread.start()
     return session.info()
 
@@ -86,7 +85,7 @@ def replay_seek(req: Seek):
     try:
         s.seek(req.ts)
     except ValueError as e:
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, str(e)) from e
     return s.info()
 
 
@@ -96,7 +95,7 @@ def replay_speed(speed: int):
     try:
         s.clock.set_speed(speed)
     except ValueError as e:
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, str(e)) from e
     return s.info()
 
 
@@ -146,7 +145,7 @@ def runs_start(req: RunStart):
     try:
         sc = load_scenario(req.scenario)
     except FileNotFoundError as e:
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, str(e)) from e
     sim_time = req.sim_time or (session.info()["sim_time"] if session and session.sc["name"] == req.scenario else sc["start"])
     sid = session.id if session and session.sc["name"] == req.scenario else f"{req.scenario}-manual"
     tick = len([r for r in runner.list_runs() if r.startswith(sid + ":")]) + 500
@@ -189,7 +188,7 @@ def run_resume(run_id: str, req: Resume, x_solarda_internal: str | None = Header
     try:
         values = runner.resume_run(run_id, [a.model_dump(mode="json", exclude_none=True) for a in req.approvals])
     except ValueError as e:
-        raise HTTPException(409, str(e))
+        raise HTTPException(409, str(e)) from e
     return {"run_id": run_id, **runner.list_runs()[run_id], "dispatched": values.get("dispatched", [])}
 
 

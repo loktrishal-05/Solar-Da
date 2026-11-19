@@ -6,7 +6,6 @@ Any value this module alters is re-tagged source="simulated" so it is never show
 """
 from .clock import parse_ts
 
-
 PLANT_EVENTS = ("offset", "pump_failure")
 
 

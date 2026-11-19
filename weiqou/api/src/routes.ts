@@ -255,7 +255,7 @@ router.post('/proposals/:id/confirm', (req: Request, res: Response) => {
       harvestBlockActiveUntilMs: 0,
     },
     Date.now(),
-    (p) => true // Dispatch mock callback -> returns hardware ACK true
+    (_p) => true // Dispatch mock callback -> returns hardware ACK true
   );
 
   if (pipelineResult.status === 'DISPATCHED_AND_VERIFIED') {

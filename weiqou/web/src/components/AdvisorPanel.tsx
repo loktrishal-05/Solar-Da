@@ -71,7 +71,7 @@ export const AdvisorPanel: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidth
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm space-y-3">
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <h3 className="font-black uppercase tracking-wider text-[#1B4332] mr-auto">Farmer advisor</h3>
+        <h2 className="font-black uppercase tracking-wider text-[#1B4332] mr-auto">Farmer advisor</h2>
         <div className="flex rounded-full border overflow-hidden font-mono">
           {(['ta', 'en'] as const).map((l) => (
             <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 ${lang === l ? 'bg-[#1B4332] text-white' : 'bg-white'}`}>{l === 'ta' ? 'தமிழ்' : 'English'}</button>
@@ -96,10 +96,10 @@ export const AdvisorPanel: React.FC<{ lowBandwidth: boolean }> = ({ lowBandwidth
       <div className="space-y-2">
         {turns.map((t, i) => (
           <div key={i} className={`rounded-xl border p-3 text-sm ${t.escalated ? 'border-amber-300 bg-amber-50' : 'border-gray-200'}`}>
-            <div className="text-xs text-gray-500 mb-1">{t.q}</div>
+            <div className="text-xs text-gray-600 mb-1">{t.q}</div>
             {t.escalated && <div className="text-xs font-bold text-amber-800 flex items-center gap-1 mb-1"><ShieldAlert className="w-3.5 h-3.5" /> Escalated to a human ({t.risk})</div>}
             <div className="whitespace-pre-wrap">{t.answer}</div>
-            {t.citations.length > 0 && <ol className="mt-2 text-[11px] text-gray-500 list-decimal ml-4">{t.citations.map((c) => <li key={c}>{c}</li>)}</ol>}
+            {t.citations.length > 0 && <ol className="mt-2 text-[11px] text-gray-600 list-decimal ml-4">{t.citations.map((c) => <li key={c}>{c}</li>)}</ol>}
             <div className="flex gap-2 mt-2">
               <button onClick={() => navigator.clipboard?.writeText(plain(t))} className="text-[11px] flex items-center gap-1 text-gray-600 hover:text-gray-900"><Copy className="w-3 h-3" /> Copy plain text (forward by SMS/WhatsApp)</button>
               {canSpeak && <button onClick={() => speak(t.answer)} className="text-[11px] flex items-center gap-1 text-gray-600 hover:text-gray-900"><Volume2 className="w-3 h-3" /> Read aloud</button>}

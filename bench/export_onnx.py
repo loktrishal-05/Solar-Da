@@ -6,9 +6,8 @@ from pathlib import Path
 
 import joblib
 import numpy as np
-from skl2onnx import to_onnx
-
 import skl2onnx.common.tree_ensemble as _te
+from skl2onnx import to_onnx
 
 _add = _te.add_node  # skl2onnx 1.20 passes numpy bools for the missing-value flag; ONNX wants ints
 

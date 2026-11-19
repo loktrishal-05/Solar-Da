@@ -105,12 +105,31 @@ authRouter.post('/auth/signup', (req: Request, res: Response) => {
   res.status(201).setHeader('Set-Cookie', sessionCookie(user.id)).json({ user: toPublic(user) });
 });
 
+// Failed sign-ins are limited per email (requests arrive through proxies, so the caller's IP is not meaningful).
+// ponytail: in-memory window per process; move to a shared store if the API ever runs as several instances.
+const FAIL_LIMIT = 10;
+const FAIL_WINDOW_MS = 15 * 60 * 1000;
+const failures = new Map<string, number[]>();
+const recentFailures = (email: string) => (failures.get(email) ?? []).filter((t) => Date.now() - t < FAIL_WINDOW_MS);
+
 authRouter.post('/auth/login', (req: Request, res: Response) => {
   const p = LoginSchema.safeParse(req.body);
-  const user = p.success ? readUsers().find((u) => u.email === p.data.email.toLowerCase()) : undefined;
+  const email = p.success ? p.data.email.toLowerCase() : '';
+  const recent = recentFailures(email);
+  if (recent.length >= FAIL_LIMIT) {
+    const wait = Math.ceil((FAIL_WINDOW_MS - (Date.now() - recent[0])) / 1000);
+    return res.status(429).setHeader('Retry-After', String(wait))
+      .json({ error: `Too many failed sign-ins for this email. Try again in ${Math.ceil(wait / 60)} minutes.` });
+  }
+  const user = p.success ? readUsers().find((u) => u.email === email) : undefined;
   if (!p.success || !user || !verifyPassword(p.data.password, user.password)) {
+    if (email) {
+      if (failures.size > 5000) for (const k of failures.keys()) if (!recentFailures(k).length) failures.delete(k);
+      failures.set(email, [...recent, Date.now()]);
+    }
     return res.status(401).json({ error: 'Wrong email or password' });
   }
+  failures.delete(email);
   res.setHeader('Set-Cookie', sessionCookie(user.id)).json({ user: toPublic(user) });
 });
 

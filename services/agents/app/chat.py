@@ -15,7 +15,8 @@ engine still decides every action. Farm data is replayed or simulated and the as
 import json
 import re
 import time
-from typing import Callable, Iterator, Literal
+from collections.abc import Callable, Iterator
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -148,12 +149,13 @@ def tool_price_outlook() -> dict:
 
 def tool_weather_now() -> dict:
     """Real current weather and 3-day forecast for the farm site from Open-Meteo (free, no key). Not replayed."""
-    import json, urllib.request
+    import json
+    import urllib.request
+
     from .weather import SITE
-    url = ("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&timezone=Asia%%2FKolkata&forecast_days=3"
+    url = (f"https://api.open-meteo.com/v1/forecast?latitude={SITE['lat']}&longitude={SITE['lon']}&timezone=Asia%2FKolkata&forecast_days=3"
            "&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m"
-           "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max"
-           % (SITE["lat"], SITE["lon"]))
+           "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max")
     try:
         d = json.load(urllib.request.urlopen(url, timeout=8))
     except Exception as e:
@@ -164,7 +166,10 @@ def tool_weather_now() -> dict:
 
 def tool_market_price(commodity: str) -> dict:
     """Latest mandi prices in Tamil Nadu from Agmarknet via data.gov.in. Needs the owner's own free DATA_GOV_API_KEY."""
-    import json, os, urllib.parse, urllib.request
+    import json
+    import os
+    import urllib.parse
+    import urllib.request
     key = os.environ.get("DATA_GOV_API_KEY")
     if not key:
         return {"error": "no price service is connected (DATA_GOV_API_KEY is not set); say you cannot give today's mandi price"}

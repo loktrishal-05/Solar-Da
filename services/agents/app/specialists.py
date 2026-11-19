@@ -147,6 +147,7 @@ RESCAN_AFTER_DAYS = 5
 def _new_images(state: dict) -> list[dict]:
     """Photos that arrived since the previous tick (scenario packs schedule them on the replay clock)."""
     from datetime import timedelta
+
     from .replay.clock import fmt_ts, parse_ts
     now = state["sim_time"]
     # Photos since the previous run of this session; a first run looks back one tick.

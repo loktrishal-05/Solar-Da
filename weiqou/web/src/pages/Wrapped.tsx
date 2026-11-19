@@ -113,7 +113,7 @@ export const SettingsPage: React.FC = () => {
           {([['TERRASUB_MVP', 'Soil and substrate beds', 'Pulse irrigation, moisture targets'], ['SOLARDA_V3', 'Hydroponic towers', 'Nutrient tank, pH and EC dosing, solar pump']] as const).map(([m, t, d]) => (
             <button key={m} onClick={() => choose(m as ProductMode)} aria-pressed={mode === m}
                     className={`rounded-lg border px-4 py-3 text-left ${mode === m ? 'border-leaf-600 bg-leaf-50' : 'border-leaf-100 bg-white'}`}>
-              <div className="font-semibold">{t}</div><div className="text-sm text-ink/60">{d}</div>
+              <div className="font-semibold">{t}</div><div className="text-sm text-ink/70">{d}</div>
             </button>
           ))}
         </div>

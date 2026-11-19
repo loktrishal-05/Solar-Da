@@ -1,11 +1,10 @@
 """Vision service: POST /vision/classify (leaf image -> label with calibrated confidence, or abstain)."""
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
 
 from . import classifier
 
 app = FastAPI(title="Solarda vision")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# No CORS middleware: the web app reaches this service through the same origin (Vite proxy, nginx, Vercel proxy).
 MAX_BYTES = 10 * 1024 * 1024
 
 
@@ -28,5 +27,5 @@ async def classify(image: UploadFile = File(...)):
         raise HTTPException(503, "model not installed: run scripts/fetch_vision_model.ps1")
     try:
         return classifier.classify(data)
-    except OSError:
-        raise HTTPException(400, "not a readable image")
+    except OSError as e:
+        raise HTTPException(400, "not a readable image") from e

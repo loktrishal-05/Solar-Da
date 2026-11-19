@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, ThumbsUp, CheckCircle2, Users, Send, Paperclip } from 'lucide-react';
+import { MessageSquare, ThumbsUp, CheckCircle2, Send, Paperclip } from 'lucide-react';
 
 export const LightCommunitySection: React.FC = () => {
   const [filterTab, setFilterTab] = useState<string>('ALL');
@@ -111,36 +111,36 @@ export const LightCommunitySection: React.FC = () => {
                         <span className="font-bold text-gray-900 text-xs">{t.author}</span>
                         <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-mono text-[10px]">{t.role}</span>
                         {t.verified && (
-                          <span className="px-2 py-0.5 rounded bg-emerald-50 text-[#059669] border border-emerald-200 font-bold text-[10px] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-[#059669]" /> Verified
+                          <span className="px-2 py-0.5 rounded bg-emerald-50 text-[#047857] border border-emerald-200 font-bold text-[10px] flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-[#047857]" /> Verified
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <span className="text-gray-400 text-[10px]">{t.timestamp}</span>
+                  <span className="text-gray-600 text-[10px]">{t.timestamp}</span>
                 </div>
 
-                <h3 className="font-extrabold text-gray-900 text-sm">{t.title}</h3>
+                <h2 className="font-extrabold text-gray-900 text-sm">{t.title}</h2>
                 <p className="text-xs text-gray-600 leading-relaxed font-normal">{t.preview}</p>
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs font-mono">
                   <div className="flex items-center space-x-4">
                     <button
                       onClick={(e) => handleUpvote(t.id, e)}
-                      className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-[#059669] border border-emerald-200 rounded-full font-bold transition"
+                      className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-[#047857] border border-emerald-200 rounded-full font-bold transition"
                     >
                       <ThumbsUp className="w-3.5 h-3.5" />
                       <span>{upvotesMap[t.id] || 0} Upvotes</span>
                     </button>
 
-                    <span className="flex items-center space-x-1 text-gray-500">
+                    <span className="flex items-center space-x-1 text-gray-600">
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span>{t.replies} Replies</span>
                     </span>
 
                     {t.attachments > 0 && (
-                      <span className="flex items-center space-x-1 text-gray-500">
+                      <span className="flex items-center space-x-1 text-gray-600">
                         <Paperclip className="w-3.5 h-3.5" />
                         <span>{t.attachments} Attached</span>
                       </span>
@@ -162,7 +162,7 @@ export const LightCommunitySection: React.FC = () => {
                       <div key={i} className="p-3 bg-white border border-gray-200 rounded-xl space-y-1 border-l-4 border-l-[#1B4332]">
                         <div className="flex justify-between text-[11px] font-mono text-[#1B4332] font-bold">
                           <span>{r.author} ({r.role})</span>
-                          <span className="text-gray-400">{r.time}</span>
+                          <span className="text-gray-600">{r.time}</span>
                         </div>
                         <p className="text-xs text-gray-700 font-normal leading-relaxed">{r.text}</p>
                       </div>
@@ -205,7 +205,7 @@ export const LightCommunitySection: React.FC = () => {
               <span className="font-bold text-gray-900 font-mono uppercase text-[11px] block">Co-op Bulk Buying Groups</span>
               <div className="p-4 bg-white rounded-xl border border-gray-200 space-y-2 font-mono">
                 <span className="font-bold text-gray-900 block text-xs">Ranipet Fish Gelatin Co-op</span>
-                <span className="text-[11px] text-gray-500 block">34 Members • 1.2 Tons Order</span>
+                <span className="text-[11px] text-gray-600 block">34 Members • 1.2 Tons Order</span>
                 <button className="w-full mt-2 py-2 bg-[#1B4332] hover:bg-[#143326] text-white font-extrabold rounded-full transition shadow-sm">
                   Join Group (22% Bulk Discount)
                 </button>

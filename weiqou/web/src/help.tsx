@@ -79,7 +79,7 @@ export const PageIntro: React.FC = () => {
         <div className="grid gap-4 px-4 pb-4 text-[15px] md:grid-cols-[1.2fr_1fr]">
           <p className="text-ink/80">{intro.what}</p>
           <div>
-            <div className="text-sm font-semibold text-ink/60">You can</div>
+            <div className="text-sm font-semibold text-ink/70">You can</div>
             <ul className="mt-1 list-disc space-y-0.5 pl-5 text-ink/80">{intro.can.map((c) => <li key={c}>{c}</li>)}</ul>
             {intro.tip && <p className="mt-2 text-sm text-leaf-800">{intro.tip}</p>}
             <p className="mt-2 text-sm"><Link to="/guide" className="text-leaf-700 underline">How Solarda works</Link></p>

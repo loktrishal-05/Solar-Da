@@ -117,3 +117,12 @@ Every route in `weiqou/api/src/{routes,agent_routes,auth,approvals}.ts` and `ser
 | Web: sign-in errors | one small red line | error box, invalid fields outlined, focus on password | browser check |
 | Audit log "tamper-evident" claim | append-only only; landing, slides and the round-1 video said hash-chained | each entry stores `prev` + `hash` (sha256); `GET /api/audit/verify` finds an edited entry; pre-chain entries are skipped | `audit_chain.test.ts` |
 | Known, left as is | `POST /api/mode`, `/api/proposals/:id/confirm`, `/api/sms/test`, `/agents/replay/*` need no sign-in | local demo controls; the safety engine still decides every action | - |
+
+## Repository cleanup (2026-11-19, branch `cleanup`, decision D19)
+| Removed | Why | Check |
+|---|---|---|
+| 68 web components (`Dark*`, unused `Light*`, `TerraSub/`, `SolarDa/`, legacy heroes, drawers, modals) | unreachable from `src/main.tsx` (import-graph scan) | web build, all pages browsed |
+| TF.js browser fallback (`@tensorflow/tfjs`, `public/models/`, `scripts/convert_hf_to_tfjs.py`, `scripts/download_tfjs_model.ps1`, `setup_and_test.bat`, `start_dev.bat`, `start_public.bat`, `docs/PLANT_DISEASE_MODEL.md`) | its model files were never in the repo, so it never worked; Crop doctor uses the calibrated vision service only | late-blight sample classified at 99.8% via `/vision/classify`; main bundle 2,392 kB → 791 kB |
+| 10 videos/images in `web/public/media` | used only by removed components; most showed the old TerraSub app | no references left |
+| `prisma/` and deps `@prisma/client`, `prisma`, `cors`, `ws`, `@google/generative-ai`, `ts-node`, `framer-motion` | never imported | `make test` |
+| `docs/HANDOFF.md`, `docs/terrasub-solarda-master-prompt.md`, `docs/deck/build_deck.js` | LLM handoff/prompt notes and a slide generator (organisers ban AI-made slides) | team lead's decision |

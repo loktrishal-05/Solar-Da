@@ -9,9 +9,11 @@ def test_clock_speed_pause_seek_loop():
     c = ReplayClock("2020-03-01T00:00:00Z", "2020-03-01T02:00:00Z", 60, wall=lambda: wall[0])
     wall[0] = 60  # one wall minute = one sim hour at 60x
     assert c.now().isoformat().startswith("2020-03-01T01:00")
-    c.pause(); wall[0] = 600
+    c.pause()
+    wall[0] = 600
     assert c.now().isoformat().startswith("2020-03-01T01:00")
-    c.resume(); c.seek("2020-03-01T00:30:00Z")
+    c.resume()
+    c.seek("2020-03-01T00:30:00Z")
     assert c.now().isoformat().startswith("2020-03-01T00:30")
     wall[0] = 10_000
     assert c.finished
@@ -52,15 +54,18 @@ def test_clean_primaries_have_no_bad_flags_over_14_days():
 
 def test_injected_faults_are_flagged():
     now = "2020-03-05T10:00:00Z"
-    f = lambda t, m, **k: {"type": t, "zone": "tank1" if m in ("ph", "ec", "ec_b") else "feg", "metric": m,
-                           "start": "2020-03-05T08:00:00Z", **k}
+    def f(t, m, **k):
+        return {"type": t, "zone": "tank1" if m in ("ph", "ec", "ec_b") else "feg", "metric": m, "start": "2020-03-05T08:00:00Z", **k}
+
     # Stuck probe during a heat ramp: the partner probe keeps rising, the stuck one does not.
     heat = f("offset", "air_temp", delta=6, ramp_hours=2)
-    ev, q = _window(now, [heat, f("stuck", "air_temp")]);     assert _flagged(q, "air_temp", "stuck")
-    ev, q = _window(now, [f("drift", "ec", rate_per_hour=0.5)]); assert _flagged(q, "ec", "drift")
-    ev, q = _window(now, [f("dropout", "vpd")]);              assert _flagged(q, "vpd", "dropout")
+    for faults, metric, check in [([heat, f("stuck", "air_temp")], "air_temp", "stuck"), ([f("drift", "ec", rate_per_hour=0.5)], "ec", "drift"),
+                                  ([f("dropout", "vpd")], "vpd", "dropout")]:
+        _, q = _window(now, faults)
+        assert _flagged(q, metric, check)
     spike = {"type": "spike", "zone": "feg", "metric": "air_temp", "start": "2020-03-05T09:55:00Z", "magnitude": 9}
-    ev, q = _window(now, [spike]);                            assert _flagged(q, "air_temp", "rate_of_change")
+    ev, q = _window(now, [spike])
+    assert _flagged(q, "air_temp", "rate_of_change")
     assert all(e["source"] == "simulated" for e in ev if e["metric"] == "air_temp" and e["ts"] >= "2020-03-05T09:55")
     assert pump_failed([{"type": "pump_failure", "zone": "tank1", "start": "2020-03-05T08:00:00Z"}], "tank1", now)
 

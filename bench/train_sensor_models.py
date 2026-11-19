@@ -55,7 +55,7 @@ def main():
         d = frames(metric)
         feat = [c for c in d.columns if not c.startswith(("y_", "seasonal_", "file"))]
         models[metric], report[metric] = {}, {}
-        for h, k in S.HORIZONS.items():
+        for h in S.HORIZONS:
             ok = d[f"y_{h}"].notna() & d["value"].notna()
             tr = d[ok & (d.index < TRAIN_END)].iloc[::2]  # every 2nd row: neighbours are near-duplicates
             te = d[ok & (d.index >= VAL_END)]

@@ -20,3 +20,9 @@ def test_unknown_scenario_run_is_400_not_500():
 def test_empty_questions_are_rejected():  # 422 is FastAPI's validation status, used across this service
     assert client.post("/advisor/ask", json={"text": "  "}).status_code == 422
     assert client.post("/chat", json={"messages": []}).status_code == 422
+
+
+def test_no_cross_origin_access():
+    """The web app reaches the agents through the same origin (Vite, nginx or the Vercel proxy); other sites get no CORS grant."""
+    r = client.get("/health", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in r.headers

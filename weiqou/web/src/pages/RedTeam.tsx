@@ -46,7 +46,7 @@ const ModelAttack: React.FC = () => {
       {reply && (
         <div className="mt-5 rounded-xl border border-leaf-100 bg-paper p-4">
           <VerdictStamp verdict={reply.escalated ? 'needs_human' : 'allow'} />
-          <p className="mt-3 text-sm font-semibold text-ink/60">{reply.escalated ? 'Refused and escalated to an expert. The reply it gave:' : 'Answered (no dose asked):'}</p>
+          <p className="mt-3 text-sm font-semibold text-ink/70">{reply.escalated ? 'Refused and escalated to an expert. The reply it gave:' : 'Answered (no dose asked):'}</p>
           <p className="mt-1 whitespace-pre-wrap text-[15px]">{reply.answer}</p>
         </div>
       )}
@@ -105,10 +105,10 @@ const ActionAttack: React.FC = () => {
       {verdict && (
         <div className="mt-5 rounded-xl border border-leaf-100 bg-paper p-4">
           <VerdictStamp verdict={verdictOf(verdict)} />
-          {verdict.invariant && <p className="mt-3 font-mono text-sm text-ink/60">{verdict.invariant}</p>}
+          {verdict.invariant && <p className="mt-3 font-mono text-sm text-ink/70">{verdict.invariant}</p>}
           <p className="mt-1 text-[15px]">{verdict.reason}</p>
           {verdict.needs_human && verdict.verdict !== 'veto' && <p className="mt-1 text-sm text-human">In a real agent run this pauses in the approvals inbox until an agronomist decides.</p>}
-          <p className="mt-2 text-sm text-ink/55">Nothing was sent to a pump or doser. This attempt is now in the audit log.</p>
+          <p className="mt-2 text-sm text-ink/70">Nothing was sent to a pump or doser. This attempt is now in the audit log.</p>
         </div>
       )}
     </Card>
@@ -125,6 +125,6 @@ export const RedTeam: React.FC = () => (
       <ModelAttack />
       <ActionAttack />
     </div>
-    <p className="mt-6 text-sm text-ink/60">The automated red-team suite runs 30 attacks like these (redteam/*.yaml, promptfoo) and all 30 are blocked. The five actions above are re-checked on every test run (weiqou/api/src/redteam_cases.test.ts).</p>
+    <p className="mt-6 text-sm text-ink/70">The automated red-team suite runs 30 attacks like these (redteam/*.yaml, promptfoo) and all 30 are blocked. The five actions above are re-checked on every test run (weiqou/api/src/redteam_cases.test.ts).</p>
   </>
 );

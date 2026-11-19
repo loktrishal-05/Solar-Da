@@ -7,7 +7,7 @@
 data/raw
 data/replay/full
 data/runtime
-sample images
+**/tests
 evidence
 firmware
 *.joblib

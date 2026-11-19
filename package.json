@@ -1,7 +1,7 @@
 {
-  "name": "terrasub-solarda-platform",
+  "name": "solarda",
   "version": "3.0.0",
-  "description": "TerraSub & Solar-Da v3 Agricultural Intelligence Platform Monorepo",
+  "description": "Solarda: safety-gated AI farm agents (monorepo: safety engine, API, web app, contracts)",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -17,8 +17,13 @@
     "dev": "npm run build && concurrently \"npm:dev:api\" \"npm:dev:web\""
   },
   "devDependencies": {
-    "@tensorflow/tfjs": "^4.22.0",
+    "@eslint/js": "^9.17.0",
     "concurrently": "^8.2.2",
-    "typescript": "^5.4.5"
-  }
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.18.2"
+  },
+  "license": "MIT"
 }

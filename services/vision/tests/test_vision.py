@@ -9,6 +9,8 @@ from app import classifier
 from app.main import app
 
 ROOT = Path(__file__).resolve().parents[3]
+# Palm-frond photos: real field photos that are not one of the 38 crop classes.
+PALMS = sorted((Path(__file__).parent / "fixtures").glob("palm_frond_*.jpeg"))
 client = TestClient(app)
 needs_model = pytest.mark.skipif(not classifier.available(), reason="model not fetched (scripts/fetch_vision_model.ps1)")
 
@@ -20,7 +22,7 @@ def _jpeg(img: Image.Image) -> bytes:
 
 
 def test_blurry_photo_abstains_before_the_model():
-    sharp = Image.open(next((ROOT / "sample images").glob("*.jpeg"))).convert("RGB")
+    sharp = Image.open(PALMS[0]).convert("RGB")
     blurry = sharp.filter(ImageFilter.GaussianBlur(12))
     ok, reason, _ = classifier.photo_quality(blurry)
     assert not ok and "blurry" in reason
@@ -42,19 +44,20 @@ def test_known_diseased_leaf_is_classified():
     body = r.json()
     assert r.status_code == 200
     labels = [p["label"] for p in body["predictions"]]
-    assert any("Tomato" in l for l in labels), body
+    assert any("Tomato" in label for label in labels), body
 
 
 @needs_model
 def test_out_of_distribution_palm_photos_mostly_abstain():
-    # The repo's sample photos are palm fronds: not one of the 38 classes. The gate should refuse most of them.
+    # Palm fronds are not one of the 38 classes. The gate should refuse most of them.
     res = [client.post("/vision/classify", files={"image": (p.name, p.read_bytes(), "image/jpeg")}).json()
-           for p in sorted((ROOT / "sample images").glob("*.jpeg"))]
+           for p in PALMS]
     assert sum(r["abstain"] for r in res) >= len(res) // 2 + 1, [r.get("top") for r in res]
 
 
 def test_leaf_crop_trims_background_and_leaves_full_frame_leaves_alone():
     from PIL import Image
+
     from app.classifier import leaf_crop
     bg = Image.new("RGB", (400, 400), (240, 240, 240))
     bg.paste(Image.new("RGB", (120, 160), (60, 140, 40)), (200, 150))
@@ -62,3 +65,8 @@ def test_leaf_crop_trims_background_and_leaves_full_frame_leaves_alone():
     assert c.size[0] < 250 and c.size[1] < 250
     full = Image.new("RGB", (300, 300), (60, 140, 40))
     assert leaf_crop(full).size == (300, 300)
+
+
+def test_no_cross_origin_access():
+    r = client.get("/health", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in r.headers

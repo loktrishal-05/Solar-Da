@@ -135,3 +135,9 @@ Decision: keep the light theme and the existing feature components, wrap them in
 Local sign-in in the Express API (JSON store, scrypt, HMAC cookie) with farmer/agronomist/admin roles; approvals go through
 `POST /api/runs/:id/resume` (agronomist/admin only, approver recorded). Work on branch `finale`, merged to `main` by PR
 (main is protected). Plan: `docs/superpowers/plans/2026-11-19-finale-product.md`.
+
+## D19: Repository cleanup before the finale (2026-11-19)
+The team lead asked to remove everything unnecessary and to follow the judging criteria (code quality, security, testing, efficiency,
+accessibility, problem alignment). Dead code and the never-working TF.js fallback are removed (this overrides CLAUDE.md rule 5 for
+code no user could reach); everything removed is listed in `docs/AUDIT.md` and stays in git history. Licence: MIT. `CLAUDE.md` and
+`docs/superpowers/` stay as engineering records. The `weiqou/` folder keeps its name until after the finale (Vercel root directory).

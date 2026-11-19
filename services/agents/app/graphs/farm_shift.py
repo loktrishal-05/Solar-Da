@@ -232,7 +232,8 @@ def arbiter(state: FarmState) -> dict:
 def safety_gate(state: FarmState) -> dict:
     zones = {}
     for z, ms in state["snapshot"].items():
-        g = lambda m: ms[m]["value"] if m in ms else None
+        def g(m, ms=ms):
+            return ms[m]["value"] if m in ms else None
         zones[z] = {k: v for k, v in {"ph": g("ph"), "ec": g("ec"), "solution_temp": g("solution_temp"),
                                        "level_mm": g("level") * 10 if g("level") is not None else None}.items()
                     if v is not None}

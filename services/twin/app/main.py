@@ -41,7 +41,7 @@ def run(req: RunRequest):
     try:
         return twin.run(req.planting, req.until, [i.model_dump() for i in req.irrigation], req.crop, req.soil, req.horizon_from)
     except (ValueError, KeyError, IndexError) as e:
-        raise HTTPException(400, f"twin run failed: {e}")
+        raise HTTPException(400, f"twin run failed: {e}") from e
 
 
 class HarvestRequest(BaseModel):
@@ -56,7 +56,7 @@ def harvest(req: HarvestRequest):
     try:
         return twin.forecast_harvest(req.planting, req.today, req.crop, req.soil)
     except (ValueError, KeyError, IndexError) as e:
-        raise HTTPException(400, f"twin run failed: {e}")
+        raise HTTPException(400, f"twin run failed: {e}") from e
 
 
 @app.post("/twin/options")
@@ -65,4 +65,4 @@ def options(req: OptionsRequest):
         return twin.compare_options(req.planting, req.today, [i.model_dump() for i in req.history], req.depth_mm,
                                     req.horizon_days, req.crop, req.soil)
     except (ValueError, KeyError, IndexError) as e:
-        raise HTTPException(400, f"twin run failed: {e}")
+        raise HTTPException(400, f"twin run failed: {e}") from e
