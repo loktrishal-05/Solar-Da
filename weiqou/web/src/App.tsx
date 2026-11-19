@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { usePath, navigate, Link } from './router';
+import React from 'react';
+import { usePath, Link } from './router';
 import { AuthProvider, RequireAuth, useAuth, canApprove } from './auth';
 import { AppShell, useShell } from './shell/AppShell';
 import { EmptyState, PageHeader } from './ui';
 import { Login, Signup } from './pages/Auth';
+import { Landing } from './pages/Landing';
 import { AssistantPage, AlertsPage, CommunityPage, DoctorPage, InsightsPage, SettingsPage } from './pages/Wrapped';
 import { AgentConsole } from './components/AgentConsole';
 
@@ -32,14 +33,9 @@ const NotFound: React.FC = () => (
   <EmptyState title="This page does not exist" body="The link may be old." action={<Link to="/app" className="font-semibold text-leaf-700 underline">Go to the overview</Link>} />
 );
 
-const Redirect: React.FC<{ to: string }> = ({ to }) => {
-  useEffect(() => navigate(to, true), [to]);
-  return null;
-};
-
 const Routes: React.FC = () => {
   const path = usePath().replace(/\/+$/, '') || '/';
-  if (path === '/') return <Redirect to="/login" />;
+  if (path === '/') return <Landing />;
   if (path === '/login') return <Login />;
   if (path === '/signup') return <Signup />;
   if (path === '/app' || path.startsWith('/app/')) {
