@@ -3,12 +3,13 @@ import { navigate, usePath } from './router';
 
 export type Role = 'farmer' | 'agronomist' | 'admin';
 export type User = { id: string; name: string; email: string; role: Role };
-type SignupInput = { name: string; email: string; password: string; role: 'farmer' | 'agronomist' };
+type SignupInput = { name: string; email: string; password: string };
 
 type AuthState = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  demo: (role: Role) => Promise<void>;
   signup: (input: SignupInput) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(async (email: string, password: string) => setUser(await send('login', { email, password })), []);
+  const demo = useCallback(async (role: Role) => setUser(await send('demo', { role })), []);
   const signup = useCallback(async (input: SignupInput) => setUser(await send('signup', input)), []);
   const logout = useCallback(async () => {
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
@@ -49,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     navigate('/');
   }, []);
 
-  return <Ctx.Provider value={{ user, loading, login, signup, logout }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, loading, login, demo, signup, logout }}>{children}</Ctx.Provider>;
 };
 
 export function useAuth() {

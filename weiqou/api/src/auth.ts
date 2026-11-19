@@ -85,10 +85,9 @@ export function requireRole(...roles: Role[]): RequestHandler {
 }
 
 const SignupSchema = z.object({
-  name: z.string().trim().min(1).max(80),
-  email: z.string().trim().email().max(120),
-  password: z.string().min(8).max(200),
-  role: z.enum(['farmer', 'agronomist']).default('farmer'),
+  name: z.string({ required_error: 'Enter your name' }).trim().min(1, 'Enter your name').max(80, 'Name is too long'),
+  email: z.string({ required_error: 'Enter your email' }).trim().email('Enter a valid email address').max(120, 'Email is too long'),
+  password: z.string({ required_error: 'Enter a password' }).min(8, 'Password must be at least 8 characters').max(200, 'Password is too long'),
 });
 const LoginSchema = z.object({ email: z.string().trim(), password: z.string() });
 
@@ -100,7 +99,8 @@ authRouter.post('/auth/signup', (req: Request, res: Response) => {
   const users = readUsers();
   const email = p.data.email.toLowerCase();
   if (users.some((u) => u.email === email)) return res.status(409).json({ error: 'An account with this email already exists' });
-  const user: StoredUser = { id: randomUUID(), name: p.data.name, email, role: p.data.role, password: hashPassword(p.data.password) };
+  // Everyone starts as a farmer; an admin promotes users on the Users page.
+  const user: StoredUser = { id: randomUUID(), name: p.data.name, email, role: 'farmer', password: hashPassword(p.data.password) };
   writeUsers([...users, user]);
   res.status(201).setHeader('Set-Cookie', sessionCookie(user.id)).json({ user: toPublic(user) });
 });
@@ -111,6 +111,19 @@ authRouter.post('/auth/login', (req: Request, res: Response) => {
   if (!p.success || !user || !verifyPassword(p.data.password, user.password)) {
     return res.status(401).json({ error: 'Wrong email or password' });
   }
+  res.setHeader('Set-Cookie', sessionCookie(user.id)).json({ user: toPublic(user) });
+});
+
+// One-click demo sign-in: the seeded account for a role. Set SOLARDA_DEMO_LOGIN=0 to switch it off on a real deployment.
+const DemoSchema = z.object({ role: z.enum(['farmer', 'agronomist', 'admin']) });
+authRouter.post('/auth/demo', (req: Request, res: Response) => {
+  if (process.env.SOLARDA_DEMO_LOGIN === '0') return res.status(404).json({ error: 'Demo sign-in is switched off' });
+  const p = DemoSchema.safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: 'Choose farmer, agronomist or admin' });
+  const seeded: Array<{ email: string; role: Role }> = existsSync(SEED_FILE) ? JSON.parse(readFileSync(SEED_FILE, 'utf8')) : [];
+  const email = seeded.find((u) => u.role === p.data.role)?.email.toLowerCase();
+  const user = readUsers().find((u) => u.email === email && u.role === p.data.role);
+  if (!user) return res.status(404).json({ error: 'No demo account for this role' });
   res.setHeader('Set-Cookie', sessionCookie(user.id)).json({ user: toPublic(user) });
 });
 

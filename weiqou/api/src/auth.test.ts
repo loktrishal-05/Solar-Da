@@ -44,14 +44,46 @@ test('signup with the same email in another case is a conflict', async () => {
   assert.equal(r.status, 409);
 });
 
-test('nobody can sign up as admin', async () => {
-  const r = await post('/signup', { name: 'X', email: 'x@example.com', password: 'longenough1', role: 'admin' });
-  assert.equal(r.status, 400);
+test('signup always creates a farmer, whatever role is sent', async () => {
+  for (const [i, role] of ['admin', 'agronomist'].entries()) {
+    const r = await post('/signup', { name: 'X', email: `x${i}@example.com`, password: 'longenough1', role });
+    assert.equal(r.status, 201);
+    assert.equal((await r.json()).user.role, 'farmer');
+  }
+});
+
+test('one-click demo sign-in returns each seeded role with a working session', async () => {
+  for (const role of ['farmer', 'agronomist', 'admin']) {
+    const r = await post('/demo', { role });
+    assert.equal(r.status, 200);
+    assert.equal((await r.json()).user.role, role);
+    const m = await me(cookieOf(r));
+    assert.equal((await m.json()).user.role, role);
+  }
+});
+
+test('demo sign-in rejects unknown roles', async () => {
+  assert.equal((await post('/demo', { role: 'root' })).status, 400);
+  assert.equal((await post('/demo', {})).status, 400);
+});
+
+test('demo sign-in can be switched off', async () => {
+  process.env.SOLARDA_DEMO_LOGIN = '0';
+  try {
+    const r = await post('/demo', { role: 'farmer' });
+    assert.equal(r.status, 404);
+    assert.equal(r.headers.get('set-cookie'), null);
+  } finally {
+    delete process.env.SOLARDA_DEMO_LOGIN;
+  }
 });
 
 test('short passwords are rejected', async () => {
   const r = await post('/signup', { name: 'S', email: 's@example.com', password: 'short' });
   assert.equal(r.status, 400);
+  assert.equal((await r.json()).error, 'Password must be at least 8 characters');
+  const bad = await post('/signup', { name: 'S', email: 'not-an-email', password: 'longenough1' });
+  assert.equal((await bad.json()).error, 'Enter a valid email address');
 });
 
 test('login: wrong password 401, seeded agronomist 200', async () => {
