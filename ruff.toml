@@ -1,0 +1,17 @@
+# Python lint for the agent runtime, crop twin, vision service and benchmarks.
+line-length = 140
+target-version = "py311"
+# train_colab.py is a Colab notebook source with `!pip` shell lines, not plain Python.
+extend-exclude = ["**/.venv", "services/agents/app/models/*_schema.py", "services/vision/train/train_colab.py"]
+
+[lint]
+# Pyflakes, pycodestyle errors, bugbear, pyupgrade and import sorting.
+select = ["F", "E", "W", "B", "UP", "I"]
+ignore = ["E501"]  # long lines are allowed where a table or a message reads better on one line
+
+[lint.flake8-bugbear]
+# FastAPI declares request parameters with File()/Header() defaults by design.
+extend-immutable-calls = ["fastapi.File", "fastapi.Header", "fastapi.Query"]
+
+[lint.isort]
+known-first-party = ["app"]

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, ThumbsUp, CheckCircle2, Users, Send, Paperclip } from 'lucide-react';
+import { MessageSquare, ThumbsUp, CheckCircle2, Send, Paperclip } from 'lucide-react';
 
 export const LightCommunitySection: React.FC = () => {
   const [filterTab, setFilterTab] = useState<string>('ALL');

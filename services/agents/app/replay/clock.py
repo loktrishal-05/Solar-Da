@@ -1,6 +1,6 @@
 """Replay clock. Agents read this, never the wall clock, so runs are repeatable."""
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 SPEEDS = (1, 60, 1440)
 
@@ -10,7 +10,7 @@ def parse_ts(s: str) -> datetime:
 
 
 def fmt_ts(d: datetime) -> str:
-    return d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return d.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class ReplayClock:

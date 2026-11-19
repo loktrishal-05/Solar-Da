@@ -1,7 +1,7 @@
 # Solarda local stack (Linux/macOS). Windows: scripts/start_all.ps1.
 #   make setup   once: node deps + build, three Python 3.11 venvs (uv), model weights, local secrets
 #   make dev     start api :3001, agents :8000, twin :8100, vision :8200, web :3000 (logs in data/runtime/logs)
-#   make stop | make health | make test | make docker
+#   make stop | make health | make test | make lint | make docker
 #   make reset   clear runs, approvals, audit and outbox before a demo (keeps accounts and secrets)
 SHELL := /bin/bash
 RT    := data/runtime
@@ -10,7 +10,7 @@ PY     = services/$(1)/.venv/bin/python
 # Every service sees .env (optional) plus the two generated secrets.
 ENV   := set -a; [ -f .env ] && . ./.env; SESSION_SECRET=$$(cat $(RT)/.session_secret); SOLARDA_INTERNAL_KEY=$$(cat $(RT)/.internal_key); set +a
 
-.PHONY: setup secrets dev stop health test docker logs reset
+.PHONY: setup secrets dev stop health test lint docker logs reset
 
 setup:
 	npm ci
@@ -62,6 +62,10 @@ test:
 	npm run test:engine
 	npm test -w @terrasub-solarda/api
 	@for s in $(SVCS); do echo "== $$s"; (cd services/$$s && .venv/bin/python -m pytest -q) || exit 1; done
+
+lint:
+	npx eslint .
+	uvx ruff@0.8.4 check services bench
 
 docker:
 	docker build -t solarda .

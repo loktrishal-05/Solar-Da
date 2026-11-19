@@ -28,5 +28,5 @@ async def classify(image: UploadFile = File(...)):
         raise HTTPException(503, "model not installed: run scripts/fetch_vision_model.ps1")
     try:
         return classifier.classify(data)
-    except OSError:
-        raise HTTPException(400, "not a readable image")
+    except OSError as e:
+        raise HTTPException(400, "not a readable image") from e

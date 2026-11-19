@@ -129,7 +129,10 @@ def test_classifier_down_still_escalates_a_malayalam_jailbreak(monkeypatch):
 
 
 def test_language_case_set_meets_the_bar():
-    import subprocess, sys, json, pathlib
+    import json
+    import pathlib
+    import subprocess
+    import sys
     root = pathlib.Path(__file__).resolve().parents[3]
     subprocess.run([sys.executable, str(root / "bench" / "eval_chat_lang.py")], check=True, capture_output=True)
     r = json.loads((root / "bench" / "results" / "chat_lang.json").read_text(encoding="utf-8"))
@@ -137,7 +140,9 @@ def test_language_case_set_meets_the_bar():
 
 
 def test_weather_tool_is_labelled_real_and_fails_soft(monkeypatch):
-    import io, json, urllib.request
+    import io
+    import json
+    import urllib.request
     body = json.dumps({"current": {"temperature_2m": 30}, "daily": {"precipitation_sum": [1.0]}}).encode()
     monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: io.BytesIO(body))
     out = chat._run_tool("weather_now", {}, None)
@@ -150,7 +155,9 @@ def test_weather_tool_is_labelled_real_and_fails_soft(monkeypatch):
 
 
 def test_market_price_needs_a_key_and_labels_real_rows(monkeypatch):
-    import io, json, urllib.request
+    import io
+    import json
+    import urllib.request
     monkeypatch.delenv("DATA_GOV_API_KEY", raising=False)
     assert "error" in chat._run_tool("market_price", {"commodity": "Methi"}, None)
     monkeypatch.setenv("DATA_GOV_API_KEY", "k")

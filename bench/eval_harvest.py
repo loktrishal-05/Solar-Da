@@ -39,7 +39,8 @@ def main():
                          "twin_yield_error": round(f["dry_yield_t_ha"] - truth[y]["dry_yield_t_ha"], 2),
                          "naive_yield_error": round(naive_yield - truth[y]["dry_yield_t_ha"], 2)})
             print(rows[-1])
-    mae = lambda k, rs: round(sum(abs(r[k]) for r in rs) / len(rs), 3)
+    def mae(k, rs):
+        return round(sum(abs(r[k]) for r in rs) / len(rs), 3)
     by_lead = {lead: {"twin_mae_days": mae("twin_error_days", rs), "naive_mae_days": mae("naive_error_days", rs),
                       "twin_yield_mae_t_ha": mae("twin_yield_error", rs), "naive_yield_mae_t_ha": mae("naive_yield_error", rs),
                       "n": len(rs)}

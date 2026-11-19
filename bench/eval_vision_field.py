@@ -5,7 +5,6 @@ PlantWild is CC BY-NC-ND 4.0, used here for evaluation only).
 Run: services/vision/.venv/Scripts/python -I bench/eval_vision_field.py
 Writes bench/results/vision_field.json
 """
-import io
 import json
 import subprocess
 import sys
@@ -83,7 +82,7 @@ def plantwild() -> list[tuple[Path, int]]:
     todo = [(fp, y) for fp, y in todo if y is not None]
     with ThreadPoolExecutor(16) as ex:
         paths = list(ex.map(lambda t: fetch(HF + t[0], RAW / "plantwild" / t[0]), todo))
-    return [(p, y) for p, (_, y) in zip(paths, todo) if p]
+    return [(p, y) for p, (_, y) in zip(paths, todo, strict=False) if p]
 
 
 def plantdoc() -> list[tuple[Path, int]]:

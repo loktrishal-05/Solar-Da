@@ -44,7 +44,7 @@ def test_known_diseased_leaf_is_classified():
     body = r.json()
     assert r.status_code == 200
     labels = [p["label"] for p in body["predictions"]]
-    assert any("Tomato" in l for l in labels), body
+    assert any("Tomato" in label for label in labels), body
 
 
 @needs_model
@@ -57,6 +57,7 @@ def test_out_of_distribution_palm_photos_mostly_abstain():
 
 def test_leaf_crop_trims_background_and_leaves_full_frame_leaves_alone():
     from PIL import Image
+
     from app.classifier import leaf_crop
     bg = Image.new("RGB", (400, 400), (240, 240, 240))
     bg.paste(Image.new("RGB", (120, 160), (60, 140, 40)), (200, 150))

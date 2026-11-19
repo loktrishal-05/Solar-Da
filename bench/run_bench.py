@@ -6,7 +6,6 @@ Everything is a simulation: AquaCrop-OSPy twin + Open-Meteo Chennai archive (202
 planted 15 Jan each year. No randomness: the same inputs give the same numbers. Results go to bench/results/.
 """
 import csv
-import os
 import subprocess
 import sys
 import time
@@ -157,7 +156,7 @@ def write_chart(rows):
     policies = ["fixed_schedule", "et_controller", "agent", "agent_no_forecast"]
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.6))
     for ax, key, title in zip(axes, ("water_mm", "stress_days", "dry_yield_t_ha"),
-                              ("Irrigation water (mm)", "Water-stress days", "Dry yield (t/ha)")):
+                              ("Irrigation water (mm)", "Water-stress days", "Dry yield (t/ha)"), strict=False):
         for i, p in enumerate(policies):
             vals = [r[key] for r in rows if r["policy"] == p]
             ax.bar([x + i * 0.2 for x in range(len(YEARS))], vals, width=0.2, label=p)

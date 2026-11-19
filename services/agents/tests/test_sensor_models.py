@@ -2,7 +2,8 @@ import math
 
 import pytest
 
-from app import sensor_models as S, specialists
+from app import sensor_models as S
+from app import specialists
 
 pytestmark = pytest.mark.skipif(not S.available(), reason="sensor models not installed (scripts/fetch_sensor_models.ps1)")
 

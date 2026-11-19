@@ -4,7 +4,6 @@ import {
   UploadCloud,
   RefreshCw,
   AlertTriangle,
-  CheckCircle2,
   FileText,
   Video,
   VideoOff,

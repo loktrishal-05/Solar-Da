@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, ShieldCheck, CheckCircle2, AlertTriangle, Info, Settings, Smartphone } from 'lucide-react';
+import { AlertTriangle, Info, Settings, Smartphone } from 'lucide-react';
 
 interface LightSmsAlertsSectionProps {
   alerts: Array<{ id: string; type: 'CRITICAL' | 'WARNING' | 'INFO'; message: string; timestamp: string }>;

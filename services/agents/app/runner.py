@@ -42,7 +42,7 @@ class Bus:
         return q
 
     def unsubscribe(self, q):
-        self.subs = [(l, x) for l, x in self.subs if x is not q]
+        self.subs = [(loop, x) for loop, x in self.subs if x is not q]
 
     def publish(self, kind: str, data: dict):
         e = {"type": kind, "data": data}

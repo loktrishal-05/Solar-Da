@@ -2,14 +2,11 @@ import assert from 'node:assert';
 import { test } from 'node:test';
 import {
   evaluateSafetyInterlocks,
-  runFixedActuatorPipeline,
   validateDosingStepSequence,
   calculateNutrientUptakeRatio,
   calculateSubstrateRecipe,
   validateGelatinSource,
   evaluateCropDoctorDiagnostic,
-  recommendTerraSubCrops,
-  rankSolardaCeaCropsForReservoirGroup,
   calculatePowerSchedule,
   createGenesisPassportBlock,
   appendPassportBlock,

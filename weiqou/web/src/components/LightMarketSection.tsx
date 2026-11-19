@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus, MapPin, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Minus, ChevronRight } from 'lucide-react';
 
 export const LightMarketSection: React.FC = () => {
-  const [selectedCrop, setSelectedCrop] = useState<string>('Methi');
-
   const agmarknetRows = [
     { crop: 'Methi Fenugreek', region: 'Chennai', price: 42, trend: '+3.2%', direction: 'UP' },
     { crop: 'Palak Spinach', region: 'Madurai', price: 38, trend: '-1.4%', direction: 'DOWN' },
