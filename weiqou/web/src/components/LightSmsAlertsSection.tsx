@@ -40,7 +40,7 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
                 ))}
               </div>
 
-              <span className="text-xs text-gray-500 font-mono">Total Logged: {alerts.length}</span>
+              <span className="text-xs text-gray-600 font-mono">Total Logged: {alerts.length}</span>
             </div>
 
             <div className="space-y-3 font-mono text-xs">
@@ -62,7 +62,7 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
                       {a.type === 'INFO' && <Info className="w-4 h-4 text-blue-600" />}
                       <span>{a.type}: {a.message}</span>
                     </div>
-                    <span className="text-[11px] text-gray-500 block">Timestamp: {a.timestamp} | Unit: G-04</span>
+                    <span className="text-[11px] text-gray-600 block">Timestamp: {a.timestamp} | Unit: G-04</span>
                   </div>
 
                   <button
@@ -93,6 +93,9 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
                 <div className="flex justify-between items-center">
                   <span className="text-gray-900 font-sans font-semibold">Warning (Threshold):</span>
                   <button
+                    role="switch"
+                    aria-checked={warningSmsOn}
+                    aria-label="Warning alerts by SMS"
                     onClick={() => setWarningSmsOn(!warningSmsOn)}
                     className={`w-10 h-5 rounded-full p-0.5 transition ${warningSmsOn ? 'bg-[#059669]' : 'bg-gray-300'}`}
                   >
@@ -103,6 +106,9 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
                 <div className="flex justify-between items-center">
                   <span className="text-gray-900 font-sans font-semibold">Info (Market Updates):</span>
                   <button
+                    role="switch"
+                    aria-checked={infoSmsOn}
+                    aria-label="Market update alerts by SMS"
                     onClick={() => setInfoSmsOn(!infoSmsOn)}
                     className={`w-10 h-5 rounded-full p-0.5 transition ${infoSmsOn ? 'bg-[#059669]' : 'bg-gray-300'}`}
                   >
@@ -120,12 +126,12 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
               </div>
 
               <div className="space-y-2 max-h-56 overflow-y-auto">
-                {outbox.length === 0 && <p className="text-[11px] text-gray-500">No alerts sent yet. Press the button to send a test.</p>}
+                {outbox.length === 0 && <p className="text-[11px] text-gray-600">No alerts sent yet. Press the button to send a test.</p>}
                 {outbox.slice(0, 6).map((m) => (
                   <div key={m.id} className="p-3 bg-[#FAFAF8] rounded-xl border border-gray-200 font-mono text-[11px] text-gray-800 space-y-1">
                     <span className="font-bold text-[#1B4332] block">{m.severity} · {m.at.slice(11, 19)} UTC</span>
                     <p className="leading-relaxed">{m.text}</p>
-                    <span className={`text-[9px] font-bold block ${m.channel === 'telegram' ? 'text-[#059669]' : 'text-amber-700'}`}>{m.status}</span>
+                    <span className={`text-[9px] font-bold block ${m.channel === 'telegram' ? 'text-[#047857]' : 'text-amber-700'}`}>{m.status}</span>
                   </div>
                 ))}
               </div>

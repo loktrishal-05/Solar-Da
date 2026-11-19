@@ -36,13 +36,13 @@ export const LightMarketSection: React.FC = () => {
           {/* LEFT: AGMARKNET PRICE TABLE */}
           <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-              <h3 className="font-extrabold text-sm text-[#1A1A1A]">Mandi prices (sample values, not a live feed)</h3>
-              <span className="text-[10px] text-gray-500 font-mono">* Missing data stays missing (no bare guesses)</span>
+              <h2 className="font-extrabold text-sm text-[#1A1A1A]">Mandi prices (sample values, not a live feed)</h2>
+              <span className="text-[10px] text-gray-600 font-mono">* Missing data stays missing (no bare guesses)</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#FAFAF8] text-gray-500 uppercase border-b border-gray-200">
+                <thead className="bg-[#FAFAF8] text-gray-600 uppercase border-b border-gray-200">
                   <tr>
                     <th className="py-2.5 px-3">Crop</th>
                     <th className="py-2.5 px-3">Region</th>
@@ -59,7 +59,7 @@ export const LightMarketSection: React.FC = () => {
                         {r.price !== null ? `₹${r.price}/kg` : '—'}
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`flex items-center font-bold text-[11px] ${r.direction === 'UP' ? 'text-[#059669]' : r.direction === 'DOWN' ? 'text-red-600' : 'text-gray-500'}`}>
+                        <span className={`flex items-center font-bold text-[11px] ${r.direction === 'UP' ? 'text-[#047857]' : r.direction === 'DOWN' ? 'text-red-600' : 'text-gray-600'}`}>
                           {r.direction === 'UP' && <ArrowUpRight className="w-3.5 h-3.5" />}
                           {r.direction === 'DOWN' && <ArrowDownRight className="w-3.5 h-3.5" />}
                           {r.direction === 'FLAT' && <Minus className="w-3.5 h-3.5" />}
@@ -75,8 +75,8 @@ export const LightMarketSection: React.FC = () => {
             {/* Price Chart */}
             <div className="pt-4 border-t border-gray-100 space-y-2">
               <div className="flex justify-between items-center">
-                <h4 className="font-bold text-xs text-gray-900 font-sans">Methi Fenugreek Price Trend (7-Day)</h4>
-                <span className="text-[10px] font-mono text-gray-500">Agmarknet Chennai Feed</span>
+                <h3 className="font-bold text-xs text-gray-900 font-sans">Methi Fenugreek Price Trend (7-Day)</h3>
+                <span className="text-[10px] font-mono text-gray-600">Agmarknet Chennai Feed</span>
               </div>
               <div className="h-44 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -100,8 +100,8 @@ export const LightMarketSection: React.FC = () => {
           {/* RIGHT: CROP RECOMMENDER HEURISTIC SCORE CARDS */}
           <div className="lg:col-span-5 space-y-4">
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-              <h3 className="font-extrabold text-sm text-[#1A1A1A]">Transparent Heuristic Crop Recommender</h3>
-              <p className="text-xs text-gray-500">
+              <h2 className="font-extrabold text-sm text-[#1A1A1A]">Transparent Heuristic Crop Recommender</h2>
+              <p className="text-xs text-gray-600">
                 Score = Price Trend × 0.5 + Climate Fit × 0.3 + Substrate Fit × 0.2
               </p>
             </div>
@@ -110,12 +110,12 @@ export const LightMarketSection: React.FC = () => {
               <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4 hover:shadow-md transition">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-extrabold text-gray-900 text-sm">{card.crop}</h4>
-                    <span className="text-[10px] text-gray-500 font-mono">Rank #{idx + 1} Recommendation</span>
+                    <h3 className="font-extrabold text-gray-900 text-sm">{card.crop}</h3>
+                    <span className="text-[10px] text-gray-600 font-mono">Rank #{idx + 1} Recommendation</span>
                   </div>
                   <div className="text-right">
                     <span className="font-mono text-3xl font-black text-[#1B4332]">{card.score}</span>
-                    <span className="text-[9px] text-gray-500 font-mono block">Score / 100</span>
+                    <span className="text-[9px] text-gray-600 font-mono block">Score / 100</span>
                   </div>
                 </div>
 

@@ -47,7 +47,7 @@ const Visual: React.FC<{ k: number; active: boolean }> = ({ k, active }) => {
   if (k === 1) return (
     <ul className="mt-5 grid grid-cols-2 gap-2 text-sm">
       {[['Irrigation', 'no action'], ['Climate', 'no action'], ['Disease', 'no action'], ['Fertigation', 'dose 12 ml']].map(([a, b], n) => (
-        <li key={a} className={`rounded-lg border px-3 py-2 transition-all duration-500 ${n === 3 ? 'border-leaf-600 bg-leaf-50 font-semibold' : 'border-leaf-100 text-ink/50'}`}
+        <li key={a} className={`rounded-lg border px-3 py-2 transition-all duration-500 ${n === 3 ? 'border-leaf-600 bg-leaf-50 font-semibold' : 'border-leaf-100 text-ink/70'}`}
             style={{ transitionDelay: active ? `${n * 120}ms` : '0ms', opacity: active ? 1 : 0 }}>{a}: {b}</li>
       ))}
     </ul>
@@ -55,7 +55,7 @@ const Visual: React.FC<{ k: number; active: boolean }> = ({ k, active }) => {
   if (k === 2) return (
     <ul className="mt-5 space-y-1.5 text-sm">
       {[['E-stop is off', true], ['Reading is plausible', true], ['Dose pushes pH the right way', true], ['Mixing delay has passed', true], ['Hourly dose cap: 46 + 12 > 50 ml', false]].map(([t, ok], n) => (
-        <li key={String(t)} className={`flex items-center gap-2 transition-all duration-300 ${ok ? 'text-ink/60' : 'font-semibold text-veto'}`}
+        <li key={String(t)} className={`flex items-center gap-2 transition-all duration-300 ${ok ? 'text-ink/70' : 'font-semibold text-veto'}`}
             style={{ transitionDelay: active ? `${n * 110}ms` : '0ms', opacity: active ? 1 : 0, transform: active ? 'none' : 'translateX(-8px)' }}>
           <span className={`grid h-5 w-5 place-items-center rounded-full text-xs text-white ${ok ? 'bg-allow' : 'bg-veto'}`}>{ok ? '✓' : '✕'}</span>{t}
         </li>
@@ -65,7 +65,7 @@ const Visual: React.FC<{ k: number; active: boolean }> = ({ k, active }) => {
   return (
     <div className="mt-5 flex items-center gap-4">
       <img src="/media/plant-samples/potato-late-blight.jpg" alt="Leaf with late blight (PlantVillage sample)" className="h-20 w-20 rounded-xl object-cover ring-1 ring-leaf-100" loading="lazy" />
-      <div className="text-sm text-ink/60">Disease agent → safety engine → <span className="font-semibold text-human">needs a human</span> → agronomist</div>
+      <div className="text-sm text-ink/70">Disease agent → safety engine → <span className="font-semibold text-human">needs a human</span> → agronomist</div>
     </div>
   );
 };
@@ -79,7 +79,7 @@ const StoryCard: React.FC<{ m: Moment; k: number; active: boolean; stacked?: boo
       <Visual k={k} active={active} />
       {m.card.rule && <p className="mt-4 font-mono text-sm text-veto">{m.card.rule}</p>}
       {m.card.by && <p className="mt-4 text-[15px] font-semibold text-allow">{m.card.by}</p>}
-      <p className="mt-5 max-w-[55%] text-xs text-ink/45">Example from the replayed demo scenarios</p>
+      <p className="mt-5 max-w-[55%] text-xs text-ink/70">Example from the replayed demo scenarios</p>
       {m.card.verdict && (
         <div className={`absolute bottom-7 right-7 transition-all delay-200 duration-300 ${active ? 'scale-100 opacity-100' : 'scale-150 opacity-0'}`}>
           <VerdictStamp verdict={m.card.verdict} className="bg-white/90 text-3xl" />
@@ -143,7 +143,7 @@ const Story: React.FC = () => {
             <ol className="mt-8 space-y-1" aria-label="Steps">
               {MOMENTS.map((m, k) => (
                 <li key={m.step} className={`border-l-2 py-3 pl-5 transition-all duration-500 ${k === i ? 'border-leaf-700' : 'border-leaf-100'}`}>
-                  <div className={`text-sm font-semibold transition-colors ${k === i ? 'text-leaf-700' : 'text-ink/35'}`}>Step {k + 1} · {m.step}</div>
+                  <div className={`text-sm font-semibold transition-colors ${k === i ? 'text-leaf-700' : 'text-ink/70'}`}>Step {k + 1} · {m.step}</div>
                   <div className={`grid transition-all duration-500 ${k === i ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                     <div className="overflow-hidden">
                       <h3 className="mt-1 font-display text-2xl font-bold text-leaf-950">{m.title}</h3>
@@ -188,7 +188,7 @@ const Screens: React.FC = () => {
           <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10">
             <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5" aria-hidden>
               <span className="h-2.5 w-2.5 rounded-full bg-white/20" /><span className="h-2.5 w-2.5 rounded-full bg-white/20" /><span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-              <span className="ml-3 truncate text-xs text-leaf-100/50">localhost:3000 · {SCREENS[k][1]}</span>
+              <span className="ml-3 truncate text-xs text-leaf-100/75">localhost:3000 · {SCREENS[k][1]}</span>
             </div>
             <img key={SCREENS[k][0]} src={`/media/screens/${SCREENS[k][0]}.webp`} alt={`${SCREENS[k][1]} screen`} loading="lazy" width={1400} height={701}
                  className="block w-full animate-[fadeIn_300ms_ease-out]" />
@@ -245,6 +245,7 @@ export const Landing: React.FC = () => {
         </div>
       </header>
 
+      <main>
       <section className="relative flex h-[100svh] min-h-[560px] items-end overflow-hidden bg-leaf-950">
         {still
           ? <img src="/media/hero-soil.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -268,13 +269,13 @@ export const Landing: React.FC = () => {
             </div>
           </div>
         </div>
-        <span className="absolute bottom-3 right-4 text-[11px] text-white/45">Illustrative footage</span>
+        <span className="absolute bottom-3 right-4 text-[11px] text-white/75">Illustrative footage</span>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-24 sm:py-32">
         <p className="max-w-4xl font-display text-[clamp(1.8rem,3.6vw,3rem)] font-bold leading-[1.15] text-leaf-950">
           Small farms make dozens of decisions a day about water, nutrients and disease, usually with no agronomist nearby.
-          <span className="text-ink/40"> AI could help, but only if it can never be trusted with a valve on its own.</span>
+          <span className="text-ink/70"> AI could help, but only if it can never be trusted with a valve on its own.</span>
         </p>
         <div className="mt-14 grid gap-10 md:grid-cols-3">
           {[
@@ -283,7 +284,7 @@ export const Landing: React.FC = () => {
             ['Farmers speak many languages', 'Advice has to come in Tamil, Hindi or Telugu, by voice, and say honestly where every number came from.'],
           ].map(([t, b]) => (
             <div key={t} className="border-t border-leaf-200 pt-5">
-              <h3 className="font-display text-xl font-bold text-leaf-950">{t}</h3>
+              <h2 className="font-display text-xl font-bold text-leaf-950">{t}</h2>
               <p className="mt-2 leading-relaxed text-ink/70">{b}</p>
             </div>
           ))}
@@ -302,7 +303,7 @@ export const Landing: React.FC = () => {
             <div key={n}>
               <div className="font-display text-[clamp(3rem,5vw,4.2rem)] font-extrabold leading-none text-leaf-800">{n}</div>
               <p className="mt-3 text-[16px] leading-snug">{what}</p>
-              <p className="mt-2 text-sm text-ink/50">{src}</p>
+              <p className="mt-2 text-sm text-ink/70">{src}</p>
             </div>
           ))}
         </div>
@@ -345,6 +346,8 @@ export const Landing: React.FC = () => {
           </dl>
         </div>
       </section>
+
+      </main>
 
       <footer className="bg-leaf-950 text-leaf-100/75">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-14 md:grid-cols-[1.4fr_1fr_1fr]">

@@ -32,7 +32,7 @@ const Frame: React.FC<{ title: string; intro: string; children: React.ReactNode 
     <div className="min-h-screen grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] bg-paper">
       <div className="flex flex-col px-6 sm:px-12 py-8">
         <Link to="/"><Logo /></Link>
-        <div className="my-auto w-full max-w-md py-10">
+        <main className="my-auto w-full max-w-md py-10">
           <h1 className="font-display text-3xl font-bold text-leaf-950">{title}</h1>
           <p className="mt-1 text-ink/65">{intro}</p>
           {apiDown && (
@@ -41,7 +41,7 @@ const Frame: React.FC<{ title: string; intro: string; children: React.ReactNode 
             </p>
           )}
           {children}
-        </div>
+        </main>
       </div>
       <aside className="relative hidden lg:block overflow-hidden bg-leaf-950">
         <div className="absolute inset-0"><PlantScene /></div>
@@ -102,13 +102,13 @@ export const Login: React.FC = () => {
             </span>
             <span className="flex-1">
               <span className="block font-semibold">{busy === role ? `Signing in as ${title}…` : `Continue as ${title}`}</span>
-              <span className="block text-sm text-ink/60">{does}</span>
+              <span className="block text-sm text-ink/70">{does}</span>
             </span>
           </button>
         ))}
       </div>
 
-      <div className="my-6 flex items-center gap-3 text-sm text-ink/50"><span className="h-px flex-1 bg-leaf-100" />or use your account<span className="h-px flex-1 bg-leaf-100" /></div>
+      <div className="my-6 flex items-center gap-3 text-sm text-ink/70"><span className="h-px flex-1 bg-leaf-100" />or use your account<span className="h-px flex-1 bg-leaf-100" /></div>
 
       <form onSubmit={submit} className="space-y-4">
         {error && <ErrorBox message={error} />}

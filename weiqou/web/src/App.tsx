@@ -27,7 +27,7 @@ const APP_PAGES: Record<string, React.LazyExoticComponent<React.FC>> = {
   '/app/settings': named(wrapped, 'SettingsPage'),
 };
 
-const Loading: React.FC = () => <div className="py-16 text-center text-ink/50" role="status" aria-live="polite">Loading…</div>;
+const Loading: React.FC = () => <div className="py-16 text-center text-ink/70" role="status" aria-live="polite">Loading…</div>;
 
 const NotFound: React.FC = () => (
   <EmptyState title="This page does not exist" body="The link may be old." action={<Link to="/app" className="font-semibold text-leaf-700 underline">Go to the overview</Link>} />

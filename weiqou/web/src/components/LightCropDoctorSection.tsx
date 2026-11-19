@@ -279,13 +279,13 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
               }`}
             >
               <div className="w-12 h-12 rounded-full bg-[#E8F5E9] text-[#1B4332] flex items-center justify-center mx-auto">
-                <UploadCloud className="w-6 h-6 text-[#7CB342]" />
+                <UploadCloud className="w-6 h-6 text-[#3F6B1F]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xs font-bold text-gray-900">
+                <h2 className="text-xs font-bold text-gray-900">
                   {isDragging ? 'Drop the image to scan' : 'Drag a leaf image here, or click to upload'}
-                </h3>
-                <p className="text-[11px] text-gray-500 font-mono">
+                </h2>
+                <p className="text-[11px] text-gray-600 font-mono">
                   JPG, PNG, WEBP up to 10 MB · PlantVillage 38 classes
                 </p>
               </div>
@@ -321,7 +321,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
 
               {/* Real PlantVillage sample thumbnails - the model was trained on these */}
               <div className="pt-3 border-t border-gray-200" onClick={(e) => e.stopPropagation()}>
-                <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-2">
+                <p className="text-[10px] font-mono text-gray-600 uppercase tracking-wider mb-2">
                   PlantVillage Reference Samples (real leaf photos, model trained on these)
                 </p>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -408,7 +408,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                   )}
                 </div>
               ) : (
-                <div className="rounded-xl border-2 border-dashed border-gray-200 p-12 flex flex-col items-center text-gray-400 space-y-2 max-w-[400px] w-full">
+                <div className="rounded-xl border-2 border-dashed border-gray-200 p-12 flex flex-col items-center text-gray-600 space-y-2 max-w-[400px] w-full">
                   <ImageIcon className="w-10 h-10" />
                   <span className="text-xs">No image selected</span>
                 </div>
@@ -416,13 +416,13 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
 
               {isScanning && (
                 <div className="mt-3 text-center text-xs font-bold text-[#1B4332] animate-pulse flex items-center justify-center space-x-2">
-                  <RefreshCw className="w-4 h-4 animate-spin text-[#7CB342]" />
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#3F6B1F]" />
                   <span>Running TF.js tensor inference...</span>
                 </div>
               )}
 
               {!isScanning && prediction && (
-                <div className="mt-3 w-full max-w-[400px] flex items-center justify-between text-[10px] font-mono text-gray-500">
+                <div className="mt-3 w-full max-w-[400px] flex items-center justify-between text-[10px] font-mono text-gray-600">
                   <span className="flex items-center space-x-1">
                     <Cpu className="w-3 h-3" />
                     <span>Solarda vision service</span>
@@ -475,7 +475,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     />
                     <path
-                      className={!abstained ? 'text-[#059669]' : 'text-[#D97706]'}
+                      className={!abstained ? 'text-[#047857]' : 'text-[#B45309]'}
                       strokeDasharray={`${(confidence * 100).toFixed(0)}, 100`}
                       strokeWidth="3.5"
                       strokeLinecap="round"
@@ -489,8 +489,8 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                   </span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-gray-900">Diagnostic Confidence Score</h3>
-                  <span className="text-[10px] text-gray-500 font-mono block">
+                  <h2 className="font-bold text-sm text-gray-900">Diagnostic Confidence Score</h2>
+                  <span className="text-[10px] text-gray-600 font-mono block">
                     Safety Gate Ceiling: {Math.round(gate * 100)}% · 38 classes
                   </span>
                 </div>
@@ -500,8 +500,8 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                 <span
                   className={`px-3 py-1 rounded-full font-mono text-xs font-bold ${
                     !abstained
-                      ? 'bg-emerald-50 text-[#059669] border border-emerald-200'
-                      : 'bg-amber-50 text-[#D97706] border border-amber-200'
+                      ? 'bg-emerald-50 text-[#047857] border border-emerald-200'
+                      : 'bg-amber-50 text-[#B45309] border border-amber-200'
                   }`}
                 >
                   {!abstained
@@ -513,8 +513,8 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
 
             {/* ABSTENTION BANNER vs FULL TREATMENT PROTOCOL */}
             {!prediction ? (
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center text-xs text-gray-500 space-y-2">
-                <Camera className="w-8 h-8 text-gray-300 mx-auto" />
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center text-xs text-gray-600 space-y-2">
+                <Camera className="w-8 h-8 text-gray-600 mx-auto" />
                 <p className="font-bold text-gray-700">No scan yet</p>
                 <p>
                   Upload an image, drag a leaf photo onto the upload zone, or tap <strong>Live Camera</strong> to
@@ -523,7 +523,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
               </div>
             ) : abstained ? (
               <div className="bg-[#FFF8E1] border-2 border-[#D97706] rounded-2xl p-5 space-y-4 text-xs">
-                <div className="flex items-start space-x-2 text-[#D97706] font-bold text-sm">
+                <div className="flex items-start space-x-2 text-[#B45309] font-bold text-sm">
                   <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <div>
                     <span className="block">ABSTENTION MANDATE: Low Confidence Prediction</span>
@@ -556,11 +556,11 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
               <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4 text-xs">
                 <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                   <div>
-                    <h4 className="font-bold text-[#1B4332] text-sm flex items-center space-x-1.5">
-                      <FileText className="w-4 h-4 text-[#7CB342]" />
+                    <h3 className="font-bold text-[#1B4332] text-sm flex items-center space-x-1.5">
+                      <FileText className="w-4 h-4 text-[#3F6B1F]" />
                       <span>{formatClassName(prediction.className)}</span>
-                    </h4>
-                    <span className="text-[10px] text-gray-500 font-mono block">
+                    </h3>
+                    <span className="text-[10px] text-gray-600 font-mono block">
                       Classified by {prediction.modelVersion} (top-1 of 38)
                     </span>
                   </div>
@@ -584,8 +584,8 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                         <span
                           className={
                             i === 0
-                              ? 'text-[#059669] w-12 text-right font-bold'
-                              : 'text-gray-500 w-12 text-right'
+                              ? 'text-[#047857] w-12 text-right font-bold'
+                              : 'text-gray-600 w-12 text-right'
                           }
                         >
                           {(p.confidence * 100).toFixed(2)}%
@@ -622,9 +622,9 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
 
         {/* Bottom Recent Scans Log */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider font-mono">
+          <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider font-mono">
             PlantVillage Reference Gallery
-          </h3>
+          </h2>
           <div className="flex space-x-4 overflow-x-auto pb-2">
             {plantSamples.slice(0, 3).map((sample, i) => (
               <div
@@ -641,10 +641,10 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                 </div>
                 <div className="text-xs font-mono">
                   <span className="font-bold text-gray-900 block">Sample #{i + 1}</span>
-                  <span className="text-[#059669] font-bold text-[10px] block">
+                  <span className="text-[#047857] font-bold text-[10px] block">
                     {prediction ? formatClassName(prediction.className) : sample.label}
                   </span>
-                  <span className="text-gray-400 text-[9px] block">PlantVillage dataset</span>
+                  <span className="text-gray-600 text-[9px] block">PlantVillage dataset</span>
                 </div>
               </div>
             ))}

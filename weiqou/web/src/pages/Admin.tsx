@@ -54,10 +54,10 @@ export const Admin: React.FC = () => {
             <tr><th className="px-5 py-3 font-medium">Name</th><th className="px-5 py-3 font-medium">Email</th><th className="px-5 py-3 font-medium">Role</th></tr>
           </thead>
           <tbody>
-            {users === null && <tr><td colSpan={3} className="px-5 py-6 text-ink/60">Loading users…</td></tr>}
+            {users === null && <tr><td colSpan={3} className="px-5 py-6 text-ink/70">Loading users…</td></tr>}
             {users?.map((u) => (
               <tr key={u.id} className="border-t border-leaf-100">
-                <td className="px-5 py-3 font-semibold">{u.name}{u.id === me.id && <span className="ml-2 text-sm font-normal text-ink/50">(you)</span>}</td>
+                <td className="px-5 py-3 font-semibold">{u.name}{u.id === me.id && <span className="ml-2 text-sm font-normal text-ink/70">(you)</span>}</td>
                 <td className="px-5 py-3 text-ink/70">{u.email}</td>
                 <td className="px-5 py-3">
                   <select aria-label={`Role for ${u.name}`} value={u.role} disabled={saving === u.id} onChange={(e) => change(u, e.target.value as Role)}

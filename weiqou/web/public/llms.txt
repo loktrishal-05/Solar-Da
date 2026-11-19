@@ -1,0 +1,10 @@
+# Solarda
+
+> Safety-gated AI farm agents for smallholder farms. AI agents watch farm data and propose irrigation, nutrient, climate and
+> disease actions; a deterministic TypeScript safety engine allows, modifies or blocks each one; an agronomist approves anything risky.
+
+- [How Solarda works](/guide): roles, autonomy levels, safety verdicts, where the data comes from, scenarios and a glossary.
+- [Try the demo](/login): one-click sign-in as a farmer, an agronomist or an admin.
+- Source code: https://github.com/loktrishal-05/Solar-Da (MIT licence).
+
+All farm readings in the demo are replayed from public datasets or simulated, and are labelled as such.

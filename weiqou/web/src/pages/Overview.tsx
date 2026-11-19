@@ -27,7 +27,7 @@ const Welcome: React.FC<{ role: string }> = ({ role }) => {
           <h2 className="font-display text-xl font-bold">Start here</h2>
           <p className="text-[15px] text-ink/65">A few things to try as {role === 'admin' ? 'an admin' : `a ${role}`}. New to the ideas? Read <Link to="/guide" className="text-leaf-700 underline">how Solarda works</Link>.</p>
         </div>
-        <button onClick={() => { setFlag(key); setHidden(true); }} aria-label="Hide this checklist" className="text-ink/50 hover:text-ink"><X className="h-5 w-5" /></button>
+        <button onClick={() => { setFlag(key); setHidden(true); }} aria-label="Hide this checklist" className="text-ink/70 hover:text-ink"><X className="h-5 w-5" /></button>
       </div>
       <ol className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {STEPS[role].map(([text, to], i) => (
@@ -114,7 +114,7 @@ export const Overview: React.FC = () => {
                 const h = s.verdicts.filter((x) => x.needs_human && x.verdict !== 'veto').length;
                 return (
                   <li key={s.run_id + s.at} className="py-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="w-28 shrink-0 text-sm text-ink/55">{s.sim_time.slice(5, 16).replace('T', ' ')}</span>
+                    <span className="w-28 shrink-0 text-sm text-ink/70">{s.sim_time.slice(5, 16).replace('T', ' ')}</span>
                     <span className="flex-1 min-w-[12rem] text-[15px]">{s.summary_en.replace(' Data is replayed, not from your farm.', '')}</span>
                     {v > 0 && <span className="rounded-full border border-veto/40 px-2 text-sm font-semibold text-veto">{v} blocked</span>}
                     {h > 0 && <span className="rounded-full border border-human/40 px-2 text-sm font-semibold text-human">{h} to a human</span>}
@@ -132,8 +132,8 @@ export const Overview: React.FC = () => {
               <li key={s.label} className="flex items-start gap-3">
                 <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${s.ok === null ? 'bg-stone-300' : s.ok ? 'bg-allow' : 'bg-veto'}`} aria-hidden />
                 <div>
-                  <div className="font-semibold">{s.label} <span className="font-normal text-ink/55">{s.ok === null ? 'unknown' : s.ok ? 'running' : 'down'}</span></div>
-                  <div className="text-sm text-ink/60">{s.detail}</div>
+                  <div className="font-semibold">{s.label} <span className="font-normal text-ink/70">{s.ok === null ? 'unknown' : s.ok ? 'running' : 'down'}</span></div>
+                  <div className="text-sm text-ink/70">{s.detail}</div>
                 </div>
               </li>
             ))}
