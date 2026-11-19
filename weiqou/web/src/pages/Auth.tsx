@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, navigate, useQuery } from '../router';
 import { useAuth } from '../auth';
 import { Button, Logo } from '../ui';
@@ -10,18 +10,27 @@ const DEMO = [
 
 const field = 'w-full rounded-lg border border-leaf-200 bg-white px-3 py-2.5 text-[15px] focus:border-leaf-600 focus:outline-none';
 
-const Frame: React.FC<{ title: string; children: React.ReactNode; aside: React.ReactNode }> = ({ title, children, aside }) => (
-  <div className="min-h-screen grid lg:grid-cols-[1fr_1.1fr] bg-paper">
-    <div className="flex flex-col px-6 sm:px-12 py-8">
-      <Link to="/"><Logo /></Link>
-      <div className="my-auto w-full max-w-sm py-10">
-        <h1 className="font-display text-3xl font-bold text-leaf-950">{title}</h1>
-        {children}
+const Frame: React.FC<{ title: string; children: React.ReactNode; aside: React.ReactNode }> = ({ title, children, aside }) => {
+  const [apiDown, setApiDown] = useState(false);
+  useEffect(() => { fetch('/api/health').then((r) => setApiDown(!r.ok)).catch(() => setApiDown(true)); }, []);
+  return (
+    <div className="min-h-screen grid lg:grid-cols-[1fr_1.1fr] bg-paper">
+      <div className="flex flex-col px-6 sm:px-12 py-8">
+        <Link to="/"><Logo /></Link>
+        <div className="my-auto w-full max-w-sm py-10">
+          <h1 className="font-display text-3xl font-bold text-leaf-950">{title}</h1>
+          {apiDown && (
+            <p role="status" className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+              This is a preview of the web app only. Sign-in, the agents and the safety engine run on the local stack: clone the repo and run <code className="font-mono">make setup && make dev</code>.
+            </p>
+          )}
+          {children}
+        </div>
       </div>
+      <div className="hidden lg:flex flex-col justify-end bg-leaf-950 p-12 text-leaf-100">{aside}</div>
     </div>
-    <div className="hidden lg:flex flex-col justify-end bg-leaf-950 p-12 text-leaf-100">{aside}</div>
-  </div>
-);
+  );
+};
 
 const Aside = () => (
   <blockquote className="max-w-md">

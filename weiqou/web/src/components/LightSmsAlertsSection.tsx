@@ -18,26 +18,8 @@ export const LightSmsAlertsSection: React.FC<LightSmsAlertsSectionProps> = ({ al
   const filtered = filterType === 'ALL' ? alerts : alerts.filter((a) => a.type === filterType);
 
   return (
-    <section id="alerts" className="bg-[#FAFAF8] py-20 px-4 lg:px-8 border-b border-[#E5E7EB] font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <Bell className="w-6 h-6 text-[#1B4332]" />
-              <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">SMS Notifications & Alerts Center</h2>
-            </div>
-            <p className="text-xs text-gray-500 font-normal">
-              Demo gateway: alerts from the safety engine are written to an outbox (replayed data). Real SMS needs a paid provider; optional free Telegram push is supported.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2 text-xs font-mono">
-            <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 font-bold rounded-full">
-              DEMO GATEWAY (simulated SMS)
-            </span>
-          </div>
-        </div>
+    <section id="alerts" className="font-sans">
+      <div className="space-y-8">
 
         {/* 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

@@ -5,7 +5,10 @@ State as of 2026-10-24: blueprint Phases 0-4 and expansion phases A-F are on `ma
 replay data never presented as live, LLM proposes and the TypeScript engine decides, never commit weights/secrets/datasets).
 
 ## Linux/macOS: `make setup` once, then `make dev` / `make health` / `make stop` / `make test` (see `Makefile`).
-Finale work (Nov 2026) is on branch `finale`; plan in `docs/superpowers/plans/2026-11-19-finale-product.md`.
+Finale work (Nov 2026) is on branch `finale` (main is protected; merge by PR). Plan: `docs/superpowers/plans/2026-11-19-finale-product.md`.
+State 2026-11-19: landing page, sign-in with farmer/agronomist/admin roles (demo accounts in `weiqou/api/seed/users.json`),
+sidebar app (overview, agent console, approvals, crop doctor, assistant, try-to-break-it, water and market, alerts, community, settings),
+approvals only by agronomist/admin through `POST /api/runs/:id/resume`. Demo script: `docs/finale/DEMO_SCRIPT.md`.
 
 ## Get the environment running on Windows (a fresh VS Code session)
 1. `npm install; npm run build`

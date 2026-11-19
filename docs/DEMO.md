@@ -1,5 +1,7 @@
 # Demo script (Round II)
 
+> Finale (21-22 Nov 2026): use `docs/finale/DEMO_SCRIPT.md` (Linux, `make dev`, sign-in, approvals handoff, red-team page). The notes below are the older 5-minute path and still work inside the Agent console page.
+
 Laptop with Wi-Fi off. Start (Docker Desktop running): `powershell -ExecutionPolicy Bypass -File scripts/demo.ps1`; it opens
 http://localhost:3000, click **Agent Console**. Every run starts from fresh state; stop with `scripts/demo.ps1 -Stop`.
 Without Docker: `scripts/start_all.ps1` (see README), reset with `scripts/stop_all.ps1` and delete `data/runtime/`.

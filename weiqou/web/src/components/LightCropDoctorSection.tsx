@@ -251,55 +251,9 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
   return (
     <section
       id="crop-doctor"
-      className="relative bg-white py-20 px-4 lg:px-8 border-b border-[#E5E7EB] font-sans overflow-hidden"
+      className="font-sans"
     >
-      {/* Video Background #4 — Subtle Foliage Scan Video with 88% White Overlay */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <video
-          src="/media/yrdr.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover filter saturate-[0.8] opacity-15"
-        />
-        <div className="absolute inset-0 bg-white/88" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8">
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <Camera className="w-6 h-6 text-[#1B4332]" />
-              <h2 className="font-display text-2xl font-extrabold text-[#1A1A1A]">
-                AI Crop Doctor Station (PlantVillage 38 classes)
-              </h2>
-            </div>
-            <p className="text-xs text-gray-500 font-normal">
-              Real-time leaf disease classification with mandatory{' '}
-              {Math.round(abstainThreshold * 100)}% safety abstention gate. Uses the Solarda vision service
-              (calibrated, 93% gate) when reachable; otherwise runs fully in the browser.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <span
-              className={`px-3 py-1 text-xs font-bold rounded-full font-mono border ${
-                ready
-                  ? 'bg-emerald-50 text-[#059669] border-emerald-200'
-                  : loading
-                  ? 'bg-amber-50 text-[#D97706] border-amber-200'
-                  : 'bg-rose-50 text-rose-600 border-rose-200'
-              }`}
-            >
-              {ready ? '● TF.js Model Ready' : loading ? 'Loading model...' : 'Model unavailable'}
-            </span>
-            <span className="px-3.5 py-1 bg-[#E8F5E9] text-[#1B4332] border border-[#A5D6A7] text-xs font-bold rounded-full font-mono">
-              vision-v1 · fallback MobileNet-PlantVillage-38-v1.0
-            </span>
-          </div>
-        </div>
+      <div className="relative z-10 space-y-8">
 
         {/* 50/50 Workstation Split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -494,13 +448,9 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs space-y-1">
                 <div className="font-bold flex items-center space-x-1">
                   <AlertTriangle className="w-4 h-4" />
-                  <span>Model failed to load</span>
+                  <span>The leaf model is not running here</span>
                 </div>
-                <p className="font-mono">{error}</p>
-                <p className="text-[10px] text-rose-600">
-                  Run <code>setup_and_test.bat</code> or{' '}
-                  <code>python scripts/convert_hf_to_tfjs.py</code> to generate the TF.js model files.
-                </p>
+                <p>The disease model runs in the local Solarda stack. Start it with <code>make dev</code>, then reload this page.</p>
               </div>
             )}
 
