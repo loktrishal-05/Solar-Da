@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { store } from './store.js';
+import { currentUser, fromAgentRuntime, zodMessage } from './auth.js';
 import { appendMarketplaceListing, loadMarketplaceListings } from './marketplace_store.js';
 import { processGeminiAssistantTurn } from './gemini.js';
 import {
@@ -59,7 +60,7 @@ router.post('/mode', (req: Request, res: Response) => {
 // 2. TerraSub Sensors & Irrigation Pulse
 router.post('/sensors/reading', (req: Request, res: Response) => {
   const parse = TelemetryIngestSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const input = parse.data;
   const unitId = input.growUnitId || store.growUnits[0].id;
@@ -107,12 +108,14 @@ router.post('/sensors/reading', (req: Request, res: Response) => {
 });
 
 router.get('/grow-units/:id/readings', (req: Request, res: Response) => {
-  const unit = store.growUnits.find((g) => g.id === req.params.id) || store.growUnits[0];
+  const unit = store.growUnits.find((g) => g.id === req.params.id);
+  if (!unit) return res.status(404).json({ error: 'Grow unit not found' });
   res.json({ growUnit: unit, readings: unit.readings });
 });
 
 router.get('/grow-units/:id/explain', (req: Request, res: Response) => {
-  const unit = store.growUnits.find((g) => g.id === req.params.id) || store.growUnits[0];
+  const unit = store.growUnits.find((g) => g.id === req.params.id);
+  if (!unit) return res.status(404).json({ error: 'Grow unit not found' });
   const last = unit.readings[unit.readings.length - 1];
 
   res.json({
@@ -133,7 +136,7 @@ router.get('/grow-units/:id/explain', (req: Request, res: Response) => {
 // 3. Solar-Da Reservoir Ingest & Fixed Control-Plane Pipeline
 router.post('/reservoir-groups/:id/readings', (req: Request, res: Response) => {
   const parse = TelemetryIngestSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const input = parse.data;
   const rg = store.reservoirGroups.find((r) => r.id === req.params.id) || store.reservoirGroups[0];
@@ -230,7 +233,7 @@ router.get('/proposals', (req: Request, res: Response) => {
 
 router.post('/proposals/:id/confirm', (req: Request, res: Response) => {
   const parse = ProposalConfirmationSchema.safeParse({ proposalId: req.params.id, ...req.body });
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const proposal = store.proposals.find((p) => p.id === req.params.id);
   if (!proposal) return res.status(404).json({ error: 'Proposal not found' });
@@ -280,8 +283,13 @@ router.post('/proposals/:id/confirm', (req: Request, res: Response) => {
   });
 });
 
+// Anyone may engage the emergency stop (stopping is always safe). Clearing it needs an agronomist, an admin or the agent runtime.
 router.post('/estop', (req: Request, res: Response) => {
-  const { active } = req.body;
+  const active = Boolean(req.body?.active);
+  const user = currentUser(req);
+  if (!active && store.eStopActive && !fromAgentRuntime(req) && user?.role !== 'agronomist' && user?.role !== 'admin') {
+    return res.status(403).json({ error: 'Only an agronomist or admin can clear the emergency stop', eStopActive: true });
+  }
   store.eStopActive = Boolean(active);
   store.auditLogs.push({
     id: `audit_estop_${Date.now()}`,
@@ -314,7 +322,7 @@ async function classifyWithVision(imageUrl: string) {
 
 router.post('/disease/report', async (req: Request, res: Response) => {
   const parse = DiseaseReportSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const input = parse.data;
   const vision = input.imageTarget === 'CANOPY' ? await classifyWithVision(input.imageUrl) : null;
@@ -383,7 +391,7 @@ router.post('/cea/crop-plan', (req: Request, res: Response) => {
 // 7. Substrate Recipe Calculator
 router.post('/substrate/batches', (req: Request, res: Response) => {
   const parse = SubstrateRecipeSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const recipe = calculateSubstrateRecipe({
     targetVolumeLiters: parse.data.targetVolumeLiters,
@@ -425,7 +433,7 @@ router.get('/substrate/batches', (req: Request, res: Response) => {
 // 8. Gemini Assistant Gateway
 router.post('/chat', async (req: Request, res: Response) => {
   const parse = ChatMessageSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const turn = await processGeminiAssistantTurn({
     sessionId: parse.data.sessionId,
@@ -445,7 +453,7 @@ router.get('/marketplace/listings', (req: Request, res: Response) => {
 
 router.post('/marketplace/listings', (req: Request, res: Response) => {
   const parse = MarketplaceListingSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
 
   const newListing = {
     id: `listing_${Date.now()}`,

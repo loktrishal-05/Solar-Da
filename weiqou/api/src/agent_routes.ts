@@ -7,6 +7,7 @@ import { checkAgentProposal, AgentVerdict, DispatchedRecord } from '@terrasub-so
 import { ProposedActionSchema, ApprovalSchema } from '@terrasub-solarda/contracts';
 import { store } from './store.js';
 import { readOutbox, sendAlertSms } from './sms.js';
+import { requireAgentRuntime, zodMessage } from './auth.js';
 
 // Agent-layer endpoints (docs/BLUEPRINT.md, Phase 1). The Python agent runtime calls these;
 // it never re-implements the invariants.
@@ -101,7 +102,7 @@ export const agentRouter = Router();
 
 agentRouter.post('/safety/check', (req: Request, res: Response) => {
   const parse = SafetyRequestSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
   const { proposals, context } = parse.data;
   const out = proposals.map((p) => {
     const v = check(p, context);
@@ -120,14 +121,15 @@ const ActionRequestSchema = z.object({
   approval: ApprovalSchema.optional(),
 });
 
-agentRouter.post('/actions', (req: Request, res: Response) => {
+// Only the agent runtime dispatches: a browser could otherwise post an action with a forged approval.
+agentRouter.post('/actions', requireAgentRuntime, (req: Request, res: Response) => {
   const key = req.header('Idempotency-Key');
   if (!key) return res.status(400).json({ error: 'Idempotency-Key header is required' });
   const prior = readJsonl(ACTIONS_FILE).find((a) => a.idempotency_key === key);
   if (prior) return res.json({ ...prior, replayed: true }); // a resumed run never repeats a dispatch
 
   const parse = ActionRequestSchema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.format() });
+  if (!parse.success) return res.status(400).json({ error: zodMessage(parse.error), details: parse.error.format() });
   const { run_id, sim_time, action, approval } = parse.data;
 
   const v = verdicts.get(action.id) ?? verdictFromAudit(action.id);
@@ -163,7 +165,7 @@ agentRouter.post('/sms/test', async (_req: Request, res: Response) => {
 
 agentRouter.get('/actions', (_req: Request, res: Response) => res.json({ actions: readJsonl(ACTIONS_FILE) }));
 
-agentRouter.post('/audit', (req: Request, res: Response) => {
+agentRouter.post('/audit', requireAgentRuntime, (req: Request, res: Response) => {
   appendAudit({ type: 'agent', ...req.body });
   res.status(201).json({ ok: true });
 });

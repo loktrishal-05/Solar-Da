@@ -94,3 +94,25 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Market price table, community posts, two sample alerts | UI-only, labelled | hand-entered sample content; page badges say "Sample content", table says "sample values, not a live feed". Old "Agmarknet Feed Active", "(Live)", "3 Agronomists Online", "Real-time" labels removed |
 | Old landing-page safety modal (`LightSafetyModal`) | was misleading, removed from the demo path | it logged "✓ Success" for actions that never ran; manual actions now go through the agent console |
 | Unused UI components (~50 files, `Dark*`, legacy `TerraSub/`, `SolarDa/`) | dead code | not imported anywhere; kept for now (not on the demo path) |
+
+## API and site audit (2026-11-19, round 2)
+Every route in `weiqou/api/src/{routes,agent_routes,auth,approvals}.ts` and `services/agents/app/main.py`, and every `fetch(` on the demo path, was read and probed with bad input.
+| Finding | Before | Now | Test |
+|---|---|---|---|
+| Agent-only routes open to browsers | `POST /api/actions` and `POST /api/audit` accepted anyone: a forged `approval` could dispatch a treatment without an agronomist | require the agent runtime's `X-Solarda-Internal` key (when a key is configured); agent client sends it | `api_guards.test.ts`, `test_api_client_key.py` |
+| E-stop clear | anyone could clear it | anyone may engage; only agronomist, admin or agent runtime may clear (403 otherwise, UI shows why) | `api_guards.test.ts` |
+| CORS | `access-control-allow-origin: *` | no CORS headers (same-origin app) | `app_hardening.test.ts` |
+| Headers | `x-powered-by: Express`, no hardening | nosniff, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, `Cache-Control: no-store` on `/api` | `app_hardening.test.ts` |
+| Unknown `/api` route | HTML "Cannot POST" page (UI showed "cannot reach API") | 404 JSON `Not found: METHOD path` | `app_hardening.test.ts` |
+| Malformed JSON body | 400 HTML page with a stack trace | 400 JSON "The request body is not valid JSON"; other errors 500 JSON without stack | `app_hardening.test.ts` |
+| Validation errors | nested zod object (UI would show `[object Object]`) | `error` is a readable sentence, `details` keeps the full object | `api_guards.test.ts` |
+| Unknown grow unit | returned the first unit | 404 | `api_guards.test.ts` |
+| Signup errors | raw zod text | "Enter a valid email address", "Password must be at least 8 characters" | `auth.test.ts` |
+| Agent runtime: unknown run | 200 with empty state | 404 | `test_route_errors.py` |
+| Agent runtime: run with unknown scenario | 500 | 400 with the list of scenarios | `test_route_errors.py` |
+| Agent runtime: blank question / empty chat | answered | 422 | `test_route_errors.py` |
+| Web: E-stop toggle | changed the screen before the server answered | shows the server's state and its reason | browser check |
+| Web: replay pause / speed / seek | an error reply became the session state | error shown, state unchanged | browser check |
+| Web: settings | failures silent | saved / not saved message | browser check |
+| Web: sign-in errors | one small red line | error box, invalid fields outlined, focus on password | browser check |
+| Known, left as is | `POST /api/mode`, `/api/proposals/:id/confirm`, `/api/sms/test`, `/agents/replay/*` need no sign-in | local demo controls; the safety engine still decides every action | - |

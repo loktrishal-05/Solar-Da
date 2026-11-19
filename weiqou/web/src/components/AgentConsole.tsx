@@ -101,16 +101,26 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
     if (!r.ok) setError((await r.json()).detail ?? 'could not start');
     else setSession(await r.json());
   };
-  const pause = async () => setSession(await (await post(`/replay/pause?paused=${!session.paused}`)).json());
+  // Replay controls: only accept a new session state from a successful reply; otherwise show the reason.
+  const control = async (path: string, body?: unknown) => {
+    try {
+      const r = await post(path, body);
+      const b = await r.json().catch(() => ({}));
+      if (r.ok) { setSession(b); setError(null); } else setError(typeof b.detail === 'string' ? b.detail : 'The replay control failed');
+    } catch {
+      setError(BACKEND_OFFLINE_MESSAGE);
+    }
+  };
+  const pause = () => control(`/replay/pause?paused=${!session.paused}`);
   const changeSpeed = async (s: number) => {
     setSpeed(s);
-    if (session.session_id) setSession(await (await post(`/replay/speed?speed=${s}`)).json());
+    if (session.session_id) await control(`/replay/speed?speed=${s}`);
   };
   const seek = async (frac: number) => {
     if (!session.start || !session.end) return;
     const a = Date.parse(session.start), b = Date.parse(session.end);
     const ts = new Date(a + (b - a) * frac).toISOString().replace(/\.\d+Z$/, 'Z');
-    setSession(await (await post('/replay/seek', { ts })).json());
+    await control('/replay/seek', { ts });
   };
 
   const checkNow = async () => {

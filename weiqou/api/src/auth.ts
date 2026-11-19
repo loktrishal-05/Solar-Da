@@ -156,3 +156,26 @@ authRouter.patch('/admin/users/:id', requireRole('admin'), (req: Request, res: R
   writeUsers(users);
   res.json({ user: toPublic(user) });
 });
+
+// Shared secret between this API and the agent runtime (make dev writes it to the runtime dir; Docker start.sh exports it).
+// With no key configured (old scripts), agent-only routes stay open as before.
+export function internalKey(): string {
+  if (process.env.SOLARDA_INTERNAL_KEY) return process.env.SOLARDA_INTERNAL_KEY;
+  const f = join(RUNTIME_DIR, '.internal_key');
+  return existsSync(f) ? readFileSync(f, 'utf8').trim() : '';
+}
+
+export function fromAgentRuntime(req: Request): boolean {
+  const key = internalKey();
+  const got = req.header('X-Solarda-Internal') ?? '';
+  if (!key) return true;
+  return got.length === key.length && timingSafeEqual(Buffer.from(got), Buffer.from(key));
+}
+
+export const requireAgentRuntime: RequestHandler = (req, res, next) =>
+  fromAgentRuntime(req) ? next() : res.status(403).json({ error: 'Only the Solarda agent runtime can call this' });
+
+export const zodMessage = (e: z.ZodError) => {
+  const i = e.issues[0];
+  return i ? `${i.path.length ? i.path.join('.') + ': ' : ''}${i.message}` : 'Invalid request';
+};

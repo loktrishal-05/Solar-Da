@@ -88,10 +88,19 @@ export const CommunityPage: React.FC = () => (
 
 export const SettingsPage: React.FC = () => {
   const [mode, setMode] = useState<ProductMode>('TERRASUB_MVP');
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   useEffect(() => { fetch('/api/health').then((r) => r.json()).then((h) => h.activeMode && setMode(h.activeMode)).catch(() => {}); }, []);
-  const choose = (m: ProductMode) => {
-    setMode(m);
-    fetch('/api/mode', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: m }) }).catch(() => {});
+  const choose = async (m: ProductMode) => {
+    setMsg(null);
+    try {
+      const r = await fetch('/api/mode', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: m }) });
+      const b = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(b.error ?? `HTTP ${r.status}`);
+      setMode(m);
+      setMsg({ ok: true, text: 'Saved. The safety engine now uses the limits for this farm type.' });
+    } catch (e) {
+      setMsg({ ok: false, text: `Not saved: ${(e as Error).message}` });
+    }
   };
   return (
     <>
@@ -99,6 +108,7 @@ export const SettingsPage: React.FC = () => {
       <Card className="max-w-2xl">
         <h2 className="font-display text-lg font-semibold">Farm type</h2>
         <p className="text-sm text-ink/65">Changes which safety limits the engine loads. The rules themselves stay the same.</p>
+        {msg && <p role={msg.ok ? 'status' : 'alert'} className={`mt-3 text-sm ${msg.ok ? 'text-leaf-800' : 'text-veto'}`}>{msg.text}</p>}
         <div className="mt-4 grid sm:grid-cols-2 gap-3">
           {([['TERRASUB_MVP', 'Soil and substrate beds', 'Pulse irrigation, moisture targets'], ['SOLARDA_V3', 'Hydroponic towers', 'Nutrient tank, pH and EC dosing, solar pump']] as const).map(([m, t, d]) => (
             <button key={m} onClick={() => choose(m as ProductMode)} aria-pressed={mode === m}

@@ -143,7 +143,10 @@ class RunStart(BaseModel):
 @app.post("/runs")
 def runs_start(req: RunStart):
     """One farm shift at a given sim time (default: the live session's clock, else the scenario start)."""
-    sc = load_scenario(req.scenario)
+    try:
+        sc = load_scenario(req.scenario)
+    except FileNotFoundError as e:
+        raise HTTPException(400, str(e))
     sim_time = req.sim_time or (session.info()["sim_time"] if session and session.sc["name"] == req.scenario else sc["start"])
     sid = session.id if session and session.sc["name"] == req.scenario else f"{req.scenario}-manual"
     tick = len([r for r in runner.list_runs() if r.startswith(sid + ":")]) + 500
@@ -156,13 +159,20 @@ def runs_list():
     return runner.list_runs()
 
 
+def _known_run(run_id: str) -> None:
+    if run_id not in runner.list_runs():
+        raise HTTPException(404, f"no run {run_id}")
+
+
 @app.get("/runs/{run_id}/state")
 def run_state(run_id: str):
+    _known_run(run_id)
     return runner.run_state(run_id)
 
 
 @app.get("/runs/{run_id}/history")
 def run_history(run_id: str):
+    _known_run(run_id)
     return runner.run_history(run_id)
 
 
@@ -196,7 +206,7 @@ def estop(req: EStop, run_id: str | None = None):
 
 
 class Ask(BaseModel):
-    text: str
+    text: str = Field(pattern=r"\S", description="the farmer's question; blank is rejected")
     language: str | None = None
 
 
@@ -238,7 +248,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage] = Field(max_length=40)
+    messages: list[ChatMessage] = Field(min_length=1, max_length=40)
     language: str | None = Field(None, pattern="^(en|ta|hi|te|kn|ml)$")
     mode: str = Field("chat", pattern="^(chat|guide)$")
 

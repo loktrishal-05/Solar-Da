@@ -34,6 +34,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   const [pendingApprovals, setPending] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let stop = false;
@@ -56,10 +57,17 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   useEffect(() => setMenuOpen(false), [path]);
 
+  // The server decides: anyone may stop, only an agronomist or admin may clear. Show what it says.
   const toggleEStop = async () => {
-    const next = !eStopActive;
-    setEStop(next);
-    await fetch('/api/estop', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: next }) }).catch(() => {});
+    setNotice(null);
+    try {
+      const r = await fetch('/api/estop', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ active: !eStopActive }) });
+      const b = await r.json();
+      if (typeof b.eStopActive === 'boolean') setEStop(b.eStopActive);
+      if (!r.ok) setNotice(b.error ?? 'The emergency stop could not be changed.');
+    } catch {
+      setNotice('Cannot reach the safety engine. Nothing was changed.');
+    }
   };
 
   const nav = (
@@ -114,6 +122,13 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
             </button>
           </div>
         </header>
+
+        {notice && (
+          <div role="alert" className="mx-4 lg:mx-8 mt-4 flex items-start justify-between gap-3 rounded-xl border border-veto/30 bg-red-50 px-4 py-3 text-sm text-veto">
+            <span>{notice}</span>
+            <button onClick={() => setNotice(null)} aria-label="Dismiss"><X className="h-4 w-4" /></button>
+          </div>
+        )}
 
         {backendUp === false && (
           <div role="status" className="mx-4 lg:mx-8 mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">

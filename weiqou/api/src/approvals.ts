@@ -2,9 +2,7 @@
 // (the browser's value is ignored), writes it to the audit log, and forwards to the agent runtime with the internal key.
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { requireRole, RUNTIME_DIR, type PublicUser } from './auth.js';
+import { internalKey, requireRole, type PublicUser } from './auth.js';
 import { appendAudit } from './agent_routes.js';
 
 const ResumeSchema = z.object({
@@ -15,13 +13,6 @@ const ResumeSchema = z.object({
     note: z.string().max(500).optional(),
   })).min(1),
 });
-
-// make dev writes the key to the runtime dir; reading it here keeps approvals working if only the API is restarted by hand.
-function internalKey(): string {
-  if (process.env.SOLARDA_INTERNAL_KEY) return process.env.SOLARDA_INTERNAL_KEY;
-  const f = join(RUNTIME_DIR, '.internal_key');
-  return existsSync(f) ? readFileSync(f, 'utf8').trim() : '';
-}
 
 export const approvalsRouter = Router();
 
