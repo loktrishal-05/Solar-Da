@@ -13,6 +13,11 @@ Round 2 (same day): one-click demo roles (`POST /api/auth/demo`, off with `SOLAR
 page intros + `/guide`, API audit (agent-only routes need `X-Solarda-Internal`, headers, JSON 404/400/500, see AUDIT.md), hash-chained audit log
 (`/api/audit/verify`), immersive landing (video hero, pinned story), three.js scene on sign-in, logo + favicon set. Plan: `docs/superpowers/plans/2026-11-19-finale-polish.md`.
 
+## Phase G (2026-11-19, branch `phase-g-vision-gate`, not yet merged)
+- Plant gate in front of the disease model (`services/vision/app/leafgate.py`): cars/bikes/people get "not a plant leaf", no disease named. Needs `services/vision/model/leaf_gate.onnx` (89 MB, fetched by `scripts/fetch_vision_model.ps1` and `deploy/fetch_models.py`; the service returns 503 without it).
+- Automation page (`/app/automation`): 5 cases -> Firebase -> agents -> orchestrator report -> approval -> command queued in Firebase. Works with the local store; set `FIREBASE_DB_URL` (+ optional `FIREBASE_AUTH`) in `.env` for a real project. See D20 in `docs/DECISIONS.md`.
+- Open: real Firebase project + rules, ESP32 firmware (read sensors, write readings, poll `/commands`, ack status), SSE listener instead of button-driven polling, orchestrator on a schedule.
+
 ## Get the environment running on Windows (a fresh VS Code session)
 1. `npm install; npm run build`
 2. Python 3.11 venvs: `services/{agents,twin,vision}` -> `py -3.11 -m venv .venv` and `pip install -r requirements.lock`
