@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
-  Activity, AlertTriangle, Bell, Bot, ClipboardCheck, Gauge, Leaf, LogOut, Menu, MessagesSquare, Settings, ShieldAlert, Sprout, UserCog, Users, X,
+  Activity, AlertTriangle, Bell, Bot, ClipboardCheck, Gauge, Leaf, LogOut, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, Settings, ShieldAlert, Sprout, UserCog, Users, X, Zap,
 } from 'lucide-react';
 import { Link, usePath } from '../router';
 import { useAuth } from '../auth';
-import { Logo } from '../ui';
+import { Logo, LogoMark } from '../ui';
 import { FarmChat } from '../components/FarmChat';
 
 type Shell = { eStopActive: boolean; toggleEStop: () => void; backendUp: boolean | null; pendingApprovals: number };
@@ -14,6 +14,7 @@ export const useShell = () => useContext(ShellCtx);
 const NAV: Array<[string, string, React.ElementType]> = [
   ['/app', 'Overview', Gauge],
   ['/app/console', 'Agent console', Activity],
+  ['/app/automation', 'Automation', Zap],
   ['/app/approvals', 'Approvals', ClipboardCheck],
   ['/app/doctor', 'Crop doctor', Leaf],
   ['/app/assistant', 'Farm assistant', MessagesSquare],
@@ -33,6 +34,12 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   const [backendUp, setBackendUp] = useState<boolean | null>(null);
   const [pendingApprovals, setPending] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Desktop sidebar: icons only when collapsed. The choice is remembered per browser (storage may be blocked).
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('solarda.sidebar') === 'collapsed'; } catch { return false; } });
+  const toggleSidebar = () => setCollapsed((c) => {
+    try { localStorage.setItem('solarda.sidebar', c ? 'open' : 'collapsed'); } catch { /* ignore */ }
+    return !c;
+  });
   const [chatOpen, setChatOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -76,11 +83,12 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         const active = to === '/app' ? path === '/app' : path.startsWith(to);
         return (
           <Link key={to} to={to} aria-current={active ? 'page' : undefined}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] transition ${active ? 'bg-white/10 text-white font-semibold' : 'text-leaf-100/75 hover:text-white hover:bg-white/5'}`}>
+                title={collapsed ? label : undefined} aria-label={label}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] transition ${collapsed ? 'lg:justify-center' : ''} ${active ? 'bg-white/10 text-white font-semibold' : 'text-leaf-100/75 hover:text-white hover:bg-white/5'}`}>
             <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden />
-            <span className="flex-1">{label}</span>
+            <span className={`flex-1 ${collapsed ? 'lg:hidden' : ''}`}>{label}</span>
             {to === '/app/approvals' && pendingApprovals > 0 && (
-              <span className="rounded-full bg-sprout px-2 text-xs font-bold text-leaf-950">{pendingApprovals}</span>
+              <span className={`rounded-full bg-sprout px-2 text-xs font-bold text-leaf-950 ${collapsed ? 'lg:hidden' : ''}`}>{pendingApprovals}</span>
             )}
           </Link>
         );
@@ -90,15 +98,17 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   return (
     <ShellCtx.Provider value={{ eStopActive, toggleEStop, backendUp, pendingApprovals }}>
-      <div className="min-h-screen bg-paper lg:pl-64">
+      <div className={`min-h-screen bg-paper transition-[padding] ${collapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-leaf-900 focus:shadow">Skip to main content</a>
-        <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-leaf-950 px-4 py-5 flex flex-col gap-6 transition-transform lg:translate-x-0 ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="flex items-center justify-between px-2">
-            <Link to="/"><Logo light /></Link>
+        <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-leaf-950 px-4 py-5 flex flex-col gap-6 transition-all lg:translate-x-0 ${collapsed ? 'lg:w-16 lg:px-2' : ''} ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className={`flex items-center justify-between px-2 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}>
+            <Link to="/" aria-label="Solarda home" className={collapsed ? 'lg:hidden' : ''}><Logo light /></Link>
+            {collapsed && <button className="hidden lg:block" onClick={toggleSidebar} aria-label="Expand sidebar" title="Expand sidebar"><LogoMark light size={32} /></button>}
+            <button className={`hidden text-leaf-100/80 hover:text-white ${collapsed ? '' : 'lg:block'}`} onClick={toggleSidebar} aria-label="Collapse sidebar" aria-expanded={!collapsed} title="Collapse sidebar"><PanelLeftClose className="h-5 w-5" /></button>
             <button className="lg:hidden text-white" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X className="h-5 w-5" /></button>
           </div>
           {nav}
-          <div className="mt-auto rounded-lg bg-white/5 px-3 py-3 text-sm text-leaf-100">
+          <div className={`mt-auto rounded-lg bg-white/5 px-3 py-3 text-sm text-leaf-100 ${collapsed ? 'lg:hidden' : ''}`}>
             <div className="font-semibold text-white">{user?.name}</div>
             <div className="text-leaf-100/70">{user ? ROLE_LABEL[user.role] : ''} · {user?.email}</div>
             <Link to="/guide" className="mt-2 block text-leaf-100/80 underline hover:text-white">How Solarda works</Link>
@@ -106,6 +116,12 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
               <LogOut className="h-4 w-4" aria-hidden /> Sign out
             </button>
           </div>
+          {collapsed && (
+            <div className="mt-auto hidden flex-col items-center gap-3 lg:flex">
+              <button onClick={toggleSidebar} aria-label="Expand sidebar" title="Expand sidebar" className="text-leaf-100/80 hover:text-white"><PanelLeftOpen className="h-5 w-5" /></button>
+              <button onClick={logout} aria-label="Sign out" title="Sign out" className="text-leaf-100/80 hover:text-white"><LogOut className="h-5 w-5" /></button>
+            </div>
+          )}
         </aside>
         {menuOpen && <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={() => setMenuOpen(false)} />}
 
