@@ -9,6 +9,9 @@ Finale work (Nov 2026) is on branch `finale` (main is protected; merge by PR). P
 State 2026-11-19: landing page, sign-in with farmer/agronomist/admin roles (demo accounts in `weiqou/api/seed/users.json`),
 sidebar app (overview, agent console, approvals, crop doctor, assistant, try-to-break-it, water and market, alerts, community, settings),
 approvals only by agronomist/admin through `POST /api/runs/:id/resume`. Demo script: `docs/finale/DEMO_SCRIPT.md`.
+Round 2 (same day): one-click demo roles (`POST /api/auth/demo`, off with `SOLARDA_DEMO_LOGIN=0`), farmer-only signup + admin Users page,
+page intros + `/guide`, API audit (agent-only routes need `X-Solarda-Internal`, headers, JSON 404/400/500, see AUDIT.md), hash-chained audit log
+(`/api/audit/verify`), immersive landing (video hero, pinned story), three.js scene on sign-in, logo + favicon set. Plan: `docs/superpowers/plans/2026-11-19-finale-polish.md`.
 
 ## Get the environment running on Windows (a fresh VS Code session)
 1. `npm install; npm run build`

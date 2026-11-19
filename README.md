@@ -61,6 +61,9 @@ and a human approves anything risky. The same agent answers farmers in their lan
 | **Market outlook** | 4-week onion price outlook from an Agmarknet archive, with storage and pooling alert |
 | **Traceability passport** | SHA-256 hash-chained harvest passport (tamper-evident), marketplace listings persisted to disk |
 | **Alerts** | Demo SMS gateway (outbox, simulated) with optional free Telegram delivery |
+| **Web product** | Landing page, one-click demo sign-in as farmer / agronomist / admin, Users page (admins grant roles), an "About this page" panel on every page and a public guide (`/guide`) |
+| **Approvals and audit** | Only an agronomist or admin can approve; the approver is recorded; the audit log is hash-chained (`GET /api/audit/verify`) |
+| **Try to break it** | Live prompt-injection and unsafe-action attacks against the assistant and the safety engine, all blocked |
 
 ## System architecture
 

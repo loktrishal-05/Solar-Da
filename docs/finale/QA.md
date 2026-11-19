@@ -30,10 +30,13 @@ Voice and text in Tamil, Hindi, Telugu, Kannada, Malayalam and English. Alerts g
 The agent never chooses a product or a dose. It proposes "treat for late blight" with sources; a named agronomist approves and decides the product. Their name and the time are in the tamper-evident audit log.
 
 **How is sign-in secured?**
-Passwords are hashed with scrypt; sessions are HMAC-signed, httpOnly cookies; roles are checked on the server, and the agent runtime refuses approvals that do not come through that check. The demo accounts are for the demo; a real deployment would add phone OTP sign-in.
+Passwords are hashed with scrypt; sessions are HMAC-signed, httpOnly cookies; roles are checked on the server. Only the agent runtime (with a shared key) can dispatch actions or write the audit log, so a browser cannot forge an approval. The API sends security headers and no CORS, and every error is a clear JSON message. A real deployment would add phone OTP sign-in.
 
-**Anyone can sign up as an agronomist. Doesn't that defeat the role check?**
-In the demo, yes: self-signup shows the workflow. In production an admin assigns the agronomist role after checking credentials, and only admins can grant it. The server-side check and the audit trail stay the same.
+**Can the audit log be edited after the fact?**
+Each entry stores a hash of the one before it, so editing an earlier entry breaks the chain; `GET /api/audit/verify` reports where. It is tested (`audit_chain.test.ts`).
+
+**Can anyone make themselves an agronomist?**
+No. Every signup starts as a farmer. Only an admin can give the agronomist role, on the Users page, and the last admin cannot be removed. The one-click demo buttons sign into three seeded demo accounts and can be switched off with one setting (`SOLARDA_DEMO_LOGIN=0`).
 
 **How would this scale or make money?**
 Pilot cost is about ₹1,500 to 4,200 per month plus sensors. Revenue options: a per-acre subscription for farmer groups (FPOs), and agronomist time billed per approval. The safety engine and audit log are what make it acceptable to an FPO or an insurer.

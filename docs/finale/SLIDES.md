@@ -46,14 +46,14 @@ The four boxes (keep the layout):
 1. **Propose:** AI agents for irrigation, fertigation, climate and disease
 2. **Check:** safety engine with 13 rules: allow, modify or block
 3. **Approve:** a signed-in agronomist approves risky actions; their name is logged
-4. **Act and log:** action sent once and recorded in a tamper-evident log
+4. **Act and log:** action sent once and recorded in a hash-chained audit log (edits are detected)
 
 Main components:
 
 - Crop simulation (AquaCrop) compares "wait", "irrigate now" and "irrigate tonight" before the agent decides
 - Leaf disease detection that asks for a new photo when it is not confident
 - Farm assistant in six languages with voice input
-- Web product: landing page, sign-in with farmer and agronomist roles, overview, agent console, approvals inbox
+- Web product: landing page, one-click sign-in as farmer, agronomist or admin, overview, agent console, approvals inbox, user management, and a built-in guide on every page
 - Every reading on screen is labelled as replayed, simulated or real data
 
 ## Slide 6: 5. Novelty and Show Stopper
@@ -86,7 +86,7 @@ One change in the "Human approval" box: **"Human approval (agronomist sign-in, s
 
 User interface box, replace the list with:
 
-> React web app: Landing · Sign-in (farmer / agronomist) · Overview · Agent Console · Approvals · Crop Doctor · Farm Assistant · Try to break it · Water and Market
+> React web app: Landing · Sign-in (farmer / agronomist / admin) · Overview · Agent Console · Approvals · Crop Doctor · Farm Assistant · Try to break it · Water and Market · Users · Guide
 
 Footer line:
 
@@ -126,7 +126,7 @@ Results table:
 | Disease model accuracy on lab images / on field photos it accepts | 98.2% / 87.2% |
 | Red-team attacks blocked (prompt injection, unsafe dose, fake sensor, Tamil jailbreak) | 30 / 30 |
 | Unsafe questions escalated across 6 languages | 100% (32 cases) |
-| Automated tests passing | 132 (engine, API, agents, twin, vision) |
+| Automated tests passing | 152 (engine, API, agents, twin, vision) |
 | Time to react to a trigger | Immediate (vs 5-10 min cycle) |
 
 Footer: **Results come from simulation and replayed public datasets, not field trials.**
@@ -135,11 +135,11 @@ Footer: **Results come from simulation and replayed public datasets, not field t
 
 ## Slide 12: 10. Screenshot of the outcome-1
 
-Images: `landing.jpg` (left) and `console_ph_veto.jpg` (right).
+Images: `landing.jpg` or `login.jpg` (left) and `console_ph_veto.jpg` (right).
 
 Captions:
 
-- **Landing page:** what Solarda does, how one decision flows, and results with their sources.
+- **Landing and sign-in:** a full-screen farm hero, a scroll story of one decision, and one-click sign-in as farmer, agronomist or admin.
 - **Agent Console:** tank pH is high and the agent keeps proposing pH-down. The safety engine blocks the fourth dose: 46 ml in the last hour + 12 ml would pass the 50 ml hourly cap. The broken backup probe (pH 11.37) is flagged and ignored.
 
 ## Slide 13: 11. Screenshot of the outcome-2

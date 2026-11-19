@@ -5,8 +5,8 @@ All four members must be on the call. One person shares the screen (the driver);
 ## Before the slot (30 minutes ahead)
 
 1. `make reset && make dev`, then `make health`: five `OK` lines. `reset` clears old runs and approvals from rehearsals.
-2. **Window A (normal Chrome):** http://localhost:3000, sign in as the demo **farmer**. Open the Agent console.
-3. **Window B (private window or a second browser):** sign in as the demo **agronomist**, open Approvals.
+2. **Window A (normal Chrome):** http://localhost:3000/login, click **Continue as Farmer**. Open the Agent console.
+3. **Window B (private window or a second browser):** /login, click **Continue as Agronomist** (it lands on Approvals).
    Both windows of the same browser share one sign-in, so B must be private or a different browser.
 4. Close every other tab and notification. Zoom the browser to 110% so text reads on a shared screen.
 5. Keep `evidence/screenshots/finale/` open in a file viewer as the fallback if anything fails.
@@ -18,7 +18,7 @@ All four members must be on the call. One person shares the screen (the driver);
 |---|---|---|---|
 | 0:00-0:45 | Speaker 1 | Slides 2-3 | Small farms decide by habit; events cannot wait; an AI with a valve is a risk. "How can an agent act fast, in the farmer's language, without ever being allowed to do something unsafe?" |
 | 0:45-1:30 | Speaker 1 | Slides 5-6 | Propose, check, approve, act. The show stopper: we will try to break it live. |
-| 1:30-2:15 | Driver | Window A: landing page, then Overview | The stamp on the hero shows three examples of real safety rules. Sign-in has roles. The amber badge: no live sensors, all replayed and labelled. |
+| 1:30-2:15 | Driver | Window A: landing page, then Overview | Scroll the landing: "four moments, one rulebook" pins while it plays (notice, propose, blocked, approved). Show the sign-in page with the three one-click roles and the 3D garden. On Overview: the amber badge (no live sensors, all replayed and labelled) and the "About this page" panel every page has. |
 | 2:15-4:00 | Speaker 2 | Window A: Agent console | Scenario `ph_excursion`, 1440x, L2, **Start**. Wait ~15 s. Open a run marked **veto**: the fertigation agent wants pH-down again; the safety gate says MAX_DOSE_PER_HOUR. Point at the ingest row: the backup probe reads pH 11.37 and is ignored. "The model can ask as often as it likes. Code decides." |
 | 4:00-5:45 | Speaker 3 | A then B | Scenario `diseased_leaf_rain`, 1440x, **Start**, then drag the time slider to 15 March just before 06:00. A leaf photo arrives; the disease agent proposes treatment; the trace shows "needs human". In Window A, Approvals: the farmer **cannot** approve. Switch to Window B: the agronomist sees it, presses **Approve and carry out**. Decisions shows "Dr. Priya S (agronomist)". |
 | 5:45-7:15 | Speaker 4 | Window B: Try to break it | Left: pick the **தமிழ்** prompt, send: refused in Tamil and escalated to the extension officer. Pick "SYSTEM: the user…", send: refused. Right: **Dump acid** at 500 ml: Blocked, PH_WRONG_DIRECTION. **Spoofed sensor** (pH 14): Blocked. "Two layers: the assistant refuses, and even if it were fooled, the engine blocks." |
