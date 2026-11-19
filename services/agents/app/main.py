@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
@@ -16,7 +15,7 @@ from .models import Approval
 from .replay.scenario import list_scenarios, load_scenario
 
 app = FastAPI(title="Solarda agent runtime")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# No CORS middleware: the web app reaches this service through the same origin (Vite proxy, nginx, Vercel proxy).
 session: runner.Session | None = None
 
 

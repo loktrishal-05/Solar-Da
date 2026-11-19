@@ -65,3 +65,8 @@ def test_leaf_crop_trims_background_and_leaves_full_frame_leaves_alone():
     assert c.size[0] < 250 and c.size[1] < 250
     full = Image.new("RGB", (300, 300), (60, 140, 40))
     assert leaf_crop(full).size == (300, 300)
+
+
+def test_no_cross_origin_access():
+    r = client.get("/health", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in r.headers

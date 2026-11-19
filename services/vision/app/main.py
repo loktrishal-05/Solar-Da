@@ -1,11 +1,10 @@
 """Vision service: POST /vision/classify (leaf image -> label with calibrated confidence, or abstain)."""
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
 
 from . import classifier
 
 app = FastAPI(title="Solarda vision")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# No CORS middleware: the web app reaches this service through the same origin (Vite proxy, nginx, Vercel proxy).
 MAX_BYTES = 10 * 1024 * 1024
 
 

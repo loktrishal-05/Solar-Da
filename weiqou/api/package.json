@@ -14,7 +14,7 @@
     "@terrasub-solarda/contracts": "*",
     "@terrasub-solarda/engine": "*",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "express": "^4.22.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
