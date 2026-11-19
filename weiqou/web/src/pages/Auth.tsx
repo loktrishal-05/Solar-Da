@@ -3,6 +3,7 @@ import { AlertCircle, ClipboardCheck, ShieldCheck, Sprout } from 'lucide-react';
 import { Link, navigate, useQuery } from '../router';
 import { useAuth, type Role } from '../auth';
 import { Button, Logo } from '../ui';
+import { PlantScene } from '../shell/PlantScene';
 
 // Where each demo role lands first.
 export const HOME_FOR: Record<Role, string> = { farmer: '/app', agronomist: '/app/approvals', admin: '/app/admin' };
@@ -43,6 +44,8 @@ const Frame: React.FC<{ title: string; intro: string; children: React.ReactNode 
         </div>
       </div>
       <aside className="relative hidden lg:block overflow-hidden bg-leaf-950">
+        <div className="absolute inset-0"><PlantScene /></div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-leaf-950 via-leaf-950/70 to-transparent" />
         <blockquote className="absolute inset-x-12 bottom-12 max-w-md">
           <p className="font-display text-3xl font-bold leading-tight text-white">The agent can ask as often as it likes. The safety engine decides.</p>
           <p className="mt-4 text-leaf-100/75">Every action passes 13 safety rules. Anything risky waits for a person with the right role.</p>
