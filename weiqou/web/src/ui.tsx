@@ -79,12 +79,20 @@ export const EmptyState: React.FC<{ title: string; body: React.ReactNode; action
   </div>
 );
 
+// The Solarda mark: a sprouting leaf whose vein is a check (an action the safety engine allowed) and a small sun.
+// Same drawing as public/favicon.svg.
+export const LogoMark: React.FC<{ size?: number; light?: boolean; className?: string }> = ({ size = 28, light, className }) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden>
+    <rect width="64" height="64" rx="15" fill={light ? '#1F5A3F' : '#12352A'} />
+    <circle cx="19" cy="19" r="6" fill="#F2C14E" />
+    <path d="M13 51C13 29 28 13 51 13C51 36 36 51 13 51Z" fill="#A3C94B" />
+    <path d="M22 37.5L29.5 44.5L44 24" fill="none" stroke={light ? '#1F5A3F' : '#12352A'} strokeWidth="4.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export const Logo: React.FC<{ light?: boolean }> = ({ light }) => (
   <span className={`inline-flex items-center gap-2 font-display text-xl font-extrabold tracking-tight ${light ? 'text-white' : 'text-leaf-950'}`}>
-    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden>
-      <circle cx="16" cy="16" r="15" fill={light ? '#A3C94B' : '#1F5A3F'} />
-      <path d="M16 25V13m0 0c0-4 3-6 7-6 0 4-3 6-7 6Zm0 4c0-3-2.5-5-6-5 0 3 2.5 5 6 5Z" stroke={light ? '#0C261C' : '#fff'} strokeWidth="2" fill="none" strokeLinecap="round" />
-    </svg>
+    <LogoMark light={light} />
     Solarda
   </span>
 );

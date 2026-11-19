@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePath, Link } from './router';
 import { AuthProvider, RequireAuth, useAuth, canApprove } from './auth';
 import { AppShell, useShell } from './shell/AppShell';
@@ -39,8 +39,17 @@ const NotFound: React.FC = () => (
   <EmptyState title="This page does not exist" body="The link may be old." action={<Link to="/app" className="font-semibold text-leaf-700 underline">Go to the overview</Link>} />
 );
 
+const TITLES: Record<string, string> = {
+  '/login': 'Sign in', '/signup': 'Create account', '/guide': 'How Solarda works', '/app': 'Overview', '/app/console': 'Agent console',
+  '/app/approvals': 'Approvals', '/app/doctor': 'Crop doctor', '/app/assistant': 'Farm assistant', '/app/redteam': 'Try to break it',
+  '/app/insights': 'Water and market', '/app/alerts': 'Alerts', '/app/community': 'Community', '/app/settings': 'Settings', '/app/admin': 'Users',
+};
+
 const Routes: React.FC = () => {
   const path = usePath().replace(/\/+$/, '') || '/';
+  useEffect(() => {
+    document.title = TITLES[path] ? `${TITLES[path]} · Solarda` : 'Solarda: safety-gated farm agents';
+  }, [path]);
   if (path === '/') return <Landing />;
   if (path === '/login') return <Login />;
   if (path === '/signup') return <Signup />;
