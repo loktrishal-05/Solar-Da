@@ -100,6 +100,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
           <div className="mt-auto rounded-lg bg-white/5 px-3 py-3 text-sm text-leaf-100">
             <div className="font-semibold text-white">{user?.name}</div>
             <div className="text-leaf-100/70">{user ? ROLE_LABEL[user.role] : ''} · {user?.email}</div>
+            <Link to="/guide" className="mt-2 block text-leaf-100/80 underline hover:text-white">How Solarda works</Link>
             <button onClick={logout} className="mt-2 inline-flex items-center gap-1.5 text-leaf-100/80 hover:text-white">
               <LogOut className="h-4 w-4" aria-hidden /> Sign out
             </button>
@@ -116,9 +117,9 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
             <button onClick={() => setChatOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-leaf-200 bg-white px-3 py-1.5 text-sm font-medium text-leaf-900 hover:border-leaf-600">
               <Bot className="h-4 w-4" aria-hidden /> Ask Solarda
             </button>
-            <button onClick={toggleEStop} aria-pressed={eStopActive}
+            <button onClick={toggleEStop} aria-pressed={eStopActive} title={eStopActive && user?.role === 'farmer' ? 'An agronomist or admin can clear the emergency stop' : 'Emergency stop: blocks every action'}
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold ${eStopActive ? 'bg-veto text-white' : 'border border-veto/40 bg-white text-veto'}`}>
-              <AlertTriangle className="h-4 w-4" aria-hidden /> {eStopActive ? 'E-stop on: tap to clear' : 'E-stop'}
+              <AlertTriangle className="h-4 w-4" aria-hidden /> {eStopActive ? (user?.role === 'farmer' ? 'E-stop on' : 'E-stop on: tap to clear') : 'E-stop'}
             </button>
           </div>
         </header>

@@ -119,7 +119,7 @@ export const Login: React.FC = () => {
         </label>
         <Button className="w-full py-2.5" disabled={busy !== null}>{busy === 'form' ? 'Signing in…' : 'Sign in'}</Button>
       </form>
-      <p className="mt-6 text-sm text-ink/70">New here? <Link to="/signup" className="font-semibold text-leaf-700 underline">Create an account</Link></p>
+      <p className="mt-6 text-sm text-ink/70">New here? <Link to="/signup" className="font-semibold text-leaf-700 underline">Create an account</Link> or read <Link to="/guide" className="font-semibold text-leaf-700 underline">how Solarda works</Link>.</p>
     </Frame>
   );
 };

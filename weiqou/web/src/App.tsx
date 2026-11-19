@@ -9,6 +9,7 @@ import { Overview } from './pages/Overview';
 import { Approvals } from './pages/Approvals';
 import { RedTeam } from './pages/RedTeam';
 import { Admin } from './pages/Admin';
+import { Guide } from './pages/Guide';
 import { AssistantPage, AlertsPage, CommunityPage, DoctorPage, InsightsPage, SettingsPage } from './pages/Wrapped';
 import { AgentConsole } from './components/AgentConsole';
 
@@ -55,6 +56,7 @@ const Routes: React.FC = () => {
   if (path === '/') return <Landing />;
   if (path === '/login') return <Login />;
   if (path === '/signup') return <Signup />;
+  if (path === '/guide') return <Guide />;
   if (path === '/app' || path.startsWith('/app/')) {
     const Page = APP_PAGES[path] ?? NotFound;
     return <RequireAuth><AppShell><Page /></AppShell></RequireAuth>;

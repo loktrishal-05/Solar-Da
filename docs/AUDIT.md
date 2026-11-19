@@ -115,4 +115,5 @@ Every route in `weiqou/api/src/{routes,agent_routes,auth,approvals}.ts` and `ser
 | Web: replay pause / speed / seek | an error reply became the session state | error shown, state unchanged | browser check |
 | Web: settings | failures silent | saved / not saved message | browser check |
 | Web: sign-in errors | one small red line | error box, invalid fields outlined, focus on password | browser check |
+| Audit log "tamper-evident" claim | append-only only; landing, slides and the round-1 video said hash-chained | each entry stores `prev` + `hash` (sha256); `GET /api/audit/verify` finds an edited entry; pre-chain entries are skipped | `audit_chain.test.ts` |
 | Known, left as is | `POST /api/mode`, `/api/proposals/:id/confirm`, `/api/sms/test`, `/agents/replay/*` need no sign-in | local demo controls; the safety engine still decides every action | - |

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { Link } from '../router';
 import { useAuth, canApprove } from '../auth';
 import { useShell } from '../shell/AppShell';
@@ -6,6 +7,39 @@ import { Card, EmptyState, PageHeader, SourceBadge, Stat } from '../ui';
 
 type Shift = { at: string; run_id: string; sim_time: string; verdicts: Array<{ verdict: string; needs_human?: boolean }>; dispatched: unknown[]; escalations: unknown[]; summary_en: string; summary_ta?: string };
 type Status = { label: string; ok: boolean | null; detail: string };
+
+const STEPS: Record<string, Array<[string, string]>> = {
+  farmer: [['Start a scenario in the Agent console and watch the agents work', '/app/console'], ['Open a run marked "veto" and read which rule stopped it', '/app/console'], ['Check a leaf photo in the Crop doctor', '/app/doctor'], ['Ask the Farm assistant something in your language', '/app/assistant'], ['Try to break Solarda yourself', '/app/redteam']],
+  agronomist: [['Run the "diseased_leaf_rain" scenario so a treatment needs you', '/app/console'], ['Open Approvals, read why it was sent to you, approve or reject', '/app/approvals'], ['Check that your decision appears with your name', '/app/approvals'], ['Try to break Solarda yourself', '/app/redteam']],
+  admin: [['Open Users and see who has which role', '/app/admin'], ['Give someone the agronomist role', '/app/admin'], ['Run a scenario and approve a treatment as an admin', '/app/console']],
+};
+const readFlag = (k: string) => { try { return localStorage.getItem(k) === '1'; } catch { return false; } };
+const setFlag = (k: string) => { try { localStorage.setItem(k, '1'); } catch { /* not remembered in private windows */ } };
+
+const Welcome: React.FC<{ role: string }> = ({ role }) => {
+  const key = `solarda.welcome.${role}`;
+  const [hidden, setHidden] = useState(() => readFlag(key));
+  if (hidden || !STEPS[role]) return null;
+  return (
+    <Card className="mb-6 border-leaf-200 bg-white">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-xl font-bold">Start here</h2>
+          <p className="text-[15px] text-ink/65">A few things to try as {role === 'admin' ? 'an admin' : `a ${role}`}. New to the ideas? Read <Link to="/guide" className="text-leaf-700 underline">how Solarda works</Link>.</p>
+        </div>
+        <button onClick={() => { setFlag(key); setHidden(true); }} aria-label="Hide this checklist" className="text-ink/50 hover:text-ink"><X className="h-5 w-5" /></button>
+      </div>
+      <ol className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        {STEPS[role].map(([text, to], i) => (
+          <li key={text}><Link to={to} className="flex h-full items-start gap-3 rounded-lg border border-leaf-100 px-3 py-2.5 hover:border-leaf-600">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-leaf-700 text-xs font-bold text-white">{i + 1}</span>
+            <span className="text-[15px]">{text}</span>
+          </Link></li>
+        ))}
+      </ol>
+    </Card>
+  );
+};
 
 const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 const getJson = (u: string) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
@@ -52,6 +86,8 @@ export const Overview: React.FC = () => {
           : 'Here is what the agent proposed, what the safety engine allowed or blocked, and what is waiting for an agronomist.'}
         actions={<Link to="/app/console" className="rounded-full bg-leaf-700 px-4 py-2 text-sm font-semibold text-white hover:bg-leaf-800">Open agent console</Link>}
       />
+
+      {user && <Welcome role={user.role} />}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card><Stat label="Waiting for an agronomist" value={pendingApprovals} tone="human" hint={<Link to="/app/approvals" className="underline">Open approvals</Link>} /></Card>

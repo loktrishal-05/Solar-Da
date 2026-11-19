@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageIntro } from './help';
 
 // Shared building blocks. One radius scale: 12px for surfaces, full for pills.
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -21,6 +22,7 @@ export const Card: React.FC<React.HTMLAttributes<HTMLElement> & { as?: 'section'
 );
 
 export const PageHeader: React.FC<{ title: string; subtitle?: React.ReactNode; actions?: React.ReactNode }> = ({ title, subtitle, actions }) => (
+  <>
   <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
     <div className="max-w-2xl">
       <h1 className="font-display text-3xl font-bold tracking-tight text-leaf-950">{title}</h1>
@@ -28,6 +30,8 @@ export const PageHeader: React.FC<{ title: string; subtitle?: React.ReactNode; a
     </div>
     {actions && <div className="flex items-center gap-2">{actions}</div>}
   </header>
+  <PageIntro />
+  </>
 );
 
 export const Stat: React.FC<{ label: string; value: React.ReactNode; hint?: React.ReactNode; tone?: 'default' | 'veto' | 'human' | 'allow' }> = ({ label, value, hint, tone = 'default' }) => {
