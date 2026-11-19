@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BACKEND_OFFLINE_MESSAGE } from '../backendStatus';
+import { decideRun, type ApprovalRequest } from '../approvals';
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Pause, Play, Radio, ShieldCheck, ShieldX, XCircle, Zap } from 'lucide-react';
 
 // Agent Console: replay controls, live (replayed) feed, per-node reasoning trace, approvals inbox.
@@ -9,7 +10,6 @@ const AGENTS = '/agents';
 
 type Telemetry = { ts: string; zone: string; metric: string; value: number; unit: string; source: string };
 type TraceEntry = { run_id: string; node: string; ts: string; summary: string; data?: Record<string, any> };
-type ApprovalRequest = { type: string; run_id: string; sim_time: string; actions: { verdict: any; action: any }[] };
 type SessionInfo = {
   session_id: string | null; scenario?: string; description?: string; dataset?: string; speed?: number;
   paused?: boolean; sim_time?: string; start?: string; end?: string; autonomy?: string; finished?: boolean;
@@ -119,13 +119,9 @@ export const AgentConsole: React.FC<{ eStopActive: boolean; onToggleEStop: () =>
   };
 
   const decide = useCallback(async (req: ApprovalRequest, decision: 'approve' | 'reject') => {
-    // Through the API: it checks the signed-in role and records who decided (approvals.ts).
-    const approvals = req.actions.map((a) => ({ proposal_id: a.action.id, decision, ts: req.sim_time }));
-    const r = await fetch(`/api/runs/${encodeURIComponent(req.run_id)}/resume`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ approvals }),
-    });
-    if (r.ok) setApprovals((prev) => { const n = { ...prev }; delete n[req.run_id]; return n; });
-    else { const b = await r.json().catch(() => ({})); setError(b.detail ?? b.error ?? 'resume failed'); }
+    const err = await decideRun(req, decision);
+    if (!err) setApprovals((prev) => { const n = { ...prev }; delete n[req.run_id]; return n; });
+    else setError(err);
   }, []);
 
   const runs = useMemo(() => {

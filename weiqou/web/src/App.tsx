@@ -5,6 +5,8 @@ import { AppShell, useShell } from './shell/AppShell';
 import { EmptyState, PageHeader } from './ui';
 import { Login, Signup } from './pages/Auth';
 import { Landing } from './pages/Landing';
+import { Overview } from './pages/Overview';
+import { Approvals } from './pages/Approvals';
 import { AssistantPage, AlertsPage, CommunityPage, DoctorPage, InsightsPage, SettingsPage } from './pages/Wrapped';
 import { AgentConsole } from './components/AgentConsole';
 
@@ -20,6 +22,8 @@ const ConsolePage: React.FC = () => {
 };
 
 const APP_PAGES: Record<string, React.FC> = {
+  '/app': Overview,
+  '/app/approvals': Approvals,
   '/app/console': ConsolePage,
   '/app/doctor': DoctorPage,
   '/app/assistant': AssistantPage,
