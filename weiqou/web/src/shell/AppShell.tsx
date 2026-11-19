@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
-  Activity, AlertTriangle, Bell, Bot, ClipboardCheck, Gauge, Leaf, LogOut, Menu, MessagesSquare, Settings, ShieldAlert, Sprout, Users, X,
+  Activity, AlertTriangle, Bell, Bot, ClipboardCheck, Gauge, Leaf, LogOut, Menu, MessagesSquare, Settings, ShieldAlert, Sprout, UserCog, Users, X,
 } from 'lucide-react';
 import { Link, usePath } from '../router';
 import { useAuth } from '../auth';
@@ -64,7 +64,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   const nav = (
     <nav className="flex flex-col gap-0.5" aria-label="Main">
-      {NAV.map(([to, label, Icon]) => {
+      {[...NAV, ...(user?.role === 'admin' ? [['/app/admin', 'Users', UserCog] as [string, string, React.ElementType]] : [])].map(([to, label, Icon]) => {
         const active = to === '/app' ? path === '/app' : path.startsWith(to);
         return (
           <Link key={to} to={to} aria-current={active ? 'page' : undefined}

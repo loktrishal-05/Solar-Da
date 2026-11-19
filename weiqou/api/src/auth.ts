@@ -136,3 +136,23 @@ authRouter.get('/auth/me', (req: Request, res: Response) => {
   if (!user) return res.status(401).json({ error: 'Not signed in' });
   res.json({ user });
 });
+
+// Admin: list users and change roles. The last admin cannot be demoted, so the site never locks itself out.
+authRouter.get('/admin/users', requireRole('admin'), (_req: Request, res: Response) => {
+  res.json({ users: readUsers().map(toPublic) });
+});
+
+const RoleSchema = z.object({ role: z.enum(['farmer', 'agronomist', 'admin']) });
+authRouter.patch('/admin/users/:id', requireRole('admin'), (req: Request, res: Response) => {
+  const p = RoleSchema.safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: 'Role must be farmer, agronomist or admin' });
+  const users = readUsers();
+  const user = users.find((u) => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'No such user' });
+  if (user.role === 'admin' && p.data.role !== 'admin' && users.filter((u) => u.role === 'admin').length === 1) {
+    return res.status(409).json({ error: 'This is the only admin. Make someone else an admin first.' });
+  }
+  user.role = p.data.role;
+  writeUsers(users);
+  res.json({ user: toPublic(user) });
+});

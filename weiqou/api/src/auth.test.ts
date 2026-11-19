@@ -123,3 +123,33 @@ test('sessions survive an API restart (secret persisted in the runtime dir)', as
   const user = fresh.currentUser({ headers: { cookie } } as any);
   assert.equal(user?.role, 'agronomist');
 });
+
+test('admin users API: only admins, role changes, never zero admins', async () => {
+  const demo = async (role: string) => cookieOf(await post('/demo', { role }));
+  const admin = await demo('admin');
+  const farmer = await demo('farmer');
+  const api = base.replace('/auth', '/admin');
+  const req = (path: string, cookie: string, init: RequestInit = {}) =>
+    fetch(api + path, { ...init, headers: { 'content-type': 'application/json', cookie, ...(init.headers ?? {}) } });
+
+  assert.equal((await req('/users', '')).status, 401);
+  assert.equal((await req('/users', farmer)).status, 403);
+  const list = await req('/users', admin);
+  assert.equal(list.status, 200);
+  const { users } = await list.json();
+  assert.ok(users.length >= 3);
+  assert.ok(users.every((u: any) => u.password === undefined));
+
+  const ravi = users.find((u: any) => u.email === 'ravi@example.com');
+  const promote = await req(`/users/${ravi.id}`, admin, { method: 'PATCH', body: JSON.stringify({ role: 'agronomist' }) });
+  assert.equal(promote.status, 200);
+  assert.equal((await promote.json()).user.role, 'agronomist');
+
+  assert.equal((await req(`/users/${ravi.id}`, admin, { method: 'PATCH', body: JSON.stringify({ role: 'king' }) })).status, 400);
+  assert.equal((await req('/users/nope', admin, { method: 'PATCH', body: JSON.stringify({ role: 'farmer' }) })).status, 404);
+  assert.equal((await req(`/users/${ravi.id}`, farmer, { method: 'PATCH', body: JSON.stringify({ role: 'admin' }) })).status, 403);
+
+  const me = users.find((u: any) => u.role === 'admin');
+  const demote = await req(`/users/${me.id}`, admin, { method: 'PATCH', body: JSON.stringify({ role: 'farmer' }) });
+  assert.equal(demote.status, 409);
+});

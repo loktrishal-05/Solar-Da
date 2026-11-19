@@ -8,6 +8,7 @@ import { Landing } from './pages/Landing';
 import { Overview } from './pages/Overview';
 import { Approvals } from './pages/Approvals';
 import { RedTeam } from './pages/RedTeam';
+import { Admin } from './pages/Admin';
 import { AssistantPage, AlertsPage, CommunityPage, DoctorPage, InsightsPage, SettingsPage } from './pages/Wrapped';
 import { AgentConsole } from './components/AgentConsole';
 
@@ -26,6 +27,7 @@ const APP_PAGES: Record<string, React.FC> = {
   '/app': Overview,
   '/app/approvals': Approvals,
   '/app/redteam': RedTeam,
+  '/app/admin': Admin,
   '/app/console': ConsolePage,
   '/app/doctor': DoctorPage,
   '/app/assistant': AssistantPage,
