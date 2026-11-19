@@ -7,6 +7,7 @@ import { Login, Signup } from './pages/Auth';
 import { Landing } from './pages/Landing';
 import { Overview } from './pages/Overview';
 import { Approvals } from './pages/Approvals';
+import { RedTeam } from './pages/RedTeam';
 import { AssistantPage, AlertsPage, CommunityPage, DoctorPage, InsightsPage, SettingsPage } from './pages/Wrapped';
 import { AgentConsole } from './components/AgentConsole';
 
@@ -24,6 +25,7 @@ const ConsolePage: React.FC = () => {
 const APP_PAGES: Record<string, React.FC> = {
   '/app': Overview,
   '/app/approvals': Approvals,
+  '/app/redteam': RedTeam,
   '/app/console': ConsolePage,
   '/app/doctor': DoctorPage,
   '/app/assistant': AssistantPage,
