@@ -211,7 +211,7 @@ const RESULTS: Array<[string, string, string]> = [
 const ROLES: Array<[React.ElementType, string, string]> = [
   [Sprout, 'Farmers', 'See what the agent noticed and did, ask in their own language, check a leaf. They set how much the agent may do alone.'],
   [ClipboardCheck, 'Agronomists', 'Approve or reject the treatments and large doses the safety engine sends to a person, with the evidence in front of them.'],
-  [ShieldCheck, 'Admins', 'Decide who is an agronomist. Every decision and every block lands in a tamper-evident audit log.'],
+  [ShieldCheck, 'Admins', 'Decide who is an agronomist. Every proposal, verdict and approval lands in a hash-chained audit log.'],
 ];
 
 export const Landing: React.FC = () => {
@@ -261,7 +261,7 @@ export const Landing: React.FC = () => {
               Solarda's AI agents watch the farm and propose what to do. A safety engine decides, and anything risky waits for an agronomist.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link to={cta} className="rounded-full bg-sprout px-6 py-3 font-semibold text-leaf-950 hover:bg-white">Try the live demo</Link>
+              <Link to={cta} className="rounded-full bg-sprout px-6 py-3 font-semibold text-leaf-950 hover:bg-white">Try the demo</Link>
               <a href="#story" className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10">
                 See how it decides <ArrowDown className="h-4 w-4" aria-hidden />
               </a>

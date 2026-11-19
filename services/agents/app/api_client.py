@@ -57,7 +57,9 @@ def audit(entry: dict) -> None:
 
 
 def estop(active: bool) -> bool:
-    return _client.post(f"{API}/estop", json={"active": active}, headers=internal_headers()).json()["eStopActive"]
+    # Only engaging carries the agent key. Clearing goes through the API's role check, so /agents/estop cannot
+    # be used by a farmer to clear the stop.
+    return _client.post(f"{API}/estop", json={"active": active}, headers=internal_headers() if active else {}).json()["eStopActive"]
 
 
 def health() -> bool:

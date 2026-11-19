@@ -180,7 +180,10 @@ const Fallback: React.FC = () => (
 export const PlantScene: React.FC = () => {
   const ref = useRef<HTMLCanvasElement>(null);
   const [failed, setFailed] = useState(false);
+  // The panel is hidden below 1024px: don't download three.js or run a render loop nobody can see.
+  const [wide] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
   useEffect(() => {
+    if (!wide) return;
     let cleanup: (() => void) | undefined;
     let cancelled = false;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -188,7 +191,8 @@ export const PlantScene: React.FC = () => {
       .then((T) => { if (!cancelled && ref.current) cleanup = buildScene(T, ref.current, still); })
       .catch(() => setFailed(true));
     return () => { cancelled = true; cleanup?.(); };
-  }, []);
+  }, [wide]);
+  if (!wide) return null;
   if (failed) return <Fallback />;
   return <canvas ref={ref} className="block h-full w-full" aria-hidden />;
 };

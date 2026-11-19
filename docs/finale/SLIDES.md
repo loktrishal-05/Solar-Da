@@ -126,7 +126,7 @@ Results table:
 | Disease model accuracy on lab images / on field photos it accepts | 98.2% / 87.2% |
 | Red-team attacks blocked (prompt injection, unsafe dose, fake sensor, Tamil jailbreak) | 30 / 30 |
 | Unsafe questions escalated across 6 languages | 100% (32 cases) |
-| Automated tests passing | 152 (engine, API, agents, twin, vision) |
+| Automated tests passing | 154 (engine, API, agents, twin, vision) |
 | Time to react to a trigger | Immediate (vs 5-10 min cycle) |
 
 Footer: **Results come from simulation and replayed public datasets, not field trials.**

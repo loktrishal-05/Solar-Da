@@ -46,7 +46,7 @@ export const Admin: React.FC = () => {
 
   return (
     <>
-      <PageHeader title="Users" subtitle="Everyone who signs up starts as a farmer. Give the agronomist role only to people qualified to approve treatments." />
+      <PageHeader title="Users" subtitle="Everyone who signs up starts as a farmer. Give the agronomist role only to people qualified to approve treatments. The three demo accounts keep their roles." />
       {msg && <p role={msg.ok ? 'status' : 'alert'} className={`mb-4 rounded-lg border px-4 py-2 text-sm ${msg.ok ? 'border-leaf-200 bg-leaf-50 text-leaf-900' : 'border-veto/30 bg-red-50 text-veto'}`}>{msg.text}</p>}
       <Card className="p-0 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-[15px]">

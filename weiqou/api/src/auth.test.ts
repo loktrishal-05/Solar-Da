@@ -153,3 +153,13 @@ test('admin users API: only admins, role changes, never zero admins', async () =
   const demote = await req(`/users/${me.id}`, admin, { method: 'PATCH', body: JSON.stringify({ role: 'farmer' }) });
   assert.equal(demote.status, 409);
 });
+
+test('the seeded demo accounts keep their roles, so the one-click buttons always work', async () => {
+  const admin = cookieOf(await post('/demo', { role: 'admin' }));
+  const api = base.replace('/auth', '/admin');
+  const { users } = await (await fetch(api + '/users', { headers: { cookie: admin } })).json();
+  const farmer = users.find((u: any) => u.email === 'farmer@solarda.demo');
+  const r = await fetch(api + `/users/${farmer.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json', cookie: admin }, body: JSON.stringify({ role: 'agronomist' }) });
+  assert.equal(r.status, 409);
+  assert.equal((await post('/demo', { role: 'farmer' })).status, 200);
+});

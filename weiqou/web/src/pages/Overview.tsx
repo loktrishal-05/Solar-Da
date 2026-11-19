@@ -11,7 +11,7 @@ type Status = { label: string; ok: boolean | null; detail: string };
 const STEPS: Record<string, Array<[string, string]>> = {
   farmer: [['Start a scenario in the Agent console and watch the agents work', '/app/console'], ['Open a run marked "veto" and read which rule stopped it', '/app/console'], ['Check a leaf photo in the Crop doctor', '/app/doctor'], ['Ask the Farm assistant something in your language', '/app/assistant'], ['Try to break Solarda yourself', '/app/redteam']],
   agronomist: [['Run the "diseased_leaf_rain" scenario so a treatment needs you', '/app/console'], ['Open Approvals, read why it was sent to you, approve or reject', '/app/approvals'], ['Check that your decision appears with your name', '/app/approvals'], ['Try to break Solarda yourself', '/app/redteam']],
-  admin: [['Open Users and see who has which role', '/app/admin'], ['Give someone the agronomist role', '/app/admin'], ['Run a scenario and approve a treatment as an admin', '/app/console']],
+  admin: [['Open Users and see who has which role', '/app/admin'], ['Have a colleague sign up, then give them the agronomist role', '/app/admin'], ['Run a scenario and approve a treatment as an admin', '/app/console']],
 };
 const readFlag = (k: string) => { try { return localStorage.getItem(k) === '1'; } catch { return false; } };
 const setFlag = (k: string) => { try { localStorage.setItem(k, '1'); } catch { /* not remembered in private windows */ } };

@@ -149,6 +149,9 @@ authRouter.patch('/admin/users/:id', requireRole('admin'), (req: Request, res: R
   const users = readUsers();
   const user = users.find((u) => u.id === req.params.id);
   if (!user) return res.status(404).json({ error: 'No such user' });
+  if (user.email.endsWith('@solarda.demo')) {
+    return res.status(409).json({ error: 'Demo accounts keep their roles so the one-click demo always works. Promote a real account instead.' });
+  }
   if (user.role === 'admin' && p.data.role !== 'admin' && users.filter((u) => u.role === 'admin').length === 1) {
     return res.status(409).json({ error: 'This is the only admin. Make someone else an admin first.' });
   }
