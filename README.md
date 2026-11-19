@@ -15,7 +15,14 @@
 
 > **Data honesty.** There are no live farm sensors. Every reading shown comes from the replay layer (public datasets), the crop twin or a simulation, and is tagged with its source. Weather in the chat assistant is the one real, live feed (Open-Meteo). Nothing replayed is ever presented as live.
 
-## Quick start (about 2 minutes, Docker Desktop required)
+## Quick start on Linux/macOS (Node 20+, Python 3.11 via `uv`, make)
+```bash
+make setup    # once: node deps + build, three Python venvs, model weights, local secrets
+make dev      # api :3001, agents :8000, twin :8100, vision :8200, web :3000 -> open http://localhost:3000
+make health   # OK/DOWN per service;  make stop  to stop;  make test  runs every suite
+```
+
+## Quick start with Docker (about 2 minutes, Docker Desktop required)
 ```powershell
 git clone https://github.com/loktrishal-05/Solar-Da.git; cd Solar-Da
 powershell -ExecutionPolicy Bypass -File scripts/demo.ps1     # builds once, then opens http://localhost:3000
