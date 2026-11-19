@@ -1,4 +1,4 @@
-// The Vercel proxy may only reach the backend's /api, /agents and /vision paths. Run: node --test weiqou/web/api/
+// The Vercel proxy may only reach the backend's /api, /agents and /vision paths. Run: node --test weiqou/web/api/p.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
