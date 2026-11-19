@@ -61,6 +61,8 @@ test:
 	npm run build:engine && npm run build:contracts
 	npm run test:engine
 	npm test -w @terrasub-solarda/api
+	npm test -w @terrasub-solarda/contracts
+	node --test weiqou/web/api/
 	@for s in $(SVCS); do echo "== $$s"; (cd services/$$s && .venv/bin/python -m pytest -q) || exit 1; done
 
 lint:
