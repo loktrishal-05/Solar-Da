@@ -265,7 +265,7 @@ sh deploy/smoke.sh                   # checks the UI, API, agents, vision and a 
 
 - **Hackathon demo:** run the container on the presenting laptop: `powershell -ExecutionPolicy Bypass -File scripts/demo.ps1` (opens http://localhost:3000; add `-Stop` to stop). The models are baked into the image, so it works with Wi-Fi off; only the chat, live weather and mandi prices need internet.
 - **Public URL = UI preview only.** https://solarda.vercel.app is the static front end on Vercel (project `solarda`, auto-deploys from `main`); the full system runs from the container above.
-- **Why no public full-stack host.** The stack needs about 450 MB of RAM under load (543 MB before the ONNX session and launcher trims) and Docker hosting is paid or card-gated on the free tiers we tried (Hugging Face, Google Cloud Run); `deploy/hf/` and `.gcloudignore` are ready if a host is added later.
+- **Why no public full-stack host.** The stack needs about 450 MB of RAM under load (543 MB before the ONNX session and launcher trims) and Docker hosting is paid or card-gated on the free tiers we tried (Hugging Face, Google Cloud Run); `.gcloudignore` is ready for Cloud Run if a host is added later.
 - Any container host works (Hugging Face Spaces Docker SDK uses port 7860 as is). `GEMINI_API_KEY` is optional; without it the chat falls back to the non-LLM path.
 
 ## Limitations

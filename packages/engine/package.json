@@ -1,7 +1,7 @@
 {
   "name": "@terrasub-solarda/engine",
   "version": "1.0.0",
-  "description": "Pure domain engine for TerraSub and Solar-Da v3",
+  "description": "Solarda safety engine: the deterministic rules that allow, modify or block every agent action",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -19,5 +19,6 @@
   },
   "devDependencies": {
     "typescript": "^5.4.0"
-  }
+  },
+  "license": "MIT"
 }
