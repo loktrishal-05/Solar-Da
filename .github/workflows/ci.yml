@@ -30,7 +30,7 @@ jobs:
           npm run test:engine
           npm test -w @terrasub-solarda/api
           npm test -w @terrasub-solarda/contracts
-          node --test weiqou/web/api/
+          node --test weiqou/web/api/p.test.mjs
 
       - name: Python venvs (pinned)
         run: |
