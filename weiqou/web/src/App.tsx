@@ -19,6 +19,7 @@ const APP_PAGES: Record<string, React.LazyExoticComponent<React.FC>> = {
   '/app/redteam': named(() => import('./pages/RedTeam'), 'RedTeam'),
   '/app/admin': named(() => import('./pages/Admin'), 'Admin'),
   '/app/console': named(() => import('./pages/Console'), 'ConsolePage'),
+  '/app/automation': named(() => import('./pages/Automation'), 'Automation'),
   '/app/doctor': named(wrapped, 'DoctorPage'),
   '/app/assistant': named(wrapped, 'AssistantPage'),
   '/app/insights': named(wrapped, 'InsightsPage'),
@@ -34,7 +35,7 @@ const NotFound: React.FC = () => (
 );
 
 const TITLES: Record<string, string> = {
-  '/login': 'Sign in', '/signup': 'Create account', '/guide': 'How Solarda works', '/app': 'Overview', '/app/console': 'Agent console',
+  '/login': 'Sign in', '/signup': 'Create account', '/guide': 'How Solarda works', '/app': 'Overview', '/app/console': 'Agent console', '/app/automation': 'Automation',
   '/app/approvals': 'Approvals', '/app/doctor': 'Crop doctor', '/app/assistant': 'Farm assistant', '/app/redteam': 'Try to break it',
   '/app/insights': 'Water and market', '/app/alerts': 'Alerts', '/app/community': 'Community', '/app/settings': 'Settings', '/app/admin': 'Users',
 };

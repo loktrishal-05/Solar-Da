@@ -9,7 +9,7 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
-from . import api_client, llm, runner
+from . import api_client, firebase_source, llm, orchestrator, runner
 from .graphs import advisor
 from .models import Approval
 from .replay.scenario import list_scenarios, load_scenario
@@ -304,3 +304,56 @@ def market_outlook(horizon_weeks: int = 4):
 
     o = market.latest_outlook(horizon_weeks)
     return {"outlook": o, "alert": market.storage_alert(o)}
+
+
+# ---- Firebase automation: data in Firebase -> agents -> orchestrator report -> approval -> command queued for hardware ----
+class SeedCase(BaseModel):
+    case: str
+
+
+@app.get("/firebase/status")
+def firebase_status():
+    return {"mode": firebase_source.mode(), "site": firebase_source.SITE,
+            "cases": {k: {"title": c["title"], "story": c["story"]} for k, c in firebase_source.CASES.items()},
+            "commands": firebase_source.commands(),
+            "note": "Real Firebase project" if firebase_source.mode() == "firebase"
+                    else "No Firebase project connected: a local store with the same layout stands in (set FIREBASE_DB_URL)."}
+
+
+@app.post("/firebase/seed")
+def firebase_seed(req: SeedCase):
+    """Demo stand-in for the ESP32: write one sample case into the database."""
+    if req.case not in firebase_source.CASES:
+        raise HTTPException(400, f"unknown case {req.case}; have {list(firebase_source.CASES)}")
+    firebase_source.clear_commands()
+    return firebase_source.seed(req.case)
+
+
+def _fb_report(run_id: str) -> dict:
+    meta = runner.list_runs()[run_id]
+    return orchestrator.build(runner.run_state(run_id)["values"], meta["status"], firebase_source.source_tag(),
+                              [c for c in firebase_source.commands() if c["run_id"] == run_id])
+
+
+@app.post("/firebase/run")
+def firebase_run():
+    """Read the latest data from Firebase, run every agent once, return the orchestrator's report."""
+    try:
+        site = firebase_source.read_site()
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(502, f"Cannot read Firebase: {type(e).__name__}. Check FIREBASE_DB_URL.") from e
+    if not site["events"]:
+        raise HTTPException(409, "Firebase has no sensor data yet. Send sample data first (or let the ESP32 write).")
+    sc = {"name": "firebase_live", "dataset": "none", "source": "firebase", "faults": [], "autonomy": "propose", "tick_minutes": 30,
+          "crop": "Butterhead Lettuce", "start": site["latest_ts"], "weather": site["weather"], "firebase_events": site["events"],
+          "images": site["images"], "description": "Live data read from the Firebase database (not a replay)."}
+    sid = f"firebase-{site['latest_ts'].replace(':', '').replace('-', '')}"
+    tick = len([r for r in runner.list_runs() if r.startswith(sid + ":")]) + 1
+    runner.start_run(sid, tick, sc, site["latest_ts"], "propose")
+    return _fb_report(f"{sid}:{tick:03d}")
+
+
+@app.get("/firebase/report/{run_id}")
+def firebase_report(run_id: str):
+    _known_run(run_id)
+    return _fb_report(run_id)

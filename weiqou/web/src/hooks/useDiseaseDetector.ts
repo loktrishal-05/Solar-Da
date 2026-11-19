@@ -11,6 +11,8 @@ export type DiseasePrediction = {
   threshold?: number;
   abstain?: boolean;
   reason?: string;
+  // True when the plant gate decided the photo is not a plant at all (no disease is named).
+  notALeaf?: boolean;
 };
 
 const SERVER_URL = '/vision/classify';
@@ -33,15 +35,17 @@ export async function classifyOnServer(el: HTMLImageElement | HTMLCanvasElement)
     const form = new FormData();
     form.append('image', blob, 'leaf.jpg');
     const r = await fetch(SERVER_URL, { method: 'POST', body: form, signal: AbortSignal.timeout(15000) });
+    if (r.status === 503) throw new Error('The leaf model files are not installed on this machine. Run scripts/fetch_vision_model.ps1 (or make setup), then restart.');
     if (!r.ok) return null;
     const d = await r.json();
     const topK = (d.predictions ?? []).map((p: any) => ({ classIndex: -1, className: p.label, confidence: p.confidence }));
     const best = topK[0] ?? { classIndex: -1, className: '', confidence: 0 };
     return {
       ...best, topK, modelVersion: SERVER_MODEL, inferenceTimeMs: performance.now() - start,
-      threshold: d.threshold, abstain: !!d.abstain, reason: d.reason,
+      threshold: d.threshold, abstain: !!d.abstain, reason: d.reason, notALeaf: !!d.not_a_leaf,
     };
-  } catch {
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith('The leaf model files')) throw e;
     return null;
   }
 }

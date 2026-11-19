@@ -134,6 +134,7 @@ def ingest(state: FarmState) -> dict:
     events = apply_faults(load_events(sc["dataset"], start, end), sc["faults"]) if sc["dataset"] != "none" else []
     field_events, field_weather = _field(state)
     events += field_events
+    events += sc.get("firebase_events", [])  # readings the ESP32 wrote to Firebase (app/firebase_source.py)
     for s in sc.get("synthetic", []):  # simulated streams a scenario adds (e.g. soil moisture for a field bed)
         events.append({"ts": now, "siteId": state["site_id"], "zone": s["zone"], "metric": s["metric"],
                        "value": s["value"], "unit": s["unit"], "quality": "ok", "source": "simulated"})
@@ -284,6 +285,9 @@ def dispatch(state: FarmState) -> dict:
         out.append({"proposal_id": action["id"], "kind": action["kind"], "zone": action["zone"],
                     "status_code": r["status_code"], "effect": r.get("effect"), "replayed": r.get("replayed", False),
                     "expected_effect": action["expected_effect"], "error": r.get("error")})
+        if state["scenario"].get("source") == "firebase" and r["status_code"] in (200, 201) and action["kind"] not in ("alert", "no_op"):
+            from .. import firebase_source  # approved command goes where the ESP32 will read it
+            out[-1]["hardware"] = firebase_source.queue_command(state["run_id"], action, state["sim_time"])
     ok = sum(d["status_code"] in (200, 201) for d in out)
     refused = [f"{d['proposal_id']} HTTP {d['status_code']}" for d in out if d["status_code"] not in (200, 201)]
     return {"dispatched": out,

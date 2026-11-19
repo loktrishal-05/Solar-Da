@@ -24,7 +24,7 @@ async def classify(image: UploadFile = File(...)):
     if not data or len(data) > MAX_BYTES:
         raise HTTPException(400, "send one image up to 10 MB")
     if not classifier.available():
-        raise HTTPException(503, "model not installed: run scripts/fetch_vision_model.ps1")
+        raise HTTPException(503, "model not installed (leaf_disease.onnx and leaf_gate.onnx): run scripts/fetch_vision_model.ps1")
     try:
         return classifier.classify(data)
     except OSError as e:

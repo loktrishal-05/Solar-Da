@@ -526,7 +526,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                 <div className="flex items-start space-x-2 text-[#B45309] font-bold text-sm">
                   <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="block">ABSTENTION MANDATE: Low Confidence Prediction</span>
+                    <span className="block">{prediction.notALeaf ? 'NOT A PLANT LEAF: no disease check was run' : 'ABSTENTION MANDATE: Low Confidence Prediction'}</span>
                     <span className="text-xs text-[#8D6E63] font-normal block mt-1 leading-relaxed">
                       {prediction.reason ??
                         `Model confidence (${(confidence * 100).toFixed(2)}%) is below the mandatory ${Math.round(gate * 100)}% safety threshold.`}{' '}
@@ -535,15 +535,19 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                   </div>
                 </div>
 
-                <div className="bg-white p-3 rounded-xl border border-amber-200 space-y-1 text-[11px] font-mono text-gray-700">
-                  <span className="font-bold text-gray-900 block font-sans">Top guess (insufficient confidence):</span>
-                  <span>{formatClassName(prediction.className)}</span>
-                </div>
+                {!prediction.notALeaf && (
+                  <div className="bg-white p-3 rounded-xl border border-amber-200 space-y-1 text-[11px] font-mono text-gray-700">
+                    <span className="font-bold text-gray-900 block font-sans">Top guess (insufficient confidence):</span>
+                    <span>{formatClassName(prediction.className)}</span>
+                  </div>
+                )}
 
                 <div className="flex space-x-3 pt-2">
-                  <button className="flex-1 py-2.5 bg-[#D97706] hover:bg-[#B45309] text-white font-extrabold rounded-full shadow transition">
-                    Request Agronomist Review
-                  </button>
+                  {!prediction.notALeaf && (
+                    <button className="flex-1 py-2.5 bg-[#D97706] hover:bg-[#B45309] text-white font-extrabold rounded-full shadow transition">
+                      Request Agronomist Review
+                    </button>
+                  )}
                   <button
                     onClick={openFilePicker}
                     className="flex-1 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold rounded-full transition"

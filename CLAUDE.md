@@ -9,7 +9,7 @@ The full spec is docs/BLUEPRINT.md. Follow it phase by phase.
 3. Never commit secrets, datasets, model weights or node_modules. Respect .gitignore.
 4. Existing code is unaudited. Before changing a feature, record in docs/AUDIT.md whether it is real, UI-only or broken.
 5. Do not delete existing features. Wrap or extend them.
-6. All sensor data comes from the replay layer and is tagged with its source. Never present replayed data as live.
+6. All sensor data comes from the replay layer or from Firebase (the ESP32's database, `services/agents/app/firebase_source.py`) and is tagged with its source (`replay`, `simulated`, `firebase`, `firebase-sim`). Never present replayed or simulated data as live.
 7. The LLM only proposes. The TypeScript engine safety check decides.
 8. Every task is done only when it has code, a test, and a docs update.
 9. When something is unclear or the blueprint conflicts with the code, stop and ask.

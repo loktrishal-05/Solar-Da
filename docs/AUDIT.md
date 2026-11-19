@@ -126,3 +126,11 @@ Every route in `weiqou/api/src/{routes,agent_routes,auth,approvals}.ts` and `ser
 | 10 videos/images in `web/public/media` | used only by removed components; most showed the old TerraSub app | no references left |
 | `prisma/` and deps `@prisma/client`, `prisma`, `cors`, `ws`, `@google/generative-ai`, `ts-node`, `framer-motion` | never imported | `make test` |
 | `docs/HANDOFF.md`, `docs/terrasub-solarda-master-prompt.md`, `docs/deck/build_deck.js` | LLM handoff/prompt notes and a slide generator (organisers ban AI-made slides) | team lead's decision |
+
+## Phase G: plant gate and Firebase automation (2026-11-19)
+| Item | Status | Evidence |
+|---|---|---|
+| Crop doctor on non-plant photos (car, bike) | **broken -> fixed** | UI printed "Top guess: <disease>" on every abstain, and the 38-class model has no "not a plant" option. Plant gate added; car and motorcycle now return "not a plant leaf" with no disease named (browser test, `test_vision.py`) |
+| Vision with the model files missing | **misleading -> fixed** | 503 was shown as "model not reachable"; now says which files to fetch |
+| Firebase automation (`/app/automation`) | real (simulated store) | 5 cases through the real stack: dry soil -> irrigate, rain forecast -> `RAIN_HOLD` veto, pH high -> dose_ph, nutrients low -> dose_nutrient, leaf photo -> treat_disease; approval queues a command. `tests/test_firebase_automation.py` |
+| Real Firebase project, ESP32, pumps | **not built** | needs `FIREBASE_DB_URL`; `firmware/solarda_esp32.cpp` has pins and interlocks only (no sensor read, no network) |
