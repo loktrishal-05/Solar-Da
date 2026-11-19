@@ -83,3 +83,9 @@ Method: `npm install`, `npm run build`, `npm run test:engine`, started API (`nod
 | Assistant weather / price tools | new | `weather_now` (Open-Meteo, real) and `market_price` (Agmarknet, needs the owner's DATA_GOV_API_KEY) tested with fakes; price not verified live without a key |
 | SMS demo gateway | new, simulated | `/api/sms/outbox`, `/api/sms/test`; test in `agent_routes.test.ts`; Telegram delivery verified live to the owner's phone (`evidence/phase-e/telegram_alert_delivery.txt`) |
 | Sensor and soil models runtime | now ONNX | 51 sklearn models exported to ONNX; parity test passes; runtime needs onnxruntime, not scikit-learn (D16) |
+
+## Finale push (2026-11-19, branch `finale`)
+| Item | Status | Evidence |
+|---|---|---|
+| Sign-in (`/api/auth/signup`, `login`, `logout`, `me`) | new, real | local JSON store `data/runtime/users.json`, scrypt hashes, HMAC cookie; demo accounts from `weiqou/api/seed/users.json` (demo-only passwords); `auth.test.ts` 9 tests |
+| Unused UI components (~50 files, `Dark*`, legacy `TerraSub/`, `SolarDa/`) | dead code | not imported anywhere; kept for now (not on the demo path) |
