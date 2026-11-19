@@ -22,7 +22,7 @@ interface LightCropDoctorSectionProps {
 type SourceMode = 'sample' | 'upload' | 'camera';
 
 export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ onCreateProposal }) => {
-  const { model, classNames, loading, error, ready, predict, abstainThreshold } = useDiseaseDetector();
+  const { loading, error, ready, predict, abstainThreshold } = useDiseaseDetector();
 
   const [selectedImage, setSelectedImage] = useState<string>(
     '/media/plant-samples/tomato-early-blight.jpg'
@@ -77,7 +77,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
     setPrediction(null);
     setInferenceMs(null);
     try {
-      const p = await predict(el, 3);
+      const p = await predict(el);
       if (!p) throw new Error('No prediction returned');
       setPrediction(p);
       setInferenceMs(p.inferenceTimeMs);
@@ -426,7 +426,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                 <div className="mt-3 w-full max-w-[400px] flex items-center justify-between text-[10px] font-mono text-gray-500">
                   <span className="flex items-center space-x-1">
                     <Cpu className="w-3 h-3" />
-                    <span>Backend: {model ? 'webgl' : 'cpu'}</span>
+                    <span>Solarda vision service</span>
                   </span>
                   <span className="flex items-center space-x-1">
                     <Clock className="w-3 h-3" />
@@ -492,7 +492,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                 <div>
                   <h3 className="font-bold text-sm text-gray-900">Diagnostic Confidence Score</h3>
                   <span className="text-[10px] text-gray-500 font-mono block">
-                    Safety Gate Ceiling: {Math.round(gate * 100)}% · {Object.keys(classNames).length || 38} classes
+                    Safety Gate Ceiling: {Math.round(gate * 100)}% · 38 classes
                   </span>
                 </div>
               </div>
@@ -562,7 +562,7 @@ export const LightCropDoctorSection: React.FC<LightCropDoctorSectionProps> = ({ 
                       <span>{formatClassName(prediction.className)}</span>
                     </h4>
                     <span className="text-[10px] text-gray-500 font-mono block">
-                      Classified by {prediction.modelVersion} (Top-1 of {Object.keys(classNames).length || 38})
+                      Classified by {prediction.modelVersion} (top-1 of 38)
                     </span>
                   </div>
                 </div>
