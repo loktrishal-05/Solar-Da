@@ -284,6 +284,6 @@ sh deploy/smoke.sh                   # checks the UI, API, agents, vision and a 
 Built on the TerraSub & Solar-Da platform. Datasets and models are credited in `data/*/ATTRIBUTION.md` and `evidence/`.
 
 ## Laptop as the server (public URL)
-Double-click **Start Solarda** on the Desktop (`scripts/go_live.ps1`): it starts the Docker container and an ngrok tunnel on the static domain in the gitignored `.ngrok-domain`. **Stop Solarda** runs `scripts/stop_live.ps1`. Recreate the shortcuts with `scripts/make_shortcuts.ps1`.
+Double-click **Start Solarda** on the Desktop (`scripts/go_live.ps1`): it starts Docker Desktop if needed, runs the container and opens http://localhost:3000 (local only, nothing else required). Add `-Public` to also open an ngrok tunnel on the static domain in the gitignored `.ngrok-domain`. **Stop Solarda** runs `scripts/stop_live.ps1`. Recreate the shortcuts with `scripts/make_shortcuts.ps1`.
 One-time: `ngrok config add-authtoken <token>` (ngrok agent 3.20+; run `ngrok update`). API keys go in the gitignored `.env`.
 The public URL exposes the whole app: do not put real secrets in the container's data. `weiqou/web/api/p.js` is the Vercel edge proxy (adds `ngrok-skip-browser-warning`); change the target with `BACKEND_URL`.
