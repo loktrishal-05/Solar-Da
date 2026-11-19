@@ -39,7 +39,7 @@ const DecisionDemo: React.FC = () => {
       <div className="rounded-2xl bg-white p-6 shadow-[0_30px_60px_-30px_rgba(12,38,28,0.45)] ring-1 ring-leaf-100">
         <div className="flex items-center justify-between text-sm">
           <span className="font-semibold text-leaf-800">{d.agent} proposes</span>
-          <span className="text-ink/50">replayed scenario</span>
+          <span className="text-ink/50">example</span>
         </div>
         <p className="mt-2 font-display text-2xl font-bold leading-snug text-leaf-950">{d.action}</p>
         <p className="mt-1 text-[15px] text-ink/70">{d.why}</p>

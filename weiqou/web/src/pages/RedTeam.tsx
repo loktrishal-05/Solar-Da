@@ -107,7 +107,7 @@ const ActionAttack: React.FC = () => {
           <VerdictStamp verdict={verdictOf(verdict)} />
           {verdict.invariant && <p className="mt-3 font-mono text-sm text-ink/60">{verdict.invariant}</p>}
           <p className="mt-1 text-[15px]">{verdict.reason}</p>
-          {verdict.needs_human && verdict.verdict !== 'veto' && <p className="mt-1 text-sm text-human">It waits in the approvals inbox until an agronomist decides.</p>}
+          {verdict.needs_human && verdict.verdict !== 'veto' && <p className="mt-1 text-sm text-human">In a real agent run this pauses in the approvals inbox until an agronomist decides.</p>}
           <p className="mt-2 text-sm text-ink/55">Nothing was sent to a pump or doser. This attempt is now in the audit log.</p>
         </div>
       )}

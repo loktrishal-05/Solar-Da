@@ -12,7 +12,8 @@ const field = 'w-full rounded-lg border border-leaf-200 bg-white px-3 py-2.5 tex
 
 const Frame: React.FC<{ title: string; children: React.ReactNode; aside: React.ReactNode }> = ({ title, children, aside }) => {
   const [apiDown, setApiDown] = useState(false);
-  useEffect(() => { fetch('/api/health').then((r) => setApiDown(!r.ok)).catch(() => setApiDown(true)); }, []);
+  // A static host may answer /api with index.html, so only a JSON reply counts as "API up".
+  useEffect(() => { fetch('/api/health').then((r) => (r.ok ? r.json() : Promise.reject())).then(() => setApiDown(false)).catch(() => setApiDown(true)); }, []);
   return (
     <div className="min-h-screen grid lg:grid-cols-[1fr_1.1fr] bg-paper">
       <div className="flex flex-col px-6 sm:px-12 py-8">

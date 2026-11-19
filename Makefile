@@ -10,7 +10,7 @@ PY     = services/$(1)/.venv/bin/python
 # Every service sees .env (optional) plus the two generated secrets.
 ENV   := set -a; [ -f .env ] && . ./.env; SESSION_SECRET=$$(cat $(RT)/.session_secret); SOLARDA_INTERNAL_KEY=$$(cat $(RT)/.internal_key); set +a
 
-.PHONY: setup dev stop health test docker logs reset
+.PHONY: setup secrets dev stop health test docker logs reset
 
 setup:
 	npm ci
@@ -20,8 +20,7 @@ setup:
 	  sed '1s/^\xEF\xBB\xBF//' services/$$s/requirements.lock | uv pip install -q --python services/$$s/.venv/bin/python -r /dev/stdin; \
 	done
 	python3 deploy/fetch_models.py
-	@mkdir -p $(RT)/logs $(RT)/pids
-	@for f in .session_secret .internal_key; do [ -s $(RT)/$$f ] || openssl rand -hex 32 > $(RT)/$$f; done
+	@$(MAKE) -s secrets
 	@echo "setup done -> make dev"
 
 define start
@@ -29,8 +28,14 @@ define start
 	@echo "started $(1)"
 endef
 
-dev: stop
+# Without these the approval key gate would be silently off.
+secrets:
 	@mkdir -p $(RT)/logs $(RT)/pids
+	@for f in .session_secret .internal_key; do [ -s $(RT)/$$f ] || (umask 077; openssl rand -hex 32 > $(RT)/$$f); done
+
+# Rebuilds the API (a few seconds) so a git pull never runs stale code; web is served live by Vite.
+dev: stop secrets
+	@npm run -s build:engine && npm run -s build:contracts && npm run -s build -w @terrasub-solarda/api
 	$(call start,api,weiqou/api,env PORT=3001 node dist/server.js)
 	$(call start,twin,services/twin,.venv/bin/python -m uvicorn app.main:app --port 8100)
 	$(call start,vision,services/vision,.venv/bin/python -m uvicorn app.main:app --port 8200)

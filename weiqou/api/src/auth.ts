@@ -12,7 +12,7 @@ export type PublicUser = { id: string; name: string; email: string; role: Role }
 type StoredUser = PublicUser & { password: string };
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const RUNTIME_DIR = process.env.SOLARDA_RUNTIME_DIR ?? resolve(HERE, '../../../data/runtime');
+export const RUNTIME_DIR = process.env.SOLARDA_RUNTIME_DIR ?? resolve(HERE, '../../../data/runtime');
 const USERS_FILE = join(RUNTIME_DIR, 'users.json');
 const SEED_FILE = resolve(HERE, '../seed/users.json');
 const COOKIE = 'solarda_session';

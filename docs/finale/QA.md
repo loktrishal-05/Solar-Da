@@ -32,6 +32,9 @@ The agent never chooses a product or a dose. It proposes "treat for late blight"
 **How is sign-in secured?**
 Passwords are hashed with scrypt; sessions are HMAC-signed, httpOnly cookies; roles are checked on the server, and the agent runtime refuses approvals that do not come through that check. The demo accounts are for the demo; a real deployment would add phone OTP sign-in.
 
+**Anyone can sign up as an agronomist. Doesn't that defeat the role check?**
+In the demo, yes: self-signup shows the workflow. In production an admin assigns the agronomist role after checking credentials, and only admins can grant it. The server-side check and the audit trail stay the same.
+
 **How would this scale or make money?**
 Pilot cost is about ₹1,500 to 4,200 per month plus sensors. Revenue options: a per-acre subscription for farmer groups (FPOs), and agronomist time billed per approval. The safety engine and audit log are what make it acceptable to an FPO or an insurer.
 

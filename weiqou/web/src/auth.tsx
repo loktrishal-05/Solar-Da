@@ -23,7 +23,7 @@ async function send(path: string, body: unknown): Promise<User> {
     throw new Error('Cannot reach the Solarda API. Start the local stack with make dev.');
   }
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(data.error ?? 'Cannot reach the Solarda API. Start the local stack with make dev.');
+  if (!r.ok || !data.user) throw new Error(data.error ?? 'Cannot reach the Solarda API. Start the local stack with make dev.');
   return data.user;
 }
 
